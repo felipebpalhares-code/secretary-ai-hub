@@ -12,15 +12,23 @@ import { Boletos } from "@/components/banks/Boletos"
 import { Tributos } from "@/components/banks/Tributos"
 import { Analise } from "@/components/banks/Analise"
 import { ENTITIES, type Entity } from "@/lib/banks-data"
+import type { ComponentProps } from "react"
 
-const TABS = [
-  { id: "geral", label: "Visão Geral", icon: "grid" as const },
-  { id: "extrato", label: "Extrato", icon: "chart" as const },
-  { id: "cartoes", label: "Cartões", icon: "card" as const },
-  { id: "pix", label: "PIX & Operações", icon: "send" as const },
-  { id: "boletos", label: "Boletos", icon: "file" as const },
-  { id: "tributos", label: "Tributos", icon: "shield" as const },
-  { id: "analise", label: "Análise", icon: "target" as const },
+type Tab = {
+  id: string
+  label: string
+  icon: ComponentProps<typeof Icon>["name"]
+  soon?: boolean
+}
+
+const TABS: Tab[] = [
+  { id: "geral", label: "Visão Geral", icon: "grid" },
+  { id: "extrato", label: "Extrato", icon: "chart" },
+  { id: "cartoes", label: "Cartões", icon: "card" },
+  { id: "pix", label: "PIX & Operações", icon: "send" },
+  { id: "boletos", label: "Boletos", icon: "file" },
+  { id: "tributos", label: "Tributos", icon: "shield" },
+  { id: "analise", label: "Análise", icon: "target" },
 ]
 
 export function BancosHub() {
