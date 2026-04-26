@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 248 250 252;
+  --card: 255 255 255;
+  --ink: 15 23 42;
+  --ink-2: 71 85 105;
+  --ink-3: 148 163 184;
+  --ink-4: 203 213 225;
+  --hair: 226 232 240;
+  --hair-2: 241 245 249;
+  --accent: 79 70 229;
+  --accent-hover: 67 56 202;
+  --accent-soft: 238 242 255;
+  --ok: 16 185 129;
+  --warn: 217 119 6;
+  --err: 220 38 38;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  height: 100%;
+  letter-spacing: -0.05px;
+}
+
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--ink));
+  font-feature-settings: "ss01", "cv11";
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--hair));
+  border-radius: 99px;
+}
+
+.mono, .tabular {
+  font-variant-numeric: tabular-nums;
+}

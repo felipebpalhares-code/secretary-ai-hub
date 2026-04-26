@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Felipe Hub — Quem Sou Eu</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+:root{
+  --bg:#f8fafc;--card:#fff;--ink:#0f172a;--ink-2:#475569;--ink-3:#94a3b8;--ink-4:#cbd5e1;
+  --hair:#e2e8f0;--hair-2:#f1f5f9;
+  --accent:#4f46e5;--accent-hover:#4338ca;--accent-soft:#eef2ff;
+  --ok:#10b981;--warn:#d97706;--err:#dc2626;
+  --shadow-xs:0 1px 2px rgba(15,23,42,.04);--shadow-sm:0 1px 3px rgba(15,23,42,.06);
+  --r-sm:8px;--r-md:10px;--r-lg:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;overflow:hidden;font-size:13.5px;letter-spacing:-.05px}
+button{font-family:inherit;letter-spacing:inherit}
+.icn{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.icn-sm{width:13px;height:13px}
+
+/* SIDEBAR (shared) */
+aside{width:236px;min-width:236px;background:#0f172a;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:18px 18px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-mark{width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+.sb-brand{font-size:14px;font-weight:700;color:#f1f5f9;letter-spacing:-.25px}
+.sb-tag{font-size:10px;color:#64748b;font-weight:500;margin-top:1px}
+nav{flex:1;padding:10px;overflow-y:auto}
+nav::-webkit-scrollbar{display:none}
+.nv-label{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.07em;padding:12px 12px 4px}
+.nv-item{display:flex;align-items:center;gap:11px;padding:8px 12px;border-radius:7px;color:#94a3b8;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:1px;transition:all .12s}
+.nv-item:hover{background:rgba(255,255,255,.04);color:#e2e8f0}
+.nv-item.active{background:rgba(79,70,229,.15);color:#e0e7ff}
+.nv-item svg{width:15px;height:15px;opacity:.9}
+.nv-count{margin-left:auto;font-size:10.5px;font-weight:600;color:#64748b;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.04)}
+.nv-count.alert{background:rgba(220,38,38,.2);color:#fca5a5}
+.sb-bottom{padding:10px;border-top:1px solid rgba(255,255,255,.06)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer}
+.sb-user-av{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.sb-user-n{font-size:12.5px;font-weight:600;color:#e2e8f0}
+.sb-user-r{font-size:10.5px;color:#64748b;margin-top:1px}
+
+/* MAIN */
+main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--hair);background:var(--card);flex-shrink:0}
+.tb-title{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.4px;line-height:1}
+.tb-sub{font-size:12px;color:var(--ink-3);margin-top:3px;font-weight:500}
+.tb-actions{display:flex;gap:6px}
+.btn-i{width:32px;height:32px;border-radius:7px;border:1px solid var(--hair);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-2);transition:all .15s}
+.btn-i:hover{background:var(--bg);color:var(--ink);border-color:var(--ink-4)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid var(--hair);background:var(--card);color:var(--ink);transition:all .15s}
+.btn:hover{background:var(--bg);border-color:var(--ink-4)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+
+/* PROFILE BANNER */
+.profile-banner{background:var(--card);padding:18px 24px;border-bottom:1px solid var(--hair);display:flex;align-items:center;gap:16px;flex-shrink:0}
+.pb-av{width:56px;height:56px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;letter-spacing:-.3px}
+.pb-info{flex:1}
+.pb-name{font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.4px}
+.pb-role{font-size:12px;color:var(--ink-2);margin-top:2px;font-weight:500}
+.pb-tags{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.pb-tag{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:4px;background:var(--hair-2);color:var(--ink-2);border:1px solid var(--hair)}
+.pb-stats{display:flex;border:1px solid var(--hair);border-radius:var(--r-md);overflow:hidden;background:var(--card)}
+.pb-stat{padding:10px 18px;text-align:center;border-right:1px solid var(--hair)}
+.pb-stat:last-child{border-right:none}
+.pb-stat-v{font-size:17px;font-weight:700;color:var(--accent);line-height:1;font-variant-numeric:tabular-nums}
+.pb-stat-l{font-size:10px;font-weight:600;color:var(--ink-3);margin-top:3px;text-transform:uppercase;letter-spacing:.04em}
+
+/* TABS */
+.tab-nav{background:var(--card);border-bottom:1px solid var(--hair);display:flex;padding:0 20px;overflow-x:auto;flex-shrink:0}
+.tab-nav::-webkit-scrollbar{display:none}
+.tab-btn{padding:12px 14px;font-size:12.5px;font-weight:600;color:var(--ink-3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .12s;display:flex;align-items:center;gap:6px;letter-spacing:-.1px}
+.tab-btn:hover{color:var(--ink-2)}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-btn svg{width:14px;height:14px}
+.tab-notif{font-size:9px;font-weight:800;background:var(--err);color:#fff;border-radius:999px;padding:1px 5px;line-height:1.4}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:22px 24px;display:flex;flex-direction:column;gap:20px}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+.tab-panel{display:none;flex-direction:column;gap:20px}
+.tab-panel.active{display:flex}
+
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3)}
+.edit-btn{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--accent);background:none;border:1px solid var(--hair);padding:5px 11px;border-radius:6px;cursor:pointer}
+.edit-btn:hover{border-color:var(--accent)}
+.add-btn{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--accent);background:none;border:1px dashed var(--ink-4);padding:5px 11px;border-radius:6px;cursor:pointer}
+.add-btn:hover{border-color:var(--accent)}
+
+/* CARDS */
+.cards-row{display:grid;gap:12px}
+.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:1fr 1fr 1fr}.c1{grid-template-columns:1fr}
+.card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-lg);padding:16px 18px;transition:all .15s}
+.card:hover{border-color:var(--ink-4)}
+.card-title{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:12px;display:flex;align-items:center;gap:7px;letter-spacing:-.15px}
+.card-title svg{width:14px;height:14px;color:var(--ink-2)}
+
+/* FIELD ROWS */
+.frow{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--hair-2);font-size:12.5px}
+.frow:last-child{border-bottom:none;padding-bottom:0}
+.flabel{width:138px;min-width:138px;font-size:11px;font-weight:600;color:var(--ink-3);padding-top:1px}
+.fval{font-weight:600;color:var(--ink);flex:1;line-height:1.4;letter-spacing:-.1px}
+.fval.empty{color:var(--ink-4);font-style:italic}
+
+/* SENSITIVE */
+.sens{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sens-txt{font-weight:600;color:var(--ink);letter-spacing:0;font-family:-apple-system-ui-monospace,"SF Mono",monospace;font-size:12px}
+.eye-btn{background:none;border:none;cursor:pointer;color:var(--ink-3);padding:2px;border-radius:4px;display:flex;align-items:center;transition:color .12s}
+.eye-btn:hover{color:var(--accent)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:4px;letter-spacing:.01em;border:1px solid transparent}
+.b-green{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.b-red{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.b-amber{background:#fffbeb;color:#b45309;border-color:#fde68a}
+.b-gray{background:var(--hair-2);color:var(--ink-2);border-color:var(--hair)}
+.b-indigo{background:var(--accent-soft);color:var(--accent);border-color:#c7d2fe}
+.b-neutral{background:var(--hair-2);color:var(--ink-2);border-color:var(--hair)}
+
+/* ALERT BANNERS */
+.abanner{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--r-md);font-size:12.5px;font-weight:600;border:1px solid transparent;letter-spacing:-.1px}
+.abanner.warn{background:#fffbeb;color:#92400e;border-color:#fde68a}
+.abanner.danger{background:#fef2f2;color:#991b1b;border-color:#fecaca}
+.abanner.info{background:var(--accent-soft);color:var(--accent);border-color:#c7d2fe}
+
+/* PROCESS CARDS */
+.proc-card{background:var(--card);border:1px solid var(--hair);border-left:3px solid var(--err);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:10px}
+.proc-card.closed-proc{border-left-color:var(--ink-4);opacity:.75}
+.proc-title{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;letter-spacing:-.15px}
+.proc-num{font-size:10.5px;font-weight:600;color:var(--ink-3);font-family:-apple-system-ui-monospace,"SF Mono",monospace}
+
+/* DATA LIST */
+.data-list{display:flex;flex-direction:column;gap:6px}
+.data-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border:1px solid var(--hair);border-radius:var(--r-md)}
+.data-item:hover{border-color:var(--ink-4)}
+.di-left{display:flex;flex-direction:column;gap:2px;min-width:0}
+.di-main{font-size:12.5px;font-weight:600;color:var(--ink);letter-spacing:-.1px}
+.di-sub{font-size:11px;color:var(--ink-3);font-weight:500}
+.di-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.di-value{font-size:12.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* VAULT ITEM */
+.vault-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border:1px solid var(--hair);border-radius:var(--r-md);margin-bottom:6px}
+.vault-icon{width:30px;height:30px;border-radius:7px;background:var(--card);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:var(--ink-2);flex-shrink:0}
+.vault-icon svg{width:14px;height:14px}
+.vault-info{flex:1;min-width:0}
+.vault-name{font-size:12.5px;font-weight:600;color:var(--ink);letter-spacing:-.1px}
+.vault-user{font-size:11px;color:var(--ink-3);margin-top:1px}
+.vault-pass{font-family:-apple-system-ui-monospace,"SF Mono",monospace;font-size:12px;color:var(--ink-2);letter-spacing:.05em;padding:0 8px}
+.copy-btn{background:var(--card);border:1px solid var(--hair);border-radius:5px;padding:4px 8px;font-size:10.5px;font-weight:600;color:var(--ink-2);cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:4px}
+.copy-btn:hover{border-color:var(--ink-4);color:var(--ink)}
+
+/* GOAL */
+.goal-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:var(--r-md);background:var(--bg);border:1px solid var(--hair);margin-bottom:6px}
+.goal-text{font-size:12.5px;font-weight:500;color:var(--ink);flex:1;letter-spacing:-.05px}
+.progress-bar{height:3px;background:var(--hair);border-radius:99px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;border-radius:99px;background:var(--accent)}
+
+/* PREF */
+.pref-box{background:var(--bg);border:1px solid var(--hair);border-radius:var(--r-md);padding:14px 16px;font-size:12.5px;color:var(--ink-2);line-height:1.65;font-weight:500}
+
+/* SCHEDULE */
+.schedule-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center}
+.day-name{font-size:10px;font-weight:700;color:var(--ink-3);text-transform:uppercase}
+.day-block{border-radius:6px;padding:6px 4px;font-size:10.5px;font-weight:600;margin-top:4px}
+.day-on{background:var(--accent-soft);color:var(--accent);border:1px solid #c7d2fe}
+.day-half{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.day-off{background:var(--hair-2);color:var(--ink-3);border:1px solid var(--hair)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;z-index:999}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--card);border-radius:var(--r-lg);width:540px;max-width:95vw;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.2)}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--hair)}
+.modal-title{font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-.2px}
+.modal-close{background:none;border:none;cursor:pointer;color:var(--ink-3);padding:2px}
+.modal-close svg{width:16px;height:16px}
+.modal-body{padding:18px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fgroup{display:flex;flex-direction:column;gap:5px}
+.flb{font-size:11px;font-weight:600;color:var(--ink-3)}
+.finput,.fselect{border:1px solid var(--hair);border-radius:7px;padding:8px 11px;font-size:12.5px;color:var(--ink);background:var(--card);outline:none;transition:border-color .12s;font-family:inherit}
+.finput:focus,.fselect:focus{border-color:var(--accent)}
+.modal-ftr{display:flex;justify-content:flex-end;gap:7px;padding:12px 20px;border-top:1px solid var(--hair)}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="sb-logo"><div class="sb-mark">FH</div><div><div class="sb-brand">Felipe Hub</div><div class="sb-tag">Secretário Pessoal</div></div></div>
+  <nav>
+    <div class="nv-label">Principal</div>
+    <div class="nv-item active"><svg class="icn" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Quem Sou Eu</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Painel</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>Agentes<span class="nv-count">8</span></div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Bater Papo<span class="nv-count alert">5</span></div>
+    <div class="nv-label">Produtividade</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Finanças</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Contatos</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>Agenda</div>
+    <div class="nv-label">Organização</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/></svg>Bancos</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documentos</div>
+    <div class="nv-label">Sistema</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51"/></svg>Configurações</div>
+  </nav>
+  <div class="sb-bottom"><div class="sb-user"><div class="sb-user-av">F</div><div><div class="sb-user-n">Felipe Palhares</div><div class="sb-user-r">Administrador</div></div></div></div>
+</aside>
+
+<main>
+  <div class="top-bar">
+    <div><div class="tb-title">Quem Sou Eu</div><div class="tb-sub">Perfil pessoal e empresarial</div></div>
+    <div class="tb-actions">
+      <button class="btn-i"><svg class="icn icn-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+      <button class="btn btn-primary" onclick="openModal()"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>Editar perfil</button>
+    </div>
+  </div>
+
+  <!-- Profile Banner -->
+  <div class="profile-banner">
+    <div class="pb-av">F</div>
+    <div class="pb-info">
+      <div class="pb-name">Felipe Braz Palhares</div>
+      <div class="pb-role">Empresário · Curitiba, Paraná</div>
+      <div class="pb-tags">
+        <span class="pb-tag">CEO PalharesTech</span>
+        <span class="pb-tag">Sócio Distribuidora Braz</span>
+        <span class="pb-tag">Holding Vimar</span>
+      </div>
+    </div>
+    <div class="pb-stats">
+      <div class="pb-stat"><div class="pb-stat-v">3</div><div class="pb-stat-l">Empresas</div></div>
+      <div class="pb-stat"><div class="pb-stat-v">2</div><div class="pb-stat-l">Processos</div></div>
+      <div class="pb-stat"><div class="pb-stat-v">5</div><div class="pb-stat-l">Imóveis</div></div>
+      <div class="pb-stat"><div class="pb-stat-v">7</div><div class="pb-stat-l">Metas 2026</div></div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('identidade')"><svg class="icn" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Identidade</button>
+    <button class="tab-btn" onclick="switchTab('empresarial')"><svg class="icn" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>Empresarial</button>
+    <button class="tab-btn" onclick="switchTab('familia')"><svg class="icn" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Família</button>
+    <button class="tab-btn" onclick="switchTab('financeiro')"><svg class="icn" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financeiro</button>
+    <button class="tab-btn" onclick="switchTab('juridico')"><svg class="icn" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Jurídico<span class="tab-notif">!</span></button>
+    <button class="tab-btn" onclick="switchTab('acessos')"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Acessos</button>
+    <button class="tab-btn" onclick="switchTab('objetivos')"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Objetivos</button>
+  </div>
+
+  <div class="content">
+
+    <!-- TAB 1: IDENTIDADE -->
+    <div id="identidade" class="tab-panel active">
+
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Dados Pessoais</span><button class="edit-btn" onclick="openModal()"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>Editar</button></div>
+        <div class="cards-row c2">
+
+          <div class="card">
+            <div class="card-title"><svg class="icn" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Informações gerais</div>
+            <div class="frow"><span class="flabel">Nome completo</span><span class="fval">Felipe Braz Palhares</span></div>
+            <div class="frow"><span class="flabel">Apelido</span><span class="fval">Felipe</span></div>
+            <div class="frow"><span class="flabel">Nascimento</span><span class="fval">15/03/1985 <span class="badge b-neutral">40 anos</span></span></div>
+            <div class="frow"><span class="flabel">Estado civil</span><span class="fval">Casado</span></div>
+            <div class="frow"><span class="flabel">Religião</span><span class="fval">Católico</span></div>
+            <div class="frow"><span class="flabel">Naturalidade</span><span class="fval">Curitiba — PR</span></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>Documentos</div>
+            <div class="frow"><span class="flabel">CPF</span><span class="fval"><div class="sens"><span class="sens-txt" id="cpf-val">***.786.456-**</span><button class="eye-btn" onclick="toggleSens('cpf-val','023.786.456-09')"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><span class="badge b-green">Regular</span></div></span></div>
+            <div class="frow"><span class="flabel">RG</span><span class="fval"><div class="sens"><span class="sens-txt" id="rg-val">**.**.**-5</span><button class="eye-btn" onclick="toggleSens('rg-val','12.345.678-5')"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></span></div>
+            <div class="frow"><span class="flabel">CNH</span><span class="fval"><div class="sens"><span class="sens-txt">*****34567**</span><span class="badge b-green">Cat. B · 03/2027</span></div></span></div>
+            <div class="frow"><span class="flabel">Passaporte</span><span class="fval"><div class="sens"><span class="sens-txt">BR*****89</span><span class="badge b-green">06/2028</span></div></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Endereços</span><button class="add-btn"><svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar</button></div>
+        <div class="cards-row c2">
+          <div class="card">
+            <div class="card-title"><svg class="icn" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Residência principal <span class="badge b-indigo" style="margin-left:auto">Principal</span></div>
+            <div class="frow"><span class="flabel">Logradouro</span><span class="fval">Av. Batel, 1234</span></div>
+            <div class="frow"><span class="flabel">Complemento</span><span class="fval">Apto 82, Torre A</span></div>
+            <div class="frow"><span class="flabel">Bairro</span><span class="fval">Batel</span></div>
+            <div class="frow"><span class="flabel">Cidade/UF</span><span class="fval">Curitiba — PR</span></div>
+            <div class="frow"><span class="flabel">CEP</span><span class="fval">80.420-090</span></div>
+          </div>
+          <div class="card" style="border-style:dashed;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--ink-3);font-size:12px;padding:40px"><div><div style="margin-bottom:10px">Nenhum endereço alternativo</div><button class="add-btn" style="display:inline-flex"><svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar endereço</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: EMPRESARIAL -->
+    <div id="empresarial" class="tab-panel">
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Empresas</span><button class="add-btn"><svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nova empresa</button></div>
+
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-title"><svg class="icn" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>PalharesTech Ltda.<span class="badge b-green" style="margin-left:auto">Ativa</span></div>
+          <div class="cards-row c2" style="margin-bottom:12px">
+            <div>
+              <div class="frow"><span class="flabel">CNPJ</span><span class="fval"><div class="sens"><span class="sens-txt">**.***.***/0001-**</span></div></span></div>
+              <div class="frow"><span class="flabel">Ramo</span><span class="fval">Tecnologia · Desenvolvimento</span></div>
+              <div class="frow"><span class="flabel">Cargo</span><span class="fval">CEO e Sócio-Fundador</span></div>
+              <div class="frow"><span class="flabel">Participação</span><span class="fval"><span class="badge b-indigo">70%</span></span></div>
+            </div>
+            <div>
+              <div class="frow"><span class="flabel">Contador</span><span class="fval">José Ferreira — CRC 12345-PR</span></div>
+              <div class="frow"><span class="flabel">Advogado</span><span class="fval">Dra. Maria Lima — OAB/PR 54321</span></div>
+              <div class="frow"><span class="flabel">Sistemas</span><span class="fval"><span class="badge b-gray">SAP</span> <span class="badge b-gray">Salesforce</span> <span class="badge b-gray">G Suite</span></span></div>
+            </div>
+          </div>
+          <div style="font-size:10px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Sócios</div>
+          <div class="data-list">
+            <div class="data-item"><div class="di-left"><div class="di-main">Felipe Braz Palhares</div><div class="di-sub">CPF ***.786.456-**</div></div><div class="di-right"><span class="badge b-indigo">70%</span></div></div>
+            <div class="data-item"><div class="di-left"><div class="di-main">João Ricardo Santos</div><div class="di-sub">CPF ***.***.**-**</div></div><div class="di-right"><span class="badge b-gray">30%</span></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><svg class="icn" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/></svg>Distribuidora Braz Ltda.<span class="badge b-green" style="margin-left:auto">Ativa</span></div>
+          <div class="cards-row c2">
+            <div>
+              <div class="frow"><span class="flabel">CNPJ</span><span class="fval"><div class="sens"><span class="sens-txt">**.***.***/0001-**</span></div></span></div>
+              <div class="frow"><span class="flabel">Ramo</span><span class="fval">Distribuição e Comércio</span></div>
+              <div class="frow"><span class="flabel">Cargo</span><span class="fval">Sócio Administrador</span></div>
+              <div class="frow"><span class="flabel">Participação</span><span class="fval"><span class="badge b-indigo">100%</span></span></div>
+            </div>
+            <div>
+              <div class="frow"><span class="flabel">Sistemas</span><span class="fval"><span class="badge b-gray">TOTVS</span> <span class="badge b-gray">ERP interno</span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: FAMÍLIA -->
+    <div id="familia" class="tab-panel">
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Cônjuge</span><button class="edit-btn">Editar</button></div>
+        <div class="card">
+          <div class="card-title">Ana Carolina Palhares</div>
+          <div class="cards-row c2">
+            <div>
+              <div class="frow"><span class="flabel">CPF</span><span class="fval"><div class="sens"><span class="sens-txt">***.***.**-**</span></div></span></div>
+              <div class="frow"><span class="flabel">Aniversário</span><span class="fval">22/08/1987</span></div>
+            </div>
+            <div>
+              <div class="frow"><span class="flabel">WhatsApp</span><span class="fval"><div class="sens"><span class="sens-txt">(41) 9 ****-****</span></div></span></div>
+              <div class="frow"><span class="flabel">E-mail</span><span class="fval">ana.palhares@email.com</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Filhos</span><button class="add-btn">Adicionar</button></div>
+        <div class="cards-row c2">
+          <div class="card">
+            <div class="card-title">Mateus Palhares<span class="badge b-neutral" style="margin-left:auto">12 anos</span></div>
+            <div class="frow"><span class="flabel">Nascimento</span><span class="fval">05/03/2012</span></div>
+            <div class="frow"><span class="flabel">Escola</span><span class="fval">Colégio Marista Rosário</span></div>
+            <div class="frow"><span class="flabel">Médico</span><span class="fval">Dr. Pedro Almeida</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Sofia Palhares<span class="badge b-neutral" style="margin-left:auto">8 anos</span></div>
+            <div class="frow"><span class="flabel">Nascimento</span><span class="fval">14/09/2016</span></div>
+            <div class="frow"><span class="flabel">Escola</span><span class="fval">Colégio Positivo Junior</span></div>
+            <div class="frow"><span class="flabel">Médico</span><span class="fval">Dr. Pedro Almeida</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Pais e Irmãos</span></div>
+        <div class="data-list">
+          <div class="data-item"><div class="di-left"><div class="di-main">José Braz Palhares <span class="badge b-gray">Pai</span></div><div class="di-sub">10/11/1955 · (41) 9 ****-****</div></div><div class="di-right"><button class="copy-btn">Contato</button></div></div>
+          <div class="data-item"><div class="di-left"><div class="di-main">Maria Helena Palhares <span class="badge b-gray">Mãe</span></div><div class="di-sub">03/04/1958 · (41) 9 ****-****</div></div><div class="di-right"><button class="copy-btn">Contato</button></div></div>
+          <div class="data-item"><div class="di-left"><div class="di-main">Ricardo Braz Palhares <span class="badge b-gray">Irmão</span></div><div class="di-sub">(41) 9 ****-****</div></div><div class="di-right"><button class="copy-btn">Contato</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: FINANCEIRO -->
+    <div id="financeiro" class="tab-panel">
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Bancos e Contas</span><button class="add-btn">Adicionar</button></div>
+        <div class="data-list">
+          <div class="data-item"><div class="di-left"><div class="di-main">Itaú Unibanco</div><div class="di-sub">Ag. 0001 · CC 12345-6 · Corrente</div></div><div class="di-right"><span class="badge b-indigo">Principal</span></div></div>
+          <div class="data-item"><div class="di-left"><div class="di-main">Nubank</div><div class="di-sub">CC 78901-2 · Digital</div></div><div class="di-right"><span class="badge b-gray">Digital</span></div></div>
+          <div class="data-item"><div class="di-left"><div class="di-main">Bradesco</div><div class="di-sub">Ag. 0567 · CP 34567-8 · Poupança</div></div><div class="di-right"><span class="badge b-gray">Poupança</span></div></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Investimentos</span></div>
+        <div class="data-list">
+          <div class="data-item"><div class="di-left"><div class="di-main">Tesouro Direto</div><div class="di-sub">Itaú Investimentos</div></div><div class="di-right"><div class="di-value">R$ 150.000</div><span class="badge b-green">+8,2%</span></div></div>
+          <div class="data-item"><div class="di-left"><div class="di-main">FIIs</div><div class="di-sub">XP Investimentos</div></div><div class="di-right"><div class="di-value">R$ 80.000</div><span class="badge b-green">+6,8%</span></div></div>
+          <div class="data-item"><div class="di-left"><div class="di-main">Ações</div><div class="di-sub">Rico</div></div><div class="di-right"><div class="di-value">R$ 50.000</div><span class="badge b-amber">−2,1%</span></div></div>
+          <div class="data-item"><div class="di-left"><div class="di-main">CDB</div><div class="di-sub">Nubank · 112% CDI</div></div><div class="di-right"><div class="di-value">R$ 30.000</div><span class="badge b-green">+12%</span></div></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Imóveis</span><button class="add-btn">Adicionar</button></div>
+        <div class="cards-row c2">
+          <div class="card">
+            <div class="card-title">Residência Batel<span class="badge b-green" style="margin-left:auto">Quitado</span></div>
+            <div class="frow"><span class="flabel">Endereço</span><span class="fval">Av. Batel, 1234</span></div>
+            <div class="frow"><span class="flabel">Matrícula</span><span class="fval">123.456</span></div>
+            <div class="frow"><span class="flabel">Valor</span><span class="fval" style="font-weight:700">R$ 850.000</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Sala Comercial<span class="badge b-amber" style="margin-left:auto">Financiado</span></div>
+            <div class="frow"><span class="flabel">Endereço</span><span class="fval">R. XV, 567 · Curitiba</span></div>
+            <div class="frow"><span class="flabel">Matrícula</span><span class="fval">789.012</span></div>
+            <div class="frow"><span class="flabel">Valor</span><span class="fval" style="font-weight:700">R$ 420.000</span></div>
+            <div class="frow"><span class="flabel">Financiado até</span><span class="fval">Dezembro / 2031</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: JURÍDICO -->
+    <div id="juridico" class="tab-panel">
+      <div class="abanner danger">Prazo processual em <strong style="margin:0 4px">12 dias</strong> — Proc. 0001234-56.2024 · Dr. Carlos Lima já foi notificado</div>
+      <div class="abanner warn">Contrato de locação comercial vence em <strong style="margin:0 4px">30 dias</strong> — renovar ou rescindir</div>
+
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Processos Ativos</span><button class="add-btn">Adicionar</button></div>
+
+        <div class="proc-card">
+          <div class="proc-title">Reclamação Trabalhista<span class="badge b-red">Em andamento</span></div>
+          <div class="proc-num">Nº 0001234-56.2024.5.09.0001</div>
+          <div class="cards-row c2" style="margin-top:10px">
+            <div>
+              <div class="frow"><span class="flabel">Vara</span><span class="fval">1ª Vara do Trabalho</span></div>
+              <div class="frow"><span class="flabel">Tipo</span><span class="fval">Trabalhista</span></div>
+            </div>
+            <div>
+              <div class="frow"><span class="flabel">Advogado</span><span class="fval">Dr. Carlos Lima · OAB/PR 54321</span></div>
+              <div class="frow"><span class="flabel">Próx. prazo</span><span class="fval"><span class="badge b-red">05/05/2026 — 12d</span></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="proc-card" style="border-left-color:var(--warn)">
+          <div class="proc-title">Ação Declaratória<span class="badge b-amber">Aguardando</span></div>
+          <div class="proc-num">Nº 0005678-12.2023.8.16.0001</div>
+          <div class="cards-row c2" style="margin-top:10px">
+            <div>
+              <div class="frow"><span class="flabel">Vara</span><span class="fval">3ª Vara Cível</span></div>
+              <div class="frow"><span class="flabel">Tipo</span><span class="fval">Cível</span></div>
+            </div>
+            <div>
+              <div class="frow"><span class="flabel">Advogado</span><span class="fval">Dra. Maria Lima · OAB/PR 67890</span></div>
+              <div class="frow"><span class="flabel">Próx. prazo</span><span class="fval"><span class="badge b-gray">20/06/2026</span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Contratos Importantes</span></div>
+        <div class="data-list">
+          <div class="data-item"><div class="di-left"><div class="di-main">Locação Comercial</div><div class="di-sub">PalharesTech × Imobiliária ABC · 12/2026</div></div><div class="di-right"><span class="badge b-amber">Vence em 30d</span></div></div>
+          <div class="data-item"><div class="di-left"><div class="di-main">Prestação de Serviços</div><div class="di-sub">PalharesTech × Cliente XYZ · 03/2027</div></div><div class="di-right"><span class="badge b-green">OK</span></div></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Alertas Automáticos</span></div>
+        <div class="data-list">
+          <div class="data-item"><div class="di-left"><div class="di-main">30 dias antes</div><div class="di-sub">Prazos e vencimentos de contratos</div></div><div class="di-right"><span class="badge b-green">Ativo</span></div></div>
+          <div class="data-item"><div class="di-left"><div class="di-main">15 dias antes</div><div class="di-sub">Prazos processuais</div></div><div class="di-right"><span class="badge b-green">Ativo</span></div></div>
+          <div class="data-item"><div class="di-left"><div class="di-main">7 dias antes</div><div class="di-sub">Prazos processuais urgentes</div></div><div class="di-right"><span class="badge b-green">Ativo</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: ACESSOS -->
+    <div id="acessos" class="tab-panel">
+      <div class="abanner info">Todos os dados deste cofre são criptografados com AES-256 antes de salvar no banco local</div>
+
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Portais Governamentais</span><button class="add-btn">Adicionar</button></div>
+        <div class="vault-item">
+          <div class="vault-icon"><svg class="icn" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/></svg></div>
+          <div class="vault-info"><div class="vault-name">e-CAC · Receita Federal</div><div class="vault-user">CPF ***.786.456-**</div></div>
+          <div class="vault-pass">●●●●●●●●</div>
+          <button class="eye-btn"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          <button class="copy-btn">Copiar</button>
+        </div>
+        <div class="vault-item">
+          <div class="vault-icon"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg></div>
+          <div class="vault-info"><div class="vault-name">GOV.BR</div><div class="vault-user">Nível: Ouro</div></div>
+          <div class="vault-pass">●●●●●●●●</div>
+          <button class="eye-btn"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          <button class="copy-btn">Copiar</button>
+        </div>
+        <div class="vault-item">
+          <div class="vault-icon"><svg class="icn" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div class="vault-info"><div class="vault-name">TJ-PR</div><div class="vault-user">Login: fpalhares</div></div>
+          <div class="vault-pass">●●●●●●●●</div>
+          <button class="eye-btn"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          <button class="copy-btn">Copiar</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Bancos Online</span></div>
+        <div class="vault-item">
+          <div class="vault-icon"><svg class="icn" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/></svg></div>
+          <div class="vault-info"><div class="vault-name">Itaú</div><div class="vault-user">Ag. 0001 · CC 12345-6</div></div>
+          <div class="vault-pass">●●●●●●●●</div>
+          <button class="copy-btn">Copiar</button>
+        </div>
+        <div class="vault-item">
+          <div class="vault-icon"><svg class="icn" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/></svg></div>
+          <div class="vault-info"><div class="vault-name">Nubank</div><div class="vault-user">felipe@email.com</div></div>
+          <div class="vault-pass">●●●●</div>
+          <button class="copy-btn">Copiar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 7: OBJETIVOS -->
+    <div id="objetivos" class="tab-panel">
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Metas Pessoais 2026</span><button class="edit-btn">Editar</button></div>
+        <div class="card">
+          <div class="goal-item"><div style="flex:1"><div class="goal-text">Tirar férias em julho — viagem internacional com a família</div><div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div></div><span class="badge b-amber">20%</span></div>
+          <div class="goal-item"><div style="flex:1"><div class="goal-text">Academia 3× por semana · consistência anual</div><div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div></div><span class="badge b-green">60%</span></div>
+          <div class="goal-item"><div style="flex:1"><div class="goal-text">Ler 12 livros no ano — 1 por mês</div><div class="progress-bar"><div class="progress-fill" style="width:33%"></div></div></div><span class="badge b-indigo">4/12</span></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Metas Empresariais 2026</span></div>
+        <div class="card">
+          <div class="goal-item"><div style="flex:1"><div class="goal-text">PalharesTech — Faturar R$ 5M (atual R$ 2,8M)</div><div class="progress-bar"><div class="progress-fill" style="width:56%"></div></div></div><span class="badge b-green">56%</span></div>
+          <div class="goal-item"><div style="flex:1"><div class="goal-text">Distribuidora Braz — Abrir CD em São Paulo</div><div class="progress-bar"><div class="progress-fill" style="width:30%"></div></div></div><span class="badge b-amber">30%</span></div>
+          <div class="goal-item"><div style="flex:1"><div class="goal-text">Contratar 2 desenvolvedores sênior</div><div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div></div><span class="badge b-indigo">1/2</span></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Como prefere ser tratado</span><button class="edit-btn">Editar</button></div>
+        <div class="card">
+          <div class="pref-box">
+            Chame-me de <strong>Felipe</strong>. Seja direto e objetivo — evite enrolação.<br/>
+            Use <strong>listas e bullet points</strong> sempre que possível.<br/>
+            Quando houver prazo ou urgência, <strong>destaque em negrito e no início</strong> da resposta.<br/>
+            Lembre-me proativamente de compromissos e prazos próximos.<br/>
+            No contexto empresarial, assuma que sou o decisor final.
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Disponibilidade</span></div>
+        <div class="card">
+          <div class="schedule-grid">
+            <div><div class="day-name">Seg</div><div class="day-block day-on">08–18h</div></div>
+            <div><div class="day-name">Ter</div><div class="day-block day-on">08–18h</div></div>
+            <div><div class="day-name">Qua</div><div class="day-block day-on">08–18h</div></div>
+            <div><div class="day-name">Qui</div><div class="day-block day-on">08–18h</div></div>
+            <div><div class="day-name">Sex</div><div class="day-block day-on">08–18h</div></div>
+            <div><div class="day-name">Sáb</div><div class="day-block day-half">09–12h</div></div>
+            <div><div class="day-name">Dom</div><div class="day-block day-off">Folga</div></div>
+          </div>
+          <div style="margin-top:12px;font-size:11.5px;color:var(--ink-2);font-weight:500">Urgências disponíveis via WhatsApp 24h para emergências</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Prioridades de Vida</span></div>
+        <div class="data-list">
+          <div class="data-item"><div class="di-left"><div class="di-main">1 · Família</div><div class="di-sub">Tempo de qualidade com Ana, Mateus e Sofia</div></div></div>
+          <div class="data-item"><div class="di-left"><div class="di-main">2 · Saúde</div><div class="di-sub">Física e mental</div></div></div>
+          <div class="data-item"><div class="di-left"><div class="di-main">3 · Negócios</div><div class="di-sub">Crescimento sustentável das empresas</div></div></div>
+          <div class="data-item"><div class="di-left"><div class="di-main">4 · Lazer e Cultura</div><div class="di-sub">Viagens, leitura, experiências</div></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- MODAL -->
+<div id="modal-edit" class="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <span class="modal-title">Editar dados pessoais</span>
+      <button class="modal-close" onclick="closeModal()"><svg class="icn" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="fgroup"><label class="flb">Nome completo</label><input class="finput" value="Felipe Braz Palhares"/></div>
+        <div class="fgroup"><label class="flb">Apelido</label><input class="finput" value="Felipe"/></div>
+      </div>
+      <div class="form-row">
+        <div class="fgroup"><label class="flb">Nascimento</label><input class="finput" type="date" value="1985-03-15"/></div>
+        <div class="fgroup"><label class="flb">Estado civil</label>
+          <select class="fselect"><option>Casado</option><option>Solteiro</option><option>Divorciado</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fgroup"><label class="flb">CPF</label><input class="finput" type="password" placeholder="000.000.000-00"/></div>
+        <div class="fgroup"><label class="flb">RG</label><input class="finput" type="password" placeholder="00.000.000-0"/></div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="closeModal()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(id){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.tab-btn[onclick="switchTab('${id}')"]`).classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+function toggleSens(id, real){
+  const el = document.getElementById(id);
+  const hidden = el.dataset.hidden !== 'false';
+  if(hidden){ el.dataset.original = el.textContent; el.textContent = real; el.dataset.hidden = 'false'; el.style.color = 'var(--accent)'; }
+  else { el.textContent = el.dataset.original; el.dataset.hidden = 'true'; el.style.color = ''; }
+}
+function openModal(){ document.getElementById('modal-edit').classList.add('open'); }
+function closeModal(){ document.getElementById('modal-edit').classList.remove('open'); }
+function closeModalOutside(e){ if(e.target === document.getElementById('modal-edit')) closeModal(); }
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+</script>
+</body>
+</html>

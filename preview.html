@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Felipe Hub — Painel</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+:root{
+  --bg:#f8fafc;--card:#fff;--ink:#0f172a;--ink-2:#475569;--ink-3:#94a3b8;--ink-4:#cbd5e1;
+  --hair:#e2e8f0;--hair-2:#f1f5f9;
+  --accent:#4f46e5;--accent-hover:#4338ca;--accent-soft:#eef2ff;
+  --ok:#10b981;--warn:#d97706;--err:#dc2626;
+  --shadow-xs:0 1px 2px rgba(15,23,42,.04);--shadow-sm:0 1px 3px rgba(15,23,42,.06);
+  --r-sm:8px;--r-md:10px;--r-lg:12px;--r-xl:16px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;overflow:hidden;font-size:13.5px;letter-spacing:-.05px}
+button{font-family:inherit;letter-spacing:inherit}
+.icn{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.icn-sm{width:14px;height:14px}.icn-lg{width:20px;height:20px}
+
+/* SIDEBAR */
+aside{width:236px;min-width:236px;background:#0f172a;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:18px 18px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-mark{width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+.sb-brand{font-size:14px;font-weight:700;color:#f1f5f9;letter-spacing:-.25px}
+.sb-tag{font-size:10px;color:#64748b;font-weight:500;margin-top:1px}
+nav{flex:1;padding:10px;overflow-y:auto}
+nav::-webkit-scrollbar{display:none}
+.nv-label{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.07em;padding:12px 12px 4px}
+.nv-item{display:flex;align-items:center;gap:11px;padding:8px 12px;border-radius:7px;color:#94a3b8;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:1px;transition:all .12s;letter-spacing:-.1px}
+.nv-item:hover{background:rgba(255,255,255,.04);color:#e2e8f0}
+.nv-item.active{background:rgba(79,70,229,.15);color:#e0e7ff}
+.nv-item svg{width:15px;height:15px;opacity:.9}
+.nv-count{margin-left:auto;font-size:10.5px;font-weight:600;color:#64748b;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.04)}
+.nv-count.alert{background:rgba(220,38,38,.2);color:#fca5a5}
+.nv-count.notice{background:rgba(217,119,6,.2);color:#fcd34d}
+.sb-bottom{padding:10px;border-top:1px solid rgba(255,255,255,.06)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .12s}
+.sb-user:hover{background:rgba(255,255,255,.04)}
+.sb-user-av{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.sb-user-n{font-size:12.5px;font-weight:600;color:#e2e8f0}
+.sb-user-r{font-size:10.5px;color:#64748b;font-weight:500;margin-top:1px}
+
+/* MAIN */
+main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--hair);background:var(--card);flex-shrink:0}
+.tb-title{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.4px;line-height:1}
+.tb-sub{font-size:12px;color:var(--ink-3);margin-top:3px;font-weight:500}
+.tb-actions{display:flex;align-items:center;gap:6px}
+.btn-i{width:32px;height:32px;border-radius:7px;border:1px solid var(--hair);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-2);transition:all .15s;position:relative}
+.btn-i:hover{background:var(--bg);color:var(--ink);border-color:var(--ink-4)}
+.notif-dot{position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:var(--err);border:1.5px solid var(--card)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid var(--hair);background:var(--card);color:var(--ink);transition:all .15s;letter-spacing:-.1px}
+.btn:hover{background:var(--bg);border-color:var(--ink-4)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+
+.content{flex:1;overflow-y:auto;padding:22px 24px;display:flex;flex-direction:column;gap:22px}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+
+.sec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);margin-bottom:10px}
+
+/* SUMMARY CARDS */
+.cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-lg);padding:18px 20px;display:flex;flex-direction:column;gap:12px;transition:all .15s;cursor:default}
+.card:hover{border-color:var(--ink-4);box-shadow:var(--shadow-sm)}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between}
+.card-icon{width:36px;height:36px;border-radius:8px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:var(--ink-2)}
+.card-icon svg{width:17px;height:17px}
+.card-trend{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;letter-spacing:-.05px;display:inline-flex;align-items:center;gap:3px}
+.trend-up{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+.trend-down{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+.trend-neu{background:var(--hair-2);color:var(--ink-2);border:1px solid var(--hair)}
+.card-value{font-size:26px;font-weight:700;color:var(--ink);letter-spacing:-.6px;line-height:1;font-variant-numeric:tabular-nums}
+.card-label{font-size:13px;font-weight:600;color:var(--ink);margin-top:6px;letter-spacing:-.15px}
+.card-meta{font-size:11px;color:var(--ink-3);margin-top:2px;font-weight:500}
+.card-bar{height:3px;border-radius:99px;background:var(--hair-2);overflow:hidden}
+.card-bar-fill{height:100%;border-radius:99px;background:var(--accent)}
+
+/* ALERT CARDS */
+.alerts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.alert-card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-lg);overflow:hidden}
+.alert-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--hair-2)}
+.alert-title-row{display:flex;align-items:center;gap:8px}
+.alert-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.alert-title{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:-.2px}
+.alert-count{font-size:10.5px;font-weight:700;background:var(--hair-2);color:var(--ink-2);padding:2px 7px;border-radius:999px;letter-spacing:-.05px}
+.alert-list{padding:4px 0}
+.alert-item{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;transition:background .1s;cursor:pointer;border-bottom:1px solid var(--hair-2)}
+.alert-item:last-child{border-bottom:none}
+.alert-item:hover{background:var(--bg)}
+.alert-item-icon{width:28px;height:28px;border-radius:7px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:var(--ink-2);flex-shrink:0}
+.alert-item-icon svg{width:14px;height:14px}
+.alert-item-body{flex:1;min-width:0}
+.alert-item-title{font-size:12.5px;font-weight:600;color:var(--ink);letter-spacing:-.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alert-item-meta{font-size:11px;color:var(--ink-3);margin-top:2px;font-weight:500}
+.alert-item-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap;flex-shrink:0;align-self:flex-start;margin-top:1px;letter-spacing:.01em;border:1px solid transparent}
+.tag-red{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.tag-amber{background:#fffbeb;color:#b45309;border-color:#fde68a}
+.tag-indigo{background:var(--accent-soft);color:var(--accent);border-color:#c7d2fe}
+.tag-green{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.tag-gray{background:var(--hair-2);color:var(--ink-2);border-color:var(--hair)}
+.alert-footer{padding:8px 16px 10px;border-top:1px solid var(--hair-2)}
+.alert-footer a{font-size:12px;font-weight:600;color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:3px;letter-spacing:-.1px}
+.alert-footer a:hover{color:var(--accent-hover)}
+
+.dot-warn{background:var(--warn)}
+.dot-err{background:var(--err)}
+.dot-indigo{background:var(--accent)}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="sb-logo">
+    <div class="sb-mark">FH</div>
+    <div><div class="sb-brand">Felipe Hub</div><div class="sb-tag">Secretário Pessoal</div></div>
+  </div>
+  <nav>
+    <div class="nv-label">Principal</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Quem Sou Eu</div>
+    <div class="nv-item active"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Painel</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>Agentes<span class="nv-count">8</span></div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Bater Papo<span class="nv-count alert">5</span></div>
+    <div class="nv-label">Produtividade</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Finanças</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Contatos<span class="nv-count notice">2</span></div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Agenda</div>
+    <div class="nv-label">Organização</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/></svg>Bancos</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documentos</div>
+    <div class="nv-label">Sistema</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Configurações</div>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-user">
+      <div class="sb-user-av">F</div>
+      <div><div class="sb-user-n">Felipe Palhares</div><div class="sb-user-r">Administrador</div></div>
+    </div>
+  </div>
+</aside>
+
+<main>
+  <div class="top-bar">
+    <div>
+      <div class="tb-title">Painel</div>
+      <div class="tb-sub">Visão geral da operação</div>
+    </div>
+    <div class="tb-actions">
+      <button class="btn-i"><svg class="icn icn-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+      <button class="btn-i"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-dot"></span></button>
+      <button class="btn btn-primary"><svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nova tarefa</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div>
+      <div class="sec-title">Visão geral</div>
+      <div class="cards-grid">
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg></div>
+            <span class="card-trend trend-up">● Online</span>
+          </div>
+          <div>
+            <div class="card-value">3</div>
+            <div class="card-label">Agentes ativos</div>
+            <div class="card-meta">Claude · GPT-4o · Gemini</div>
+          </div>
+          <div class="card-bar"><div class="card-bar-fill" style="width:100%"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon"><svg class="icn" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg></div>
+            <span class="card-trend trend-up">+4 novos</span>
+          </div>
+          <div>
+            <div class="card-value">128</div>
+            <div class="card-label">Contatos</div>
+            <div class="card-meta">12 marcados como VIP</div>
+          </div>
+          <div class="card-bar"><div class="card-bar-fill" style="width:72%"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon"><svg class="icn" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+            <span class="card-trend trend-down">+8 hoje</span>
+          </div>
+          <div>
+            <div class="card-value">23</div>
+            <div class="card-label">E-mails não lidos</div>
+            <div class="card-meta">3 marcados como urgentes</div>
+          </div>
+          <div class="card-bar"><div class="card-bar-fill" style="width:55%;background:var(--err)"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+            <span class="card-trend trend-neu">Hoje</span>
+          </div>
+          <div>
+            <div class="card-value">4</div>
+            <div class="card-label">Eventos hoje</div>
+            <div class="card-meta">Próximo às 14h00</div>
+          </div>
+          <div class="card-bar"><div class="card-bar-fill" style="width:40%;background:var(--warn)"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <span class="card-trend trend-up">+2 novos</span>
+          </div>
+          <div>
+            <div class="card-value">47</div>
+            <div class="card-label">Documentos</div>
+            <div class="card-meta">5 aguardando revisão</div>
+          </div>
+          <div class="card-bar"><div class="card-bar-fill" style="width:63%;background:var(--ok)"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon"><svg class="icn" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/></svg></div>
+            <span class="card-trend trend-up">+R$1.2k</span>
+          </div>
+          <div>
+            <div class="card-value">3</div>
+            <div class="card-label">Bancos conectados</div>
+            <div class="card-meta">Último sync há 2 min</div>
+          </div>
+          <div class="card-bar"><div class="card-bar-fill" style="width:100%"></div></div>
+        </div>
+
+      </div>
+    </div>
+
+    <div>
+      <div class="sec-title">Atenção necessária</div>
+      <div class="alerts-grid">
+
+        <div class="alert-card">
+          <div class="alert-header">
+            <div class="alert-title-row"><span class="alert-dot dot-warn"></span><span class="alert-title">Compromissos próximos</span></div>
+            <span class="alert-count">4 hoje</span>
+          </div>
+          <div class="alert-list">
+            <div class="alert-item">
+              <div class="alert-item-icon"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+              <div class="alert-item-body"><div class="alert-item-title">Call com equipe de produto</div><div class="alert-item-meta">Hoje · 13h00 · Google Meet</div></div>
+              <span class="alert-item-tag tag-amber">Em 1h</span>
+            </div>
+            <div class="alert-item">
+              <div class="alert-item-icon"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+              <div class="alert-item-body"><div class="alert-item-title">Reunião com cliente Acme</div><div class="alert-item-meta">Hoje · 14h30 · Presencial</div></div>
+              <span class="alert-item-tag tag-indigo">14h30</span>
+            </div>
+            <div class="alert-item">
+              <div class="alert-item-icon"><svg class="icn icn-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+              <div class="alert-item-body"><div class="alert-item-title">Review semanal</div><div class="alert-item-meta">Hoje · 17h00 · Zoom</div></div>
+              <span class="alert-item-tag tag-gray">17h00</span>
+            </div>
+          </div>
+          <div class="alert-footer"><a href="#">Ver agenda completa →</a></div>
+        </div>
+
+        <div class="alert-card">
+          <div class="alert-header">
+            <div class="alert-title-row"><span class="alert-dot dot-err"></span><span class="alert-title">E-mails importantes</span></div>
+            <span class="alert-count">3 urgentes</span>
+          </div>
+          <div class="alert-list">
+            <div class="alert-item">
+              <div class="alert-item-icon"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+              <div class="alert-item-body"><div class="alert-item-title">Proposta comercial — prazo hoje</div><div class="alert-item-meta">De: joao@acme.com · 09h14</div></div>
+              <span class="alert-item-tag tag-red">Urgente</span>
+            </div>
+            <div class="alert-item">
+              <div class="alert-item-icon"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+              <div class="alert-item-body"><div class="alert-item-title">Contrato para assinatura digital</div><div class="alert-item-meta">De: juridico@empresa.com · 08h52</div></div>
+              <span class="alert-item-tag tag-amber">Assinar</span>
+            </div>
+            <div class="alert-item">
+              <div class="alert-item-icon"><svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+              <div class="alert-item-body"><div class="alert-item-title">Boleto vence amanhã — R$2.400</div><div class="alert-item-meta">De: financeiro@banco.com · 07h30</div></div>
+              <span class="alert-item-tag tag-red">Pagar</span>
+            </div>
+          </div>
+          <div class="alert-footer"><a href="#">Ver todos os e-mails →</a></div>
+        </div>
+
+        <div class="alert-card">
+          <div class="alert-header">
+            <div class="alert-title-row"><span class="alert-dot dot-indigo"></span><span class="alert-title">Tarefas pendentes</span></div>
+            <span class="alert-count">7 abertas</span>
+          </div>
+          <div class="alert-list">
+            <div class="alert-item">
+              <div class="alert-item-icon"><svg class="icn icn-sm" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+              <div class="alert-item-body"><div class="alert-item-title">Finalizar relatório Q1</div><div class="alert-item-meta">Vence hoje · Alta prioridade</div></div>
+              <span class="alert-item-tag tag-red">Atrasada</span>
+            </div>
+            <div class="alert-item">
+              <div class="alert-item-icon"><svg class="icn icn-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51"/></svg></div>
+              <div class="alert-item-body"><div class="alert-item-title">Revisar configuração dos agentes</div><div class="alert-item-meta">Vence amanhã · Média prioridade</div></div>
+              <span class="alert-item-tag tag-amber">Amanhã</span>
+            </div>
+            <div class="alert-item">
+              <div class="alert-item-icon"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></div>
+              <div class="alert-item-body"><div class="alert-item-title">Enviar NF para cliente</div><div class="alert-item-meta">Vence sex · Baixa prioridade</div></div>
+              <span class="alert-item-tag tag-green">Sex</span>
+            </div>
+          </div>
+          <div class="alert-footer"><a href="#">Ver todas as tarefas →</a></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+</body>
+</html>

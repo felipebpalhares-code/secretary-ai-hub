@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Felipe Hub — Bater Papo</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+:root{
+  --bg:#f8fafc;--card:#fff;--ink:#0f172a;--ink-2:#475569;--ink-3:#94a3b8;--ink-4:#cbd5e1;
+  --hair:#e2e8f0;--hair-2:#f1f5f9;
+  --accent:#4f46e5;--accent-hover:#4338ca;--accent-soft:#eef2ff;
+  --ok:#10b981;--warn:#d97706;--err:#dc2626;
+  --r-sm:8px;--r-md:10px;--r-lg:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;overflow:hidden;font-size:13.5px;letter-spacing:-.05px}
+button{font-family:inherit;letter-spacing:inherit}
+.icn{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.icn-sm{width:13px;height:13px}
+
+/* SIDEBAR */
+aside{width:236px;min-width:236px;background:#0f172a;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;z-index:10}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:18px 18px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-mark{width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+.sb-brand{font-size:14px;font-weight:700;color:#f1f5f9;letter-spacing:-.25px}
+.sb-tag{font-size:10px;color:#64748b;font-weight:500;margin-top:1px}
+nav{flex:1;padding:10px;overflow-y:auto}
+nav::-webkit-scrollbar{display:none}
+.nv-label{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.07em;padding:12px 12px 4px}
+.nv-item{display:flex;align-items:center;gap:11px;padding:8px 12px;border-radius:7px;color:#94a3b8;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:1px;transition:all .12s}
+.nv-item:hover{background:rgba(255,255,255,.04);color:#e2e8f0}
+.nv-item.active{background:rgba(79,70,229,.15);color:#e0e7ff}
+.nv-item svg{width:15px;height:15px;opacity:.9}
+.nv-count{margin-left:auto;font-size:10.5px;font-weight:600;color:#64748b;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.04)}
+.nv-count.alert{background:rgba(220,38,38,.2);color:#fca5a5}
+.sb-bottom{padding:10px;border-top:1px solid rgba(255,255,255,.06)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer}
+.sb-user-av{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.sb-user-n{font-size:12.5px;font-weight:600;color:#e2e8f0}
+.sb-user-r{font-size:10.5px;color:#64748b;margin-top:1px}
+
+/* HUB 3 COLUMNS */
+main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.hub{flex:1;display:flex;overflow:hidden;min-width:0}
+
+/* COL 1: CONV LIST */
+.conv-sidebar{width:276px;min-width:276px;background:var(--card);border-right:1px solid var(--hair);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.cs-header{padding:14px 16px;border-bottom:1px solid var(--hair);flex-shrink:0}
+.cs-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;letter-spacing:-.25px}
+.btn-new-chat{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;background:var(--accent);color:#fff;font-size:11.5px;font-weight:600;border-radius:6px;border:none;cursor:pointer}
+.btn-new-chat:hover{background:var(--accent-hover)}
+.btn-new-chat svg{width:12px;height:12px}
+.cs-search{display:flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--hair);border-radius:6px;padding:6px 10px}
+.cs-search input{border:none;background:none;flex:1;font-size:12px;outline:none;color:var(--ink);font-family:inherit}
+.cs-search input::placeholder{color:var(--ink-3)}
+
+/* Scenarios */
+.scenarios{padding:10px 12px;border-bottom:1px solid var(--hair);flex-shrink:0}
+.scenarios-lbl{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-3);letter-spacing:.07em;margin-bottom:7px}
+.scenarios-row{display:flex;flex-direction:column;gap:4px}
+.sc-btn{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;border:1px solid var(--hair);background:var(--card);cursor:pointer;font-size:12px;font-weight:600;color:var(--ink-2);text-align:left;transition:all .12s;letter-spacing:-.1px}
+.sc-btn:hover{background:var(--bg);border-color:var(--ink-4);color:var(--ink)}
+.sc-btn svg{width:13px;height:13px;color:var(--ink-3)}
+.sc-btn.urgent{border-color:#fecaca;color:var(--err)}
+.sc-btn.urgent svg{color:var(--err)}
+
+/* Mode bar */
+.mode-bar{display:flex;gap:3px;padding:10px 12px;border-bottom:1px solid var(--hair);flex-shrink:0;background:var(--card)}
+.mode-btn{flex:1;padding:6px 5px;border-radius:6px;border:1px solid var(--hair);background:var(--card);font-size:11px;font-weight:600;color:var(--ink-2);cursor:pointer;transition:all .12s;letter-spacing:-.1px}
+.mode-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.mode-btn:hover:not(.active){background:var(--bg);border-color:var(--ink-4)}
+
+/* Conv list */
+.conv-list{flex:1;overflow-y:auto}
+.conv-list::-webkit-scrollbar{width:3px}
+.conv-list::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+.conv-section-lbl{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-3);letter-spacing:.07em;padding:10px 16px 4px}
+.conv-item{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;cursor:pointer;transition:background .1s;border-bottom:1px solid var(--hair-2);position:relative}
+.conv-item:hover{background:var(--bg)}
+.conv-item.active{background:var(--accent-soft)}
+.conv-item.active::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--accent)}
+.ci-icon{width:32px;height:32px;border-radius:8px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.ci-body{flex:1;min-width:0}
+.ci-name{font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.15px}
+.ci-preview{font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;font-weight:500}
+.ci-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.ci-time{font-size:10px;color:var(--ink-3);font-weight:500}
+.ci-badge{background:var(--accent);color:#fff;font-size:9.5px;font-weight:700;border-radius:999px;padding:1px 6px;min-width:18px;text-align:center}
+.ci-badge.alert{background:var(--err)}
+.ci-badge.amber{background:var(--warn)}
+
+/* COL 2: CHAT */
+.chat-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+.chat-hdr{display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--card);border-bottom:1px solid var(--hair);flex-shrink:0}
+.ch-agents{display:flex;gap:-4px}
+.ch-av{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;background:var(--bg);border:1.5px solid var(--card);margin-left:-5px}
+.ch-av:first-child{margin-left:0}
+.ch-title{font-size:13.5px;font-weight:700;color:var(--ink);flex:1;letter-spacing:-.2px}
+.ch-sub{font-size:11px;color:var(--ink-3);font-weight:500;margin-top:1px}
+.ch-actions{display:flex;gap:5px}
+.ch-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;border:1px solid var(--hair);background:var(--card);color:var(--ink);transition:all .15s}
+.ch-btn:hover{background:var(--bg);border-color:var(--ink-4)}
+.ch-btn svg{width:12px;height:12px}
+.context-pill{display:inline-flex;align-items:center;gap:4px;background:var(--accent-soft);border:1px solid #c7d2fe;color:var(--accent);font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:999px;letter-spacing:-.05px}
+
+/* Messages */
+.messages{flex:1;overflow-y:auto;padding:18px 20px 6px;display:flex;flex-direction:column;gap:6px}
+.messages::-webkit-scrollbar{width:4px}
+.messages::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+
+.sys-msg{text-align:center;margin:8px 0}
+.sys-pill{display:inline-flex;align-items:center;gap:5px;background:var(--hair-2);border:1px solid var(--hair);border-radius:999px;padding:4px 12px;font-size:10.5px;font-weight:600;color:var(--ink-2);letter-spacing:-.05px}
+.sys-pill.briefing{background:#fffbeb;border-color:#fde68a;color:#92400e}
+
+/* Agent message */
+.msg-group{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}
+.agent-label{display:flex;align-items:center;gap:7px;margin-bottom:3px}
+.al-av{width:22px;height:22px;border-radius:6px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.al-name{font-size:11.5px;font-weight:700;letter-spacing:-.1px}
+.al-time{font-size:10px;color:var(--ink-3);margin-left:auto;font-weight:500}
+.ag-bubble{max-width:80%;padding:10px 14px;border-radius:4px 11px 11px 11px;font-size:12.5px;line-height:1.55;background:var(--card);border:1px solid var(--hair);color:var(--ink);border-left-width:3px}
+.ag-bubble ul{padding-left:16px;margin:4px 0 2px}
+.ag-bubble li{margin-bottom:2px}
+.ag-bubble strong{font-weight:700}
+.ag-bubble.silva{border-left-color:#7c3aed}
+.ag-bubble.ricardo{border-left-color:var(--ok)}
+.ag-bubble.ana{border-left-color:#ec4899}
+.ag-bubble.clara{border-left-color:var(--accent)}
+.ag-bubble.eng{border-left-color:#f97316}
+.ag-bubble.diretor{border-left-color:#3b82f6}
+.ag-bubble.alert-urgent{background:#fef2f2;border-color:#fecaca;border-left-color:var(--err)}
+
+.name-silva{color:#7c3aed}
+.name-ricardo{color:var(--ok)}
+.name-ana{color:#be185d}
+.name-clara{color:var(--accent)}
+.name-eng{color:#c2410c}
+.name-diretor{color:#1d4ed8}
+
+/* User msg */
+.user-msg-row{display:flex;justify-content:flex-end;margin-bottom:12px;gap:8px;align-items:flex-end}
+.user-bubble{max-width:70%;background:var(--accent);color:#fff;padding:10px 14px;border-radius:11px 11px 4px 11px;font-size:12.5px;line-height:1.55}
+.user-mini-av{width:26px;height:26px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+
+/* Agent-to-agent */
+.a2a-indicator{display:flex;align-items:center;gap:7px;padding:6px 11px;background:var(--accent-soft);border:1px solid #c7d2fe;border-radius:6px;font-size:10.5px;color:var(--accent);font-weight:600;margin:4px 0;align-self:flex-start;letter-spacing:-.05px}
+.a2a-dot{width:5px;height:5px;border-radius:50%;background:var(--accent)}
+
+/* Command bar */
+.cmd-bar{display:flex;gap:5px;padding:8px 16px;background:var(--card);border-top:1px solid var(--hair);overflow-x:auto;flex-shrink:0}
+.cmd-bar::-webkit-scrollbar{display:none}
+.cmd-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:6px;background:var(--card);border:1px solid var(--hair);font-size:11px;font-weight:600;color:var(--ink-2);cursor:pointer;white-space:nowrap;transition:all .12s;flex-shrink:0;font-family:-apple-system-ui-monospace,"SF Mono",monospace;letter-spacing:-.05px}
+.cmd-btn:hover{background:var(--accent-soft);border-color:#c7d2fe;color:var(--accent)}
+
+/* Input */
+.input-wrap{display:flex;gap:6px;align-items:flex-end;padding:12px 16px;background:var(--card);border-top:1px solid var(--hair);flex-shrink:0}
+.chat-input-area{flex:1;background:var(--bg);border:1px solid var(--hair);border-radius:9px;padding:9px 13px;font-size:12.5px;color:var(--ink);outline:none;resize:none;font-family:inherit;min-height:40px;max-height:120px;line-height:1.5}
+.chat-input-area:focus{border-color:var(--accent);background:var(--card)}
+.send-btn-c{width:40px;height:40px;border-radius:9px;background:var(--accent);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;transition:background .15s;flex-shrink:0}
+.send-btn-c:hover{background:var(--accent-hover)}
+.send-btn-c svg{width:16px;height:16px}
+
+/* COL 3: AGENT FEED */
+.agent-feed{width:288px;min-width:288px;background:var(--card);border-left:1px solid var(--hair);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;transition:all .25s}
+.agent-feed.collapsed{width:0;min-width:0;border:none}
+.af-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--hair);flex-shrink:0}
+.af-title{font-size:12.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:7px;letter-spacing:-.15px}
+.af-live{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+.af-toggle{background:none;border:none;cursor:pointer;color:var(--ink-3);padding:4px}
+.af-toggle:hover{color:var(--ink)}
+.af-filter{display:flex;gap:5px;padding:8px 12px;border-bottom:1px solid var(--hair);overflow-x:auto;flex-shrink:0}
+.af-filter::-webkit-scrollbar{display:none}
+.af-f-btn{padding:4px 9px;border-radius:999px;font-size:10.5px;font-weight:600;border:1px solid var(--hair);background:var(--card);color:var(--ink-2);cursor:pointer;white-space:nowrap;letter-spacing:-.05px}
+.af-f-btn.active{background:var(--accent-soft);border-color:#c7d2fe;color:var(--accent)}
+.af-list{flex:1;overflow-y:auto}
+.af-list::-webkit-scrollbar{width:3px}
+.af-list::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+
+.feed-item{padding:10px 14px;border-bottom:1px solid var(--hair-2);cursor:pointer;transition:background .1s}
+.feed-item:hover{background:var(--bg)}
+.feed-item.unread{background:#fcfdff}
+.feed-item.unread{border-left:2px solid var(--accent)}
+.fi-row{display:flex;align-items:flex-start;gap:7px}
+.fi-av{width:20px;height:20px;border-radius:5px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.fi-arrow{font-size:10px;color:var(--ink-3);flex-shrink:0;margin-top:3px}
+.fi-content{flex:1;min-width:0}
+.fi-names{font-size:11px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.1px}
+.fi-msg{font-size:10.5px;color:var(--ink-2);margin-top:2px;line-height:1.4;font-weight:500}
+.fi-time{font-size:10px;color:var(--ink-3);flex-shrink:0;margin-left:auto;white-space:nowrap;font-weight:500}
+.fi-status{display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:700;margin-top:4px;padding:1px 6px;border-radius:3px;border:1px solid transparent}
+.fi-status.done{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.fi-status.pending{background:#fffbeb;color:#b45309;border-color:#fde68a}
+
+/* Meeting modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:999;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--card);border-radius:var(--r-lg);width:520px;max-width:95vw;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.2)}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--hair)}
+.modal-title{font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-.2px}
+.modal-close{background:none;border:none;cursor:pointer;color:var(--ink-3);padding:2px}
+.modal-close svg{width:16px;height:16px}
+.modal-body{padding:18px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.fgroup{display:flex;flex-direction:column;gap:5px}
+.flb{font-size:11px;font-weight:600;color:var(--ink-3)}
+.finput{border:1px solid var(--hair);border-radius:7px;padding:8px 11px;font-size:12.5px;color:var(--ink);background:var(--card);outline:none;font-family:inherit}
+.finput:focus{border-color:var(--accent)}
+.agent-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.ap-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 5px;border-radius:8px;border:1px solid var(--hair);cursor:pointer;font-size:10.5px;font-weight:600;color:var(--ink-2);text-align:center;transition:all .12s;background:var(--card)}
+.ap-item:hover{border-color:var(--ink-4);background:var(--bg)}
+.ap-item.selected{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.ap-av{width:30px;height:30px;border-radius:8px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:14px}
+.modal-ftr{display:flex;justify-content:flex-end;gap:6px;padding:12px 20px;border-top:1px solid var(--hair)}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid var(--hair);background:var(--card);color:var(--ink)}
+.btn:hover{background:var(--bg);border-color:var(--ink-4)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+
+/* ATA */
+.ata-body{padding:20px 22px;overflow-y:auto;font-size:12.5px;line-height:1.65;color:var(--ink-2)}
+.ata-body h2{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:2px;letter-spacing:-.2px}
+.ata-body .ata-meta{font-size:11px;color:var(--ink-3);margin-bottom:14px;font-weight:500}
+.ata-body h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);margin:14px 0 6px}
+.ata-body ul{padding-left:16px}
+.ata-body li{margin-bottom:4px}
+.ata-body .decision{background:#ecfdf5;border:1px solid #a7f3d0;border-radius:7px;padding:8px 12px;margin:6px 0;font-weight:500;color:#047857}
+.ata-body .action{background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:8px 12px;margin:6px 0;font-weight:600;color:#b45309}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="sb-logo"><div class="sb-mark">FH</div><div><div class="sb-brand">Felipe Hub</div><div class="sb-tag">Secretário Pessoal</div></div></div>
+  <nav>
+    <div class="nv-label">Principal</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Quem Sou Eu</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Painel</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>Agentes<span class="nv-count">8</span></div>
+    <div class="nv-item active"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Bater Papo<span class="nv-count alert">5</span></div>
+    <div class="nv-label">Produtividade</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Finanças</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Contatos</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>Agenda</div>
+    <div class="nv-label">Organização</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/></svg>Bancos</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documentos</div>
+    <div class="nv-label">Sistema</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51"/></svg>Configurações</div>
+  </nav>
+  <div class="sb-bottom"><div class="sb-user"><div class="sb-user-av">F</div><div><div class="sb-user-n">Felipe Palhares</div><div class="sb-user-r">Administrador</div></div></div></div>
+</aside>
+
+<main>
+<div class="hub">
+
+  <!-- COL 1 -->
+  <div class="conv-sidebar">
+    <div class="cs-header">
+      <div class="cs-title">Conversas
+        <button class="btn-new-chat" onclick="openMeeting()"><svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Reunião</button>
+      </div>
+      <div class="cs-search"><svg class="icn icn-sm" viewBox="0 0 24 24" style="color:var(--ink-3)"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Buscar..."/></div>
+    </div>
+
+    <div class="scenarios">
+      <div class="scenarios-lbl">Ações rápidas</div>
+      <div class="scenarios-row">
+        <button class="sc-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>Como está meu dia?</button>
+        <button class="sc-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg>Status jurídico</button>
+        <button class="sc-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>Status das obras</button>
+        <button class="sc-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Saúde financeira</button>
+        <button class="sc-btn urgent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Modo urgência</button>
+      </div>
+    </div>
+
+    <div class="mode-bar">
+      <button class="mode-btn active">Livre</button>
+      <button class="mode-btn">Reunião</button>
+      <button class="mode-btn">Briefing</button>
+    </div>
+
+    <div class="conv-list">
+      <div class="conv-section-lbl">Hoje</div>
+      <div class="conv-item active">
+        <div class="ci-icon">🌅</div>
+        <div class="ci-body"><div class="ci-name">Briefing Diário</div><div class="ci-preview">Clara: 3 emails urgentes...</div></div>
+        <div class="ci-meta"><div class="ci-time">07:00</div><div class="ci-badge amber">5</div></div>
+      </div>
+      <div class="conv-item">
+        <div class="ci-icon">⚖️</div>
+        <div class="ci-body"><div class="ci-name">Dr. Silva</div><div class="ci-preview">Prazo em 12 dias · 05/05</div></div>
+        <div class="ci-meta"><div class="ci-time">2h</div><div class="ci-badge alert">1</div></div>
+      </div>
+
+      <div class="conv-section-lbl">Ontem</div>
+      <div class="conv-item">
+        <div class="ci-icon">🏛️</div>
+        <div class="ci-body"><div class="ci-name">Reunião: Terreno SP</div><div class="ci-preview">ATA gerada · 3 participantes</div></div>
+        <div class="ci-meta"><div class="ci-time">ontem</div></div>
+      </div>
+      <div class="conv-item">
+        <div class="ci-icon">💰</div>
+        <div class="ci-body"><div class="ci-name">Saúde financeira</div><div class="ci-preview">CDB rendeu R$312 esse mês</div></div>
+        <div class="ci-meta"><div class="ci-time">ontem</div></div>
+      </div>
+
+      <div class="conv-section-lbl">Esta semana</div>
+      <div class="conv-item">
+        <div class="ci-icon">🏗️</div>
+        <div class="ci-body"><div class="ci-name">Status das obras</div><div class="ci-preview">Bloco C 67% · 8% acima</div></div>
+        <div class="ci-meta"><div class="ci-time">2d</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COL 2 -->
+  <div class="chat-main">
+
+    <div class="chat-hdr">
+      <div class="ch-agents">
+        <div class="ch-av">🌅</div><div class="ch-av">⚖️</div><div class="ch-av">💰</div>
+        <div class="ch-av">🌸</div><div class="ch-av">🏗️</div><div class="ch-av">✉️</div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="ch-title">Briefing Diário · 24/04/2026</div>
+        <div class="ch-sub">6 agentes · Modo Briefing · 07:00</div>
+      </div>
+      <div class="ch-actions">
+        <span class="context-pill"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Perfil carregado</span>
+        <button class="ch-btn" onclick="openAta()"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>Ata</button>
+        <button class="ch-btn" onclick="toggleFeed()"><svg class="icn" viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>Feed</button>
+      </div>
+    </div>
+
+    <div class="cmd-bar">
+      <button class="cmd-btn">/reuniao</button>
+      <button class="cmd-btn">/briefing</button>
+      <button class="cmd-btn">/todos</button>
+      <button class="cmd-btn">/urgente</button>
+      <button class="cmd-btn" onclick="openAta()">/ata</button>
+      <button class="cmd-btn">/resumo</button>
+      <button class="cmd-btn">/fixar</button>
+      <button class="cmd-btn">/exportar</button>
+    </div>
+
+    <div class="messages">
+      <div class="sys-msg"><span class="sys-pill briefing">Briefing automático · 07:00 · 24/04/2026</span></div>
+      <div class="a2a-indicator"><span class="a2a-dot"></span>Agentes consultando base de conhecimento...</div>
+
+      <div class="msg-group">
+        <div class="agent-label">
+          <div class="al-av">⚖️</div><span class="al-name name-silva">Dr. Silva</span><span class="al-time">07:00</span>
+        </div>
+        <div class="ag-bubble silva alert-urgent">
+          <strong>URGENTE — Prazo em 12 dias</strong><br/>
+          Processo trabalhista <strong>0001234-56.2024</strong> — contestação até <strong>05/05/2026</strong>. Dr. Carlos Lima precisa do seu OK <strong>hoje</strong>.<br/><br/>
+          Também: contrato de locação PalharesTech vence em <strong>30 dias</strong>. Renovar ou rescindir?
+        </div>
+      </div>
+
+      <div class="msg-group">
+        <div class="agent-label">
+          <div class="al-av">💰</div><span class="al-name name-ricardo">Ricardo</span><span class="al-time">07:00</span>
+        </div>
+        <div class="ag-bubble ricardo">
+          Fatura Nubank vence <strong>amanhã</strong> (R$ 3.240). Boleto R$ 2.400 também vence amanhã.<br/><br/>
+          CDB Nubank rendeu <strong>R$ 312</strong> no mês. Portfólio total: <strong>R$ 310.000</strong> (+1,8%).<br/><br/>
+          Custas processuais estimadas para o trabalhista: R$ 1.800 — verba disponível.
+        </div>
+      </div>
+
+      <div class="msg-group">
+        <div class="agent-label">
+          <div class="al-av">🌸</div><span class="al-name name-ana">Ana</span><span class="al-time">07:00</span>
+        </div>
+        <div class="ag-bubble ana">
+          <strong>Hoje você tem 3 compromissos:</strong>
+          <ul>
+            <li>13h — Call equipe de produto (Google Meet)</li>
+            <li>14h — Reunião empreiteiro Bloco C</li>
+            <li>17h — Review semanal (Zoom)</li>
+          </ul>
+          <strong>Amanhã é aniversário da Ana!</strong> Quer que eu ajude com o presente?<br/>
+          Mateus tem atividade escolar sexta — portfólio de ciências.
+        </div>
+      </div>
+
+      <div class="msg-group">
+        <div class="agent-label">
+          <div class="al-av">✉️</div><span class="al-name name-clara">Clara</span><span class="al-time">07:01</span>
+        </div>
+        <div class="ag-bubble clara">
+          <strong>23 e-mails não lidos.</strong> Priorizei os 3 urgentes:<br/>
+          <ul>
+            <li><strong>Proposta Acme</strong> — prazo <strong>hoje até 18h</strong></li>
+            <li><strong>Contrato p/ assinatura</strong> — jurídico aguardando</li>
+            <li><strong>Boleto R$2.400</strong> — vence amanhã</li>
+          </ul>
+          Rascunho a resposta para a Acme?
+        </div>
+      </div>
+
+      <div class="msg-group">
+        <div class="agent-label">
+          <div class="al-av">🏗️</div><span class="al-name name-eng">Engenheiro</span><span class="al-time">07:01</span>
+        </div>
+        <div class="ag-bubble eng">
+          <strong>Bloco C — Vimar:</strong> 67% concluído, <strong>8% acima do orçado</strong><br/>
+          Reunião com empreiteiro hoje às <strong>14h</strong> (confirmada). Vou levar planilha de desvio.<br/><br/>
+          Bloco A 100% concluído · Bloco B aguardando vistoria CREA.
+        </div>
+      </div>
+
+      <div class="msg-group">
+        <div class="agent-label">
+          <div class="al-av">🏢</div><span class="al-name name-diretor">Diretor</span><span class="al-time">07:02</span>
+        </div>
+        <div class="ag-bubble diretor">
+          <strong>PalharesTech:</strong> 2 leads novos (R$ 180k combinado). Proposta Acme é um deles — <strong>não perca o prazo das 18h</strong>.<br/><br/>
+          <strong>Distribuidora Braz:</strong> pedido R$ 85k aguardando sua aprovação. CD SP: terreno identificado.
+        </div>
+      </div>
+
+      <div class="sys-msg"><span class="sys-pill">Felipe respondeu às 08:32</span></div>
+
+      <div class="user-msg-row">
+        <div class="user-bubble">Dr. Silva — ligo pro Dr. Carlos Lima agora. Clara — me mostra o rascunho para a Acme, quero fechar antes das 10h. Ana, sim, me ajuda com o presente!</div>
+        <div class="user-mini-av">F</div>
+      </div>
+
+      <div class="a2a-indicator"><span class="a2a-dot"></span>Dr. Silva → Ana: bloquear 3 dias em 01/05 · Clara preparando rascunho...</div>
+
+      <div class="msg-group">
+        <div class="agent-label">
+          <div class="al-av">✉️</div><span class="al-name name-clara">Clara</span><span class="al-time">08:33</span>
+        </div>
+        <div class="ag-bubble clara">
+          Rascunho para a Acme:<br/><br/>
+          <em style="color:var(--ink-2)">"Prezado João, obrigado pelo interesse. Temos prazer em apresentar nossa proposta técnica para o projeto XYZ. Conforme alinhado, segue em anexo nosso orçamento no valor de R$ 89.000 com início em 15/05. Aguardamos sua confirmação. Att, Felipe Palhares."</em><br/><br/>
+          Ajusto algum trecho antes de enviar?
+        </div>
+      </div>
+
+    </div>
+
+    <div class="input-wrap">
+      <textarea class="chat-input-area" rows="1" placeholder="Mensagem... (use /comando para ações)"></textarea>
+      <button class="send-btn-c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+    </div>
+  </div>
+
+  <!-- COL 3: AGENT FEED -->
+  <div class="agent-feed" id="agent-feed">
+    <div class="af-header">
+      <div class="af-title"><span class="af-live"></span>Feed dos Agentes</div>
+      <button class="af-toggle" onclick="toggleFeed()"><svg class="icn" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+    <div class="af-filter">
+      <button class="af-f-btn active">Todos</button>
+      <button class="af-f-btn">Silva</button>
+      <button class="af-f-btn">Ricardo</button>
+      <button class="af-f-btn">Ana</button>
+      <button class="af-f-btn">Clara</button>
+    </div>
+    <div class="af-list">
+
+      <div class="feed-item unread">
+        <div class="fi-row">
+          <div class="fi-av">⚖️</div><span class="fi-arrow">→</span><div class="fi-av">🌸</div>
+          <div class="fi-content">
+            <div class="fi-names">Dr. Silva → Ana</div>
+            <div class="fi-msg">Bloqueie agenda 3 dias antes do prazo (02–04/05)</div>
+            <div class="fi-status done">Ana confirmou</div>
+          </div>
+          <div class="fi-time">08:33</div>
+        </div>
+      </div>
+
+      <div class="feed-item unread">
+        <div class="fi-row">
+          <div class="fi-av">⚖️</div><span class="fi-arrow">→</span><div class="fi-av">💰</div>
+          <div class="fi-content">
+            <div class="fi-names">Dr. Silva → Ricardo</div>
+            <div class="fi-msg">Verificar verba para custas R$ 1.800</div>
+            <div class="fi-status done">Verba disponível</div>
+          </div>
+          <div class="fi-time">08:33</div>
+        </div>
+      </div>
+
+      <div class="feed-item">
+        <div class="fi-row">
+          <div class="fi-av">✉️</div><span class="fi-arrow">→</span><div class="fi-av">🌸</div>
+          <div class="fi-content">
+            <div class="fi-names">Clara → Ana</div>
+            <div class="fi-msg">Email Acme com prazo hoje · adicionar agenda</div>
+            <div class="fi-status done">Agenda atualizada</div>
+          </div>
+          <div class="fi-time">08:10</div>
+        </div>
+      </div>
+
+      <div class="feed-item">
+        <div class="fi-row">
+          <div class="fi-av">🏗️</div><span class="fi-arrow">→</span><div class="fi-av">💰</div>
+          <div class="fi-content">
+            <div class="fi-names">Engenheiro → Ricardo</div>
+            <div class="fi-msg">Bloco C 8% acima (R$ 24k) · incluir no relatório?</div>
+            <div class="fi-status pending">Aguardando Ricardo</div>
+          </div>
+          <div class="fi-time">07:30</div>
+        </div>
+      </div>
+
+      <div class="feed-item">
+        <div class="fi-row">
+          <div class="fi-av">🏗️</div><span class="fi-arrow">→</span><div class="fi-av">🏢</div>
+          <div class="fi-content">
+            <div class="fi-names">Engenheiro → Diretor</div>
+            <div class="fi-msg">Bloco C atraso 12 dias (chuva) · reunião hoje 14h</div>
+            <div class="fi-status done">Diretor ciente</div>
+          </div>
+          <div class="fi-time">07:01</div>
+        </div>
+      </div>
+
+      <div class="feed-item">
+        <div class="fi-row">
+          <div class="fi-av">🏢</div><span class="fi-arrow">→</span><div class="fi-av">💰</div>
+          <div class="fi-content">
+            <div class="fi-names">Diretor → Ricardo</div>
+            <div class="fi-msg">Pedido R$ 85k aguardando · verificar fluxo</div>
+            <div class="fi-status pending">Aguardando aprovação</div>
+          </div>
+          <div class="fi-time">07:02</div>
+        </div>
+      </div>
+
+      <div class="feed-item">
+        <div class="fi-row">
+          <div class="fi-av">🏛️</div><span class="fi-arrow">→</span><div class="fi-av">⚖️</div>
+          <div class="fi-content">
+            <div class="fi-names">Marcos → Dr. Silva</div>
+            <div class="fi-msg">Certidão negativa vence em 12d · pode afetar licitação</div>
+            <div class="fi-status pending">Silva analisando</div>
+          </div>
+          <div class="fi-time">06:55</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</main>
+
+<!-- MEETING MODAL -->
+<div class="modal-overlay" id="meeting-modal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <span class="modal-title">Nova Reunião com Agentes</span>
+      <button class="modal-close" onclick="closeMeeting()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="fgroup"><label class="flb">Tema da reunião</label><input class="finput" placeholder="Ex: Compra terreno SP, Estratégia 2026..."/></div>
+      <div class="fgroup">
+        <label class="flb">Selecione os agentes</label>
+        <div class="agent-picker">
+          <div class="ap-item selected" onclick="this.classList.toggle('selected')"><div class="ap-av">⚖️</div>Dr. Silva</div>
+          <div class="ap-item selected" onclick="this.classList.toggle('selected')"><div class="ap-av">💰</div>Ricardo</div>
+          <div class="ap-item" onclick="this.classList.toggle('selected')"><div class="ap-av">🏗️</div>Engenheiro</div>
+          <div class="ap-item" onclick="this.classList.toggle('selected')"><div class="ap-av">🌸</div>Ana</div>
+          <div class="ap-item selected" onclick="this.classList.toggle('selected')"><div class="ap-av">🏢</div>Diretor</div>
+          <div class="ap-item" onclick="this.classList.toggle('selected')"><div class="ap-av">🏛️</div>Marcos</div>
+          <div class="ap-item" onclick="this.classList.toggle('selected')"><div class="ap-av">✉️</div>Clara</div>
+          <div class="ap-item" onclick="this.classList.toggle('selected')"><div class="ap-av">🩺</div>Dr. Carlos</div>
+        </div>
+      </div>
+      <div class="fgroup"><label class="flb">Objetivo (opcional)</label><input class="finput" placeholder="Ex: Decidir compra, definir valor máximo..."/></div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn" onclick="closeMeeting()">Cancelar</button>
+      <button class="btn btn-primary" onclick="closeMeeting()">Iniciar reunião</button>
+    </div>
+  </div>
+</div>
+
+<!-- ATA MODAL -->
+<div class="modal-overlay" id="ata-modal">
+  <div class="modal-box" style="width:580px">
+    <div class="modal-hdr">
+      <span class="modal-title">Ata · Briefing 24/04/2026</span>
+      <button class="modal-close" onclick="closeAta()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="ata-body">
+      <h2>Briefing Diário · Felipe Hub</h2>
+      <div class="ata-meta">Data: 24/04/2026 · 07:00 às 08:40 · 6 participantes</div>
+
+      <h3>Alertas Críticos</h3>
+      <div class="action">Processo 0001234 — contestação até 05/05 (12 dias). Ligar para Dr. Carlos Lima hoje.</div>
+      <div class="action">Proposta Acme — resposta até 18h de hoje. Clara preparando rascunho.</div>
+      <div class="action">Fatura Nubank + Boleto R$2.400 — vence amanhã 25/04.</div>
+
+      <h3>Pontos Discutidos</h3>
+      <ul>
+        <li><strong>Jurídico:</strong> prazo em 12 dias, contrato locação vence em 30d</li>
+        <li><strong>Financeiro:</strong> portfólio R$310k (+1,8%), custas R$1.800 OK</li>
+        <li><strong>Agenda:</strong> 3 compromissos hoje, aniversário Ana amanhã</li>
+        <li><strong>E-mails:</strong> 23 não lidos, 3 urgentes priorizados</li>
+        <li><strong>Obras:</strong> Bloco C 67%, desvio 8%, reunião 14h</li>
+        <li><strong>Empresas:</strong> lead Acme R$89k, pedido Distribuidora R$85k</li>
+      </ul>
+
+      <h3>Decisões</h3>
+      <div class="decision">Felipe aprovará rascunho Clara para Acme antes das 10h</div>
+      <div class="decision">Felipe ligará para Dr. Carlos Lima hoje sobre prazo processual</div>
+
+      <h3>Próximas Ações</h3>
+      <ul>
+        <li>[ ] Assinar contrato (Clara) — hoje</li>
+        <li>[ ] Pagar boleto R$2.400 — amanhã</li>
+        <li>[ ] Reunião empreiteiro Bloco C — hoje 14h</li>
+        <li>[ ] Definir renovação locação — até 15/11</li>
+      </ul>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn" onclick="closeAta()">Fechar</button>
+      <button class="btn">Salvar</button>
+      <button class="btn btn-primary">Exportar PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let feedOpen = true;
+function toggleFeed(){
+  feedOpen=!feedOpen;
+  document.getElementById('agent-feed').classList.toggle('collapsed',!feedOpen);
+}
+function openMeeting(){document.getElementById('meeting-modal').classList.add('open')}
+function closeMeeting(){document.getElementById('meeting-modal').classList.remove('open')}
+function openAta(){document.getElementById('ata-modal').classList.add('open')}
+function closeAta(){document.getElementById('ata-modal').classList.remove('open')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMeeting();closeAta()}});
+document.getElementById('meeting-modal').addEventListener('click',e=>{if(e.target===document.getElementById('meeting-modal'))closeMeeting()});
+document.getElementById('ata-modal').addEventListener('click',e=>{if(e.target===document.getElementById('ata-modal'))closeAta()});
+document.querySelectorAll('.mode-btn').forEach(b=>b.addEventListener('click',function(){document.querySelectorAll('.mode-btn').forEach(x=>x.classList.remove('active'));this.classList.add('active')}));
+document.querySelectorAll('.af-f-btn').forEach(b=>b.addEventListener('click',function(){document.querySelectorAll('.af-f-btn').forEach(x=>x.classList.remove('active'));this.classList.add('active')}));
+</script>
+</body>
+</html>

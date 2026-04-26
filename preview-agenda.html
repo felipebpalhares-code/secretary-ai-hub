@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Felipe Hub — Agenda</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+:root{
+  --bg:#f8fafc;--card:#fff;--ink:#0f172a;--ink-2:#475569;--ink-3:#94a3b8;--ink-4:#cbd5e1;
+  --hair:#e2e8f0;--hair-2:#f1f5f9;
+  --accent:#4f46e5;--accent-hover:#4338ca;--accent-soft:#eef2ff;
+  --ok:#10b981;--warn:#d97706;--err:#dc2626;
+  --shadow-sm:0 1px 3px rgba(15,23,42,.06);
+  --r-sm:8px;--r-md:10px;--r-lg:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;overflow:hidden;font-size:13.5px;letter-spacing:-.05px}
+button{font-family:inherit;letter-spacing:inherit}
+.icn{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.icn-sm{width:13px;height:13px}
+
+aside{width:236px;min-width:236px;background:#0f172a;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:18px 18px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-mark{width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+.sb-brand{font-size:14px;font-weight:700;color:#f1f5f9;letter-spacing:-.25px}
+.sb-tag{font-size:10px;color:#64748b;font-weight:500;margin-top:1px}
+nav{flex:1;padding:10px;overflow-y:auto}
+nav::-webkit-scrollbar{display:none}
+.nv-label{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.07em;padding:12px 12px 4px}
+.nv-item{display:flex;align-items:center;gap:11px;padding:8px 12px;border-radius:7px;color:#94a3b8;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:1px;transition:all .12s}
+.nv-item:hover{background:rgba(255,255,255,.04);color:#e2e8f0}
+.nv-item.active{background:rgba(79,70,229,.15);color:#e0e7ff}
+.nv-item svg{width:15px;height:15px;opacity:.9}
+.nv-count{margin-left:auto;font-size:10.5px;font-weight:600;color:#64748b;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.04)}
+.nv-count.alert{background:rgba(220,38,38,.2);color:#fca5a5}
+.sb-bottom{padding:10px;border-top:1px solid rgba(255,255,255,.06)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer}
+.sb-user-av{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.sb-user-n{font-size:12.5px;font-weight:600;color:#e2e8f0}
+.sb-user-r{font-size:10.5px;color:#64748b;margin-top:1px}
+
+main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--hair);background:var(--card);flex-shrink:0}
+.tb-title{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.4px;line-height:1}
+.tb-sub{font-size:12px;color:var(--ink-3);margin-top:3px;font-weight:500}
+.tb-actions{display:flex;gap:6px}
+.btn-i{width:32px;height:32px;border-radius:7px;border:1px solid var(--hair);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-2)}
+.btn-i:hover{background:var(--bg);border-color:var(--ink-4)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid var(--hair);background:var(--card);color:var(--ink);transition:all .15s}
+.btn:hover{background:var(--bg);border-color:var(--ink-4)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+
+.hub{flex:1;display:flex;overflow:hidden;min-width:0;gap:0}
+
+/* LEFT */
+.left-col{width:262px;min-width:262px;background:var(--card);border-right:1px solid var(--hair);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.lc-body{flex:1;overflow-y:auto;padding:16px}
+.lc-body::-webkit-scrollbar{width:3px}
+.lc-body::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+
+.mini-cal{margin-bottom:16px}
+.mc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.mc-title{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:-.2px}
+.mc-nav{display:flex;gap:3px}
+.mc-nav button{width:22px;height:22px;border-radius:5px;border:1px solid var(--hair);background:var(--card);cursor:pointer;color:var(--ink-2);font-weight:700}
+.mc-nav button:hover{border-color:var(--ink-4)}
+.mc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:2px}
+.mc-dow{text-align:center;font-size:9.5px;font-weight:700;color:var(--ink-3);padding:5px 0;text-transform:uppercase;letter-spacing:.05em}
+.mc-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:600;color:var(--ink-2);border-radius:6px;cursor:pointer;position:relative;transition:all .12s}
+.mc-day:hover{background:var(--bg)}
+.mc-day.muted{color:var(--ink-4)}
+.mc-day.today{background:var(--accent);color:#fff !important;font-weight:700}
+.mc-day.selected{background:var(--accent-soft);color:var(--accent)}
+.mc-day.has-ev::after{content:"";position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--accent)}
+.mc-day.has-urgent::after{background:var(--err)}
+
+.sec-l{font-size:10px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.07em;margin:16px 0 8px;display:flex;justify-content:space-between;align-items:center}
+.sec-l .add{width:18px;height:18px;border-radius:5px;border:1px solid var(--hair);background:var(--card);color:var(--ink-2);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.sec-l .add:hover{border-color:var(--accent);color:var(--accent)}
+
+.cat{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:6px;font-size:12px;font-weight:600;color:var(--ink-2);cursor:pointer;transition:background .12s;margin-bottom:1px}
+.cat:hover{background:var(--bg)}
+.cat.on{background:var(--bg)}
+.cat-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.cd-blue{background:#3b82f6}
+.cd-red{background:var(--err)}
+.cd-purple{background:#7c3aed}
+.cd-green{background:var(--ok)}
+.cd-orange{background:#f97316}
+.cd-pink{background:#ec4899}
+.cd-amber{background:var(--warn)}
+.cd-indigo{background:var(--accent)}
+.cat-n{flex:1}
+.cat-c{font-size:10.5px;color:var(--ink-3);font-weight:700}
+
+.cal-item{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:6px;font-size:12px;color:var(--ink-2);cursor:pointer;transition:background .12s;font-weight:600;margin-bottom:1px}
+.cal-item:hover{background:var(--bg)}
+.cal-ic{width:20px;height:20px;border-radius:5px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:var(--ink-2)}
+.cal-n{flex:1}
+.cal-st{font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;letter-spacing:.03em;border:1px solid transparent}
+.cs-on{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.cs-off{background:var(--hair-2);color:var(--ink-3);border-color:var(--hair)}
+
+/* CENTER */
+.center-col{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;padding:16px 18px;gap:12px}
+
+.view-top{display:flex;gap:10px;align-items:center;flex-shrink:0}
+.date-nav{display:flex;align-items:center;gap:10px;background:var(--card);padding:6px 12px;border:1px solid var(--hair);border-radius:8px}
+.dn-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--hair);background:var(--card);cursor:pointer;color:var(--ink-2);font-weight:700}
+.dn-btn:hover{border-color:var(--ink-4)}
+.dn-today{padding:5px 12px;border-radius:6px;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:11.5px;border:1px solid #c7d2fe;cursor:pointer}
+.dn-label{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:-.2px;min-width:160px}
+.view-switch{display:flex;gap:0;background:var(--card);border:1px solid var(--hair);border-radius:7px;padding:2px;margin-left:auto}
+.vs{padding:6px 12px;border-radius:5px;border:none;background:transparent;font-size:11.5px;font-weight:600;color:var(--ink-3);cursor:pointer;letter-spacing:-.1px}
+.vs.active{background:var(--bg);color:var(--ink)}
+
+/* Week view */
+.week-view{flex:1;background:var(--card);border:1px solid var(--hair);border-radius:var(--r-md);overflow:hidden;display:flex;flex-direction:column}
+.wv-head{display:grid;grid-template-columns:54px repeat(7,1fr);border-bottom:1px solid var(--hair)}
+.wv-day{padding:10px 6px;text-align:center;border-right:1px solid var(--hair-2);cursor:pointer}
+.wv-day:last-child{border-right:none}
+.wv-day:hover{background:var(--bg)}
+.wv-dname{font-size:9.5px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
+.wv-dnum{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.3px;margin-top:2px;line-height:1}
+.wv-day.today .wv-dnum{color:#fff;background:var(--accent);width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;margin:2px auto 0}
+.wv-day.today .wv-dname{color:var(--accent)}
+
+.wv-grid{flex:1;display:grid;grid-template-columns:54px repeat(7,1fr);overflow-y:auto;position:relative}
+.wv-grid::-webkit-scrollbar{width:3px}
+.wv-grid::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+
+.wv-time-col{display:flex;flex-direction:column;border-right:1px solid var(--hair-2)}
+.wv-time{height:56px;padding:3px 6px;text-align:right;font-size:9.5px;color:var(--ink-3);font-weight:600;border-bottom:1px solid var(--hair-2)}
+
+.wv-day-col{display:flex;flex-direction:column;border-right:1px solid var(--hair-2);position:relative}
+.wv-day-col:last-child{border-right:none}
+.wv-slot{height:56px;border-bottom:1px solid var(--hair-2)}
+.wv-slot:hover{background:var(--bg)}
+
+.ev{position:absolute;left:3px;right:3px;border-radius:6px;padding:5px 8px;font-size:10.5px;font-weight:600;cursor:pointer;transition:all .12s;border:1px solid;overflow:hidden;letter-spacing:-.05px}
+.ev:hover{z-index:2;box-shadow:var(--shadow-sm)}
+.ev.selected{box-shadow:0 0 0 2px var(--accent);z-index:3}
+.ev-title{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px;letter-spacing:-.1px}
+.ev-time{font-size:9.5px;opacity:.85}
+.ev.blue{background:#eff6ff;color:#1e40af;border-color:#bfdbfe}
+.ev.red{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.ev.purple{background:#faf5ff;color:#6d28d9;border-color:#e9d5ff}
+.ev.green{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.ev.orange{background:#fff7ed;color:#c2410c;border-color:#fed7aa}
+.ev.pink{background:#fdf2f8;color:#be185d;border-color:#fbcfe8}
+.ev.amber{background:#fffbeb;color:#b45309;border-color:#fde68a}
+.ev.indigo{background:var(--accent-soft);color:var(--accent);border-color:#c7d2fe}
+
+/* Ana alert */
+.ana-alert{background:var(--card);border:1px solid var(--hair);border-left:3px solid #ec4899;border-radius:var(--r-md);padding:12px 16px;display:flex;gap:12px;align-items:center;flex-shrink:0}
+.ana-ic{width:30px;height:30px;border-radius:7px;background:#fdf2f8;color:#be185d;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.ana-ttl{font-size:12.5px;font-weight:700;color:var(--ink);letter-spacing:-.15px}
+.ana-sub{font-size:11px;color:var(--ink-2);margin-top:1px;font-weight:500}
+
+/* RIGHT */
+.right-col{width:328px;min-width:328px;background:var(--card);border-left:1px solid var(--hair);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.rc-hero{padding:20px 20px 16px;border-bottom:1px solid var(--hair);background:var(--bg)}
+.rc-close{float:right;width:26px;height:26px;border-radius:6px;border:1px solid var(--hair);background:var(--card);cursor:pointer;color:var(--ink-2);display:flex;align-items:center;justify-content:center}
+.rc-close svg{width:13px;height:13px}
+.rc-tag{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:3px 9px;border-radius:4px;margin-bottom:8px;letter-spacing:.04em;text-transform:uppercase;border:1px solid transparent}
+.rc-tag.orange{background:#fff7ed;color:#c2410c;border-color:#fed7aa}
+.rc-ttl{font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.3px;line-height:1.3}
+.rc-when{font-size:12px;color:var(--ink-2);margin-top:8px;font-weight:600}
+.rc-btns{display:flex;gap:5px;margin-top:12px}
+.rc-b{flex:1;padding:8px;border-radius:7px;border:1px solid var(--hair);background:var(--card);font-size:11.5px;font-weight:600;color:var(--ink);cursor:pointer;transition:all .12s}
+.rc-b:hover{background:var(--bg);border-color:var(--ink-4)}
+.rc-b.prim{background:var(--accent);color:#fff;border-color:var(--accent)}
+.rc-b.prim:hover{background:var(--accent-hover)}
+
+.rc-body{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:16px}
+.rc-body::-webkit-scrollbar{width:3px}
+.rc-body::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+
+.rc-sec-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin-bottom:6px}
+
+.info-row{display:flex;align-items:flex-start;gap:10px;padding:7px 0;font-size:12px;border-bottom:1px solid var(--hair-2)}
+.info-row:last-child{border-bottom:none}
+.info-ic{width:16px;color:var(--ink-3);flex-shrink:0}
+.info-ic svg{width:13px;height:13px}
+.info-lb{color:var(--ink-3);font-size:11px;width:76px;flex-shrink:0;font-weight:500}
+.info-val{color:var(--ink);font-weight:600;flex:1;word-break:break-word;letter-spacing:-.1px}
+
+.partics{display:flex;flex-wrap:wrap;gap:5px}
+.par{display:flex;align-items:center;gap:6px;padding:3px 10px 3px 3px;border-radius:999px;background:var(--bg);border:1px solid var(--hair);font-size:11.5px;font-weight:600;color:var(--ink);letter-spacing:-.1px}
+.par-av{width:20px;height:20px;border-radius:50%;background:var(--ink-2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+
+.agenda-box{background:var(--bg);border:1px solid var(--hair);border-radius:var(--r-md);padding:11px 13px;font-size:11.5px;color:var(--ink-2);line-height:1.6;font-weight:500}
+
+.link-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--hair);border-radius:8px;font-size:12px;cursor:pointer;transition:all .12s;margin-bottom:5px;background:var(--card)}
+.link-item:hover{border-color:var(--accent);background:var(--accent-soft)}
+.link-ic{width:26px;height:26px;border-radius:6px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:var(--ink-2);flex-shrink:0}
+.link-ic svg{width:13px;height:13px}
+.link-n{flex:1;font-weight:600;color:var(--ink);letter-spacing:-.1px}
+.link-m{font-size:10.5px;color:var(--ink-3);margin-top:1px;font-weight:500}
+.link-arr{color:var(--ink-3)}
+.link-arr svg{width:13px;height:13px}
+
+.agent-card{display:flex;align-items:center;gap:10px;padding:11px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--r-md)}
+.agent-av{width:30px;height:30px;border-radius:7px;background:#f97316;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.agent-n{font-weight:700;color:#7c2d12;font-size:12px;letter-spacing:-.15px}
+.agent-r{font-size:10.5px;color:#9a3412;margin-top:1px;font-weight:500;line-height:1.45}
+
+.notes-box{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;font-size:11.5px;color:#78350f;line-height:1.55;font-weight:500}
+.notes-lb{font-size:10px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="sb-logo"><div class="sb-mark">FH</div><div><div class="sb-brand">Felipe Hub</div><div class="sb-tag">Secretário Pessoal</div></div></div>
+  <nav>
+    <div class="nv-label">Principal</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Quem Sou Eu</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Painel</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>Agentes<span class="nv-count">8</span></div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Bater Papo<span class="nv-count alert">5</span></div>
+    <div class="nv-label">Produtividade</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Finanças</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Contatos</div>
+    <div class="nv-item active"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>Agenda<span class="nv-count alert">3</span></div>
+    <div class="nv-label">Organização</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/></svg>Bancos</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documentos</div>
+    <div class="nv-label">Sistema</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg>Configurações</div>
+  </nav>
+  <div class="sb-bottom"><div class="sb-user"><div class="sb-user-av">F</div><div><div class="sb-user-n">Felipe Palhares</div><div class="sb-user-r">Administrador</div></div></div></div>
+</aside>
+
+<main>
+  <div class="top-bar">
+    <div><div class="tb-title">Agenda</div><div class="tb-sub">Sexta, 24 de abril · 4 eventos hoje</div></div>
+    <div class="tb-actions">
+      <button class="btn-i"><svg class="icn icn-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+      <button class="btn"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/></svg>Importar</button>
+      <button class="btn btn-primary"><svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo evento</button>
+    </div>
+  </div>
+
+  <div class="hub">
+
+    <div class="left-col">
+      <div class="lc-body">
+        <div class="mini-cal">
+          <div class="mc-head"><div class="mc-title">Abril 2026</div><div class="mc-nav"><button>‹</button><button>›</button></div></div>
+          <div class="mc-grid">
+            <div class="mc-dow">S</div><div class="mc-dow">T</div><div class="mc-dow">Q</div><div class="mc-dow">Q</div><div class="mc-dow">S</div><div class="mc-dow">S</div><div class="mc-dow">D</div>
+          </div>
+          <div class="mc-grid">
+            <div class="mc-day muted">31</div><div class="mc-day">1</div><div class="mc-day has-ev">2</div><div class="mc-day">3</div><div class="mc-day has-ev">4</div><div class="mc-day">5</div><div class="mc-day">6</div>
+            <div class="mc-day has-ev">7</div><div class="mc-day">8</div><div class="mc-day has-ev">9</div><div class="mc-day">10</div><div class="mc-day has-ev">11</div><div class="mc-day">12</div><div class="mc-day">13</div>
+            <div class="mc-day has-ev">14</div><div class="mc-day">15</div><div class="mc-day has-ev">16</div><div class="mc-day has-ev">17</div><div class="mc-day">18</div><div class="mc-day">19</div><div class="mc-day">20</div>
+            <div class="mc-day has-urgent">21</div><div class="mc-day has-ev">22</div><div class="mc-day has-ev">23</div><div class="mc-day today has-ev">24</div><div class="mc-day has-ev">25</div><div class="mc-day has-ev">26</div><div class="mc-day">27</div>
+            <div class="mc-day">28</div><div class="mc-day">29</div><div class="mc-day has-urgent">30</div><div class="mc-day muted">1</div><div class="mc-day muted">2</div><div class="mc-day muted">3</div><div class="mc-day muted">4</div>
+          </div>
+        </div>
+
+        <div class="sec-l">Categorias <span class="add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:10px;height:10px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></div>
+        <div class="cat on"><span class="cat-dot cd-blue"></span><span class="cat-n">Reuniões</span><span class="cat-c">12</span></div>
+        <div class="cat on"><span class="cat-dot cd-red"></span><span class="cat-n">Prazos jurídicos</span><span class="cat-c">3</span></div>
+        <div class="cat on"><span class="cat-dot cd-green"></span><span class="cat-n">Financeiro</span><span class="cat-c">7</span></div>
+        <div class="cat on"><span class="cat-dot cd-orange"></span><span class="cat-n">Obras</span><span class="cat-c">5</span></div>
+        <div class="cat on"><span class="cat-dot cd-pink"></span><span class="cat-n">Família</span><span class="cat-c">4</span></div>
+        <div class="cat on"><span class="cat-dot cd-red"></span><span class="cat-n">Saúde</span><span class="cat-c">2</span></div>
+        <div class="cat on"><span class="cat-dot cd-indigo"></span><span class="cat-n">Viagem</span><span class="cat-c">1</span></div>
+        <div class="cat"><span class="cat-dot cd-amber"></span><span class="cat-n">Pessoal</span><span class="cat-c">6</span></div>
+
+        <div class="sec-l">Calendários</div>
+        <div class="cal-item"><div class="cal-ic">G</div><span class="cal-n">Google Calendar</span><span class="cal-st cs-on">Sync</span></div>
+        <div class="cal-item"><div class="cal-ic">H</div><span class="cal-n">Hub interno</span><span class="cal-st cs-on">Local</span></div>
+        <div class="cal-item"><div class="cal-ic">T</div><span class="cal-n">TJ-PR prazos</span><span class="cal-st cs-on">Auto</span></div>
+        <div class="cal-item"><div class="cal-ic">O</div><span class="cal-n">Outlook</span><span class="cal-st cs-off">Off</span></div>
+      </div>
+    </div>
+
+    <div class="center-col">
+      <div class="view-top">
+        <div class="date-nav">
+          <button class="dn-btn">‹</button>
+          <button class="dn-today">Hoje</button>
+          <button class="dn-btn">›</button>
+          <div class="dn-label">20–26 Abril 2026</div>
+        </div>
+        <div class="view-switch">
+          <button class="vs">Dia</button>
+          <button class="vs active">Semana</button>
+          <button class="vs">Mês</button>
+          <button class="vs">Lista</button>
+        </div>
+      </div>
+
+      <div class="ana-alert">
+        <div class="ana-ic">A</div>
+        <div>
+          <div class="ana-ttl">Ana: semana cheia · 4 eventos hoje · aniversário amanhã</div>
+          <div class="ana-sub">Jantar Mistura 20h reservado · Dr. Silva alertou prazo 12d · Engenheiro confirmou reunião 14h</div>
+        </div>
+      </div>
+
+      <div class="week-view">
+        <div class="wv-head">
+          <div></div>
+          <div class="wv-day"><div class="wv-dname">Seg</div><div class="wv-dnum">20</div></div>
+          <div class="wv-day"><div class="wv-dname">Ter</div><div class="wv-dnum">21</div></div>
+          <div class="wv-day"><div class="wv-dname">Qua</div><div class="wv-dnum">22</div></div>
+          <div class="wv-day"><div class="wv-dname">Qui</div><div class="wv-dnum">23</div></div>
+          <div class="wv-day today"><div class="wv-dname">Sex</div><div class="wv-dnum">24</div></div>
+          <div class="wv-day"><div class="wv-dname">Sáb</div><div class="wv-dnum">25</div></div>
+          <div class="wv-day"><div class="wv-dname">Dom</div><div class="wv-dnum">26</div></div>
+        </div>
+
+        <div class="wv-grid">
+          <div class="wv-time-col">
+            <div class="wv-time">08:00</div><div class="wv-time">09:00</div><div class="wv-time">10:00</div><div class="wv-time">11:00</div><div class="wv-time">12:00</div><div class="wv-time">13:00</div><div class="wv-time">14:00</div><div class="wv-time">15:00</div><div class="wv-time">16:00</div><div class="wv-time">17:00</div><div class="wv-time">18:00</div><div class="wv-time">19:00</div><div class="wv-time">20:00</div>
+          </div>
+
+          <div class="wv-day-col">
+            <div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div>
+            <div class="ev blue" style="top:112px;height:52px"><div class="ev-title">Planejamento Q2</div><div class="ev-time">10:00–11:00</div></div>
+            <div class="ev orange" style="top:448px;height:75px"><div class="ev-title">Obra Bloco C · vistoria</div><div class="ev-time">16:00–17:20</div></div>
+          </div>
+
+          <div class="wv-day-col">
+            <div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div>
+            <div class="ev red" style="top:56px;height:38px"><div class="ev-title">Prazo proc. 0001234</div><div class="ev-time">09:00 · Dr. Carlos</div></div>
+            <div class="ev green" style="top:280px;height:52px"><div class="ev-title">Reunião contador</div><div class="ev-time">13:00–14:00</div></div>
+          </div>
+
+          <div class="wv-day-col">
+            <div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div>
+            <div class="ev purple" style="top:28px;height:66px"><div class="ev-title">Call João · PalharesTech</div><div class="ev-time">08:30–09:40</div></div>
+            <div class="ev orange" style="top:224px;height:52px"><div class="ev-title">Visita terreno Bloco D</div><div class="ev-time">12:00–13:00</div></div>
+            <div class="ev indigo" style="top:504px;height:84px"><div class="ev-title">Academia</div><div class="ev-time">17:00–18:30</div></div>
+          </div>
+
+          <div class="wv-day-col">
+            <div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div>
+            <div class="ev green" style="top:84px;height:42px"><div class="ev-title">Assinar Acme</div><div class="ev-time">09:30 · R$89k</div></div>
+            <div class="ev pink" style="top:392px;height:56px"><div class="ev-title">Mateus · recital</div><div class="ev-time">15:00–16:15</div></div>
+          </div>
+
+          <div class="wv-day-col" style="background:rgba(79,70,229,.02)">
+            <div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div>
+            <div class="ev blue" style="top:280px;height:46px"><div class="ev-title">Call equipe produto</div><div class="ev-time">13:00–13:50</div></div>
+            <div class="ev orange selected" style="top:336px;height:70px"><div class="ev-title">Reunião empreiteiro · Bloco A</div><div class="ev-time">14:00–15:15</div></div>
+            <div class="ev blue" style="top:504px;height:52px"><div class="ev-title">Review semanal</div><div class="ev-time">17:00–18:00</div></div>
+            <div class="ev pink" style="top:672px;height:85px"><div class="ev-title">Jantar Ana · Mistura</div><div class="ev-time">20:00–21:30</div></div>
+          </div>
+
+          <div class="wv-day-col">
+            <div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div>
+            <div class="ev pink" style="top:84px;height:112px"><div class="ev-title">Família · parque</div><div class="ev-time">09:30–12:00</div></div>
+          </div>
+
+          <div class="wv-day-col">
+            <div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div><div class="wv-slot"></div>
+            <div class="ev amber" style="top:28px;height:85px"><div class="ev-title">Tempo de leitura</div><div class="ev-time">08:30–10:00</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-col">
+      <div class="rc-hero">
+        <button class="rc-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        <span class="rc-tag orange">Obras · Vimar</span>
+        <div class="rc-ttl">Reunião empreiteiro · Bloco A</div>
+        <div class="rc-when">Hoje · 14:00–15:15 (1h 15min)</div>
+        <div class="rc-btns">
+          <button class="rc-b prim">Entrar</button>
+          <button class="rc-b">Editar</button>
+          <button class="rc-b">Excluir</button>
+        </div>
+      </div>
+
+      <div class="rc-body">
+
+        <div>
+          <div class="rc-sec-t">Detalhes</div>
+          <div class="info-row"><span class="info-ic"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span><span class="info-lb">Local</span><span class="info-val">Canteiro Bloco A · Av. Batel</span></div>
+          <div class="info-row"><span class="info-ic"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></span><span class="info-lb">Obra</span><span class="info-val">Bloco A · Residencial Curitiba</span></div>
+          <div class="info-row"><span class="info-ic"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg></span><span class="info-lb">Lembrete</span><span class="info-val">30min antes · WhatsApp</span></div>
+          <div class="info-row"><span class="info-ic"><svg class="icn icn-sm" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span><span class="info-lb">Repete</span><span class="info-val">Não se repete</span></div>
+        </div>
+
+        <div>
+          <div class="rc-sec-t">Participantes (3)</div>
+          <div class="partics">
+            <span class="par"><span class="par-av">F</span>Felipe</span>
+            <span class="par"><span class="par-av">R</span>Roberto · Empreiteiro</span>
+            <span class="par"><span class="par-av">E</span>Engenheiro (agente)</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="rc-sec-t">Pauta da reunião</div>
+          <div class="agenda-box">
+            • Revisar cronograma Bloco C (8% acima)<br/>
+            • Renegociar preço do aço (Siderúrgica SP)<br/>
+            • Ajustar folha quinzenal<br/>
+            • Alinhar entregas Bloco A fase alvenaria
+          </div>
+        </div>
+
+        <div>
+          <div class="rc-sec-t">Vínculos no hub</div>
+          <div class="link-item">
+            <div class="link-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/></svg></div>
+            <div style="flex:1"><div class="link-n">Obra Bloco A</div><div class="link-m">Finanças · 67% concluída</div></div>
+            <span class="link-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+          </div>
+          <div class="link-item">
+            <div class="link-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            <div style="flex:1"><div class="link-n">Roberto Silva</div><div class="link-m">Contatos · Empreiteiro</div></div>
+            <span class="link-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+          </div>
+          <div class="link-item">
+            <div class="link-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
+            <div style="flex:1"><div class="link-n">Planilha de desvio</div><div class="link-m">Documentos · Ricardo hoje</div></div>
+            <span class="link-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+          </div>
+        </div>
+
+        <div>
+          <div class="rc-sec-t">Agente responsável</div>
+          <div class="agent-card">
+            <div class="agent-av">E</div>
+            <div style="flex:1">
+              <div class="agent-n">Engenheiro (agente)</div>
+              <div class="agent-r">Vai preparar planilha de custo e levar lista de renegociação. Registra ata após reunião.</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="rc-sec-t">Notas</div>
+          <div class="notes-box">
+            <div class="notes-lb">Felipe anotou</div>
+            Empreiteiro disse que atraso foi por chuva — verificar se justifica ou se precisa outro fornecedor. Se passar de 10% desvio, ativar plano B.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+document.querySelectorAll('.vs').forEach(b => b.addEventListener('click', function(){document.querySelectorAll('.vs').forEach(x=>x.classList.remove('active'));this.classList.add('active')}));
+document.querySelectorAll('.ev').forEach(e => e.addEventListener('click', function(){document.querySelectorAll('.ev').forEach(x=>x.classList.remove('selected'));this.classList.add('selected')}));
+document.querySelectorAll('.mc-day').forEach(d => d.addEventListener('click', function(){if(this.classList.contains('muted'))return;document.querySelectorAll('.mc-day').forEach(x=>x.classList.remove('selected'));this.classList.add('selected')}));
+document.querySelectorAll('.cat').forEach(c => c.addEventListener('click', function(){this.classList.toggle('on')}));
+</script>
+</body>
+</html>

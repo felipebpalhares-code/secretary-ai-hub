@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Felipe Hub — Documentos</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+:root{
+  --bg:#f8fafc;--card:#fff;--ink:#0f172a;--ink-2:#475569;--ink-3:#94a3b8;--ink-4:#cbd5e1;
+  --hair:#e2e8f0;--hair-2:#f1f5f9;
+  --accent:#4f46e5;--accent-hover:#4338ca;--accent-soft:#eef2ff;
+  --ok:#10b981;--warn:#d97706;--err:#dc2626;
+  --shadow-sm:0 1px 3px rgba(15,23,42,.06);
+  --r-sm:8px;--r-md:10px;--r-lg:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;overflow:hidden;font-size:13.5px;letter-spacing:-.05px}
+button{font-family:inherit;letter-spacing:inherit}
+.icn{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.icn-sm{width:13px;height:13px}
+
+/* SIDEBAR */
+aside{width:236px;min-width:236px;background:#0f172a;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:18px 18px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-mark{width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+.sb-brand{font-size:14px;font-weight:700;color:#f1f5f9;letter-spacing:-.25px}
+.sb-tag{font-size:10px;color:#64748b;font-weight:500;margin-top:1px}
+nav{flex:1;padding:10px;overflow-y:auto}
+nav::-webkit-scrollbar{display:none}
+.nv-label{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.07em;padding:12px 12px 4px}
+.nv-item{display:flex;align-items:center;gap:11px;padding:8px 12px;border-radius:7px;color:#94a3b8;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:1px;transition:all .12s}
+.nv-item:hover{background:rgba(255,255,255,.04);color:#e2e8f0}
+.nv-item.active{background:rgba(79,70,229,.15);color:#e0e7ff}
+.nv-item svg{width:15px;height:15px;opacity:.9}
+.nv-count{margin-left:auto;font-size:10.5px;font-weight:600;color:#64748b;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.04)}
+.nv-count.alert{background:rgba(220,38,38,.2);color:#fca5a5}
+.nv-count.amber{background:rgba(217,119,6,.2);color:#fcd34d}
+.sb-bottom{padding:10px;border-top:1px solid rgba(255,255,255,.06)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer}
+.sb-user-av{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.sb-user-n{font-size:12.5px;font-weight:600;color:#e2e8f0}
+.sb-user-r{font-size:10.5px;color:#64748b;margin-top:1px}
+
+/* MAIN */
+main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--hair);background:var(--card);flex-shrink:0}
+.tb-title{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.4px;line-height:1}
+.tb-sub{font-size:12px;color:var(--ink-3);margin-top:3px;font-weight:500}
+.tb-actions{display:flex;gap:6px}
+.btn-i{width:32px;height:32px;border-radius:7px;border:1px solid var(--hair);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-2);position:relative}
+.btn-i:hover{background:var(--bg);border-color:var(--ink-4)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid var(--hair);background:var(--card);color:var(--ink);transition:all .15s}
+.btn:hover{background:var(--bg);border-color:var(--ink-4)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+
+.hub{flex:1;display:flex;overflow:hidden;min-width:0}
+.col-main{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.col-main::-webkit-scrollbar{width:4px}
+.col-main::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+
+/* Alert banner */
+.alert-banner{background:var(--card);border:1px solid #fde68a;border-left:3px solid var(--warn);border-radius:var(--r-md);padding:12px 16px;display:flex;align-items:center;gap:12px}
+.alert-ic{width:32px;height:32px;border-radius:8px;background:#fffbeb;color:var(--warn);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.alert-ic svg{width:15px;height:15px}
+.alert-ttl{font-size:12.5px;font-weight:700;color:var(--ink);letter-spacing:-.15px}
+.alert-sub{font-size:11px;color:var(--ink-2);margin-top:2px;font-weight:500}
+.alert-chips{display:flex;gap:5px;margin-left:auto;flex-wrap:wrap}
+.a-chip{background:var(--card);border:1px solid var(--hair);color:var(--ink);font-size:11px;font-weight:600;padding:3px 10px;border-radius:999px;cursor:pointer;letter-spacing:-.05px}
+.a-chip.red{background:#fef2f2;border-color:#fecaca;color:var(--err)}
+.a-chip.amber{background:#fffbeb;border-color:#fde68a;color:#b45309}
+
+/* Auto-save bar */
+.autosave{background:var(--card);border:1px solid var(--hair);border-left:3px solid var(--ok);border-radius:var(--r-md);padding:11px 16px;display:flex;align-items:center;gap:12px}
+.as-ic{width:30px;height:30px;border-radius:8px;background:#ecfdf5;color:var(--ok);display:flex;align-items:center;justify-content:center}
+.as-ic svg{width:14px;height:14px}
+.as-ttl{font-size:12px;font-weight:700;color:var(--ink);letter-spacing:-.15px}
+.as-sub{font-size:11px;color:var(--ink-2);margin-top:1px;font-weight:500}
+.as-stats{margin-left:auto;display:flex;gap:14px;font-size:11px;color:var(--ink-2);font-weight:500}
+.as-stats b{color:var(--ink);font-weight:700}
+
+/* Search */
+.search-card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-lg);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.search-row{display:flex;gap:8px;align-items:center}
+.search-box{flex:1;display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--hair);border-radius:8px;padding:9px 14px;transition:all .15s}
+.search-box:focus-within{border-color:var(--accent);background:var(--card)}
+.search-box svg{color:var(--ink-3);width:15px;height:15px}
+.search-box input{flex:1;border:none;background:none;font-size:13px;color:var(--ink);outline:none;font-family:inherit}
+.search-box input::placeholder{color:var(--ink-3)}
+.kbd{font-size:10px;color:var(--ink-3);background:var(--card);border:1px solid var(--hair);padding:2px 6px;border-radius:4px;font-weight:600}
+.view-toggle{display:flex;gap:0;background:var(--card);border:1px solid var(--hair);border-radius:7px;padding:2px}
+.vt{padding:6px 10px;border-radius:5px;border:none;background:transparent;font-size:12px;font-weight:600;color:var(--ink-3);cursor:pointer}
+.vt.active{background:var(--bg);color:var(--ink)}
+
+.filter-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.filter-group{display:flex;gap:5px;align-items:center}
+.filter-label{font-size:10.5px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-right:4px}
+.f-chip{padding:4px 11px;border-radius:999px;border:1px solid var(--hair);background:var(--card);font-size:11.5px;font-weight:600;color:var(--ink-2);cursor:pointer;transition:all .12s;letter-spacing:-.05px}
+.f-chip:hover{border-color:var(--ink-4)}
+.f-chip.active{background:var(--accent-soft);border-color:#c7d2fe;color:var(--accent)}
+
+/* Section */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3)}
+
+/* Folders */
+.folders-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.folder{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-md);padding:12px;cursor:pointer;display:flex;flex-direction:column;gap:8px;transition:all .15s;border-top:2px solid var(--hair)}
+.folder:hover{border-color:var(--ink-4);box-shadow:var(--shadow-sm)}
+.folder.jur{border-top-color:#7c3aed}
+.folder.fin{border-top-color:var(--ok)}
+.folder.emp{border-top-color:#3b82f6}
+.folder.pes{border-top-color:var(--accent)}
+.folder.gov{border-top-color:var(--warn)}
+.folder.sau{border-top-color:var(--err)}
+.folder.obr{border-top-color:#f97316}
+.folder-ic{width:30px;height:30px;border-radius:7px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:var(--ink-2)}
+.folder-ic svg{width:14px;height:14px}
+.folder-name{font-size:12.5px;font-weight:700;color:var(--ink);letter-spacing:-.15px}
+.folder-count{font-size:10.5px;color:var(--ink-3);display:flex;align-items:center;gap:5px;font-weight:500}
+.folder-new{background:var(--err);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px}
+
+/* Docs grid */
+.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.doc-card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-md);padding:12px;cursor:pointer;display:flex;flex-direction:column;gap:10px;transition:all .15s;position:relative}
+.doc-card:hover{border-color:var(--ink-4);box-shadow:var(--shadow-sm)}
+.doc-card.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,.08)}
+.doc-alert{position:absolute;top:10px;right:10px;width:6px;height:6px;border-radius:50%;background:var(--err)}
+
+.doc-top{display:flex;align-items:flex-start;gap:10px}
+.doc-thumb{width:36px;height:44px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;font-weight:800;position:relative;letter-spacing:.02em}
+.doc-thumb.pdf{background:#fef2f2;color:var(--err);border:1px solid #fecaca}
+.doc-thumb.doc{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+.doc-thumb.img{background:#faf5ff;color:#7c3aed;border:1px solid #e9d5ff}
+.doc-thumb.xls{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+.doc-info{flex:1;min-width:0}
+.doc-name{font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.15px}
+.doc-cat{font-size:10.5px;color:var(--ink-3);margin-top:2px;display:flex;align-items:center;gap:5px;font-weight:500}
+.cat-dot{width:6px;height:6px;border-radius:50%}
+
+.doc-origin{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--ink-2);font-weight:500}
+.origin-ic{width:18px;height:18px;border-radius:5px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:var(--ink-2);flex-shrink:0}
+.origin-ic svg{width:10px;height:10px}
+
+.doc-tags{display:flex;gap:3px;flex-wrap:wrap}
+.dtag{font-size:9.5px;font-weight:700;padding:1.5px 6px;border-radius:3px;letter-spacing:.01em;border:1px solid transparent}
+.dt-gray{background:var(--hair-2);color:var(--ink-2);border-color:var(--hair)}
+.dt-green{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.dt-amber{background:#fffbeb;color:#b45309;border-color:#fde68a}
+.dt-red{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.dt-indigo{background:var(--accent-soft);color:var(--accent);border-color:#c7d2fe}
+
+.doc-bottom{display:flex;align-items:center;justify-content:space-between;font-size:10.5px;color:var(--ink-3);font-weight:500}
+.doc-agent{display:flex;align-items:center;gap:5px}
+.ag-mini{width:18px;height:18px;border-radius:5px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:10px}
+
+/* DETAIL DRAWER */
+.col-detail{width:340px;min-width:340px;background:var(--card);border-left:1px solid var(--hair);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;transition:all .25s}
+.col-detail.hidden{width:0;min-width:0;border:none}
+.cd-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--hair);flex-shrink:0}
+.cd-ttl{font-size:12.5px;font-weight:700;color:var(--ink);letter-spacing:-.15px}
+.cd-close{background:none;border:none;cursor:pointer;color:var(--ink-3);padding:2px}
+.cd-close svg{width:16px;height:16px}
+
+.cd-body{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:18px}
+.cd-body::-webkit-scrollbar{width:3px}
+.cd-body::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+
+.preview-card{background:var(--bg);border:1px solid var(--hair);border-radius:var(--r-md);padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.preview-thumb{width:100px;height:130px;background:var(--card);border:1px solid var(--hair);border-radius:5px;display:flex;align-items:center;justify-content:center;color:var(--err);font-size:28px;font-weight:800}
+.preview-name{font-size:12px;font-weight:700;color:var(--ink);text-align:center;word-break:break-word;letter-spacing:-.1px}
+.preview-meta{font-size:10.5px;color:var(--ink-3);display:flex;gap:8px;font-weight:500}
+
+.cd-sec-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin-bottom:6px}
+
+.cd-row{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:12px;border-bottom:1px solid var(--hair-2)}
+.cd-row:last-child{border-bottom:none}
+.cd-lb{color:var(--ink-3);font-size:11px;width:88px;flex-shrink:0;font-weight:500}
+.cd-val{color:var(--ink);font-weight:600;flex:1;text-align:right;word-break:break-word;letter-spacing:-.1px}
+.cd-val.urgent{color:var(--err);font-weight:700}
+
+.ocr-box{background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:10px 12px;font-size:11px;color:#065f46;line-height:1.55;font-weight:500}
+.ocr-tag{display:inline-flex;align-items:center;gap:4px;background:var(--ok);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-bottom:6px;letter-spacing:.03em}
+
+.cd-tags{display:flex;flex-wrap:wrap;gap:4px}
+.cd-tag{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:4px;background:var(--accent-soft);color:var(--accent);border:1px solid #c7d2fe}
+
+.cd-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.cd-btn{padding:8px;border-radius:7px;border:1px solid var(--hair);background:var(--card);font-size:11.5px;font-weight:600;color:var(--ink);cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center;gap:5px}
+.cd-btn:hover{background:var(--bg);border-color:var(--ink-4)}
+.cd-btn.prim{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cd-btn.prim:hover{background:var(--accent-hover)}
+.cd-btn svg{width:12px;height:12px}
+
+.agent-note{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;font-size:11.5px;color:#78350f;line-height:1.6;font-weight:500}
+.agent-note b{color:#92400e;display:block;margin-bottom:4px;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;font-weight:800}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="sb-logo"><div class="sb-mark">FH</div><div><div class="sb-brand">Felipe Hub</div><div class="sb-tag">Secretário Pessoal</div></div></div>
+  <nav>
+    <div class="nv-label">Principal</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Quem Sou Eu</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Painel</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>Agentes<span class="nv-count">8</span></div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Bater Papo<span class="nv-count alert">5</span></div>
+    <div class="nv-label">Produtividade</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Finanças</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Contatos</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>Agenda</div>
+    <div class="nv-label">Organização</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/></svg>Bancos</div>
+    <div class="nv-item active"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documentos<span class="nv-count amber">3</span></div>
+    <div class="nv-label">Sistema</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51"/></svg>Configurações</div>
+  </nav>
+  <div class="sb-bottom"><div class="sb-user"><div class="sb-user-av">F</div><div><div class="sb-user-n">Felipe Palhares</div><div class="sb-user-r">Administrador</div></div></div></div>
+</aside>
+
+<main>
+  <div class="top-bar">
+    <div><div class="tb-title">Documentos</div><div class="tb-sub">87 arquivos · OCR ativo</div></div>
+    <div class="tb-actions">
+      <button class="btn-i"><svg class="icn icn-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+      <button class="btn btn-primary"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Enviar documento</button>
+    </div>
+  </div>
+
+  <div class="hub">
+
+    <div class="col-main">
+
+      <div class="alert-banner">
+        <div class="alert-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg></div>
+        <div style="flex:1">
+          <div class="alert-ttl">3 documentos com vencimento próximo</div>
+          <div class="alert-sub">Agentes notificados · clique em cada item para detalhes</div>
+        </div>
+        <div class="alert-chips">
+          <span class="a-chip red">Certidão Federal · 12d</span>
+          <span class="a-chip amber">Contrato Locação · 30d</span>
+          <span class="a-chip">CNH Felipe · 45d</span>
+        </div>
+      </div>
+
+      <div class="autosave">
+        <div class="as-ic"><svg class="icn" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="as-ttl">Auto-save ativo · WhatsApp, Telegram e e-mail</div>
+          <div class="as-sub">Todo documento recebido é classificado e arquivado pelo agente certo</div>
+        </div>
+        <div class="as-stats">
+          <div>Hoje: <b>7</b></div><div>Semana: <b>23</b></div><div>Mês: <b>87</b></div>
+        </div>
+      </div>
+
+      <div class="search-card">
+        <div class="search-row">
+          <div class="search-box">
+            <svg class="icn" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input placeholder="Buscar em nome, conteúdo OCR, metadados..."/>
+            <span class="kbd">⌘K</span>
+          </div>
+          <div class="view-toggle">
+            <button class="vt active">Grade</button>
+            <button class="vt">Lista</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <div class="filter-group">
+            <span class="filter-label">Agente</span>
+            <button class="f-chip active">Todos</button>
+            <button class="f-chip">Dr. Silva</button>
+            <button class="f-chip">Ricardo</button>
+            <button class="f-chip">Engenheiro</button>
+            <button class="f-chip">+4</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <div class="filter-group">
+            <span class="filter-label">Origem</span>
+            <button class="f-chip active">Todas</button>
+            <button class="f-chip">WhatsApp</button>
+            <button class="f-chip">Telegram</button>
+            <button class="f-chip">E-mail</button>
+            <button class="f-chip">Upload</button>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Período</span>
+            <button class="f-chip active">Todos</button>
+            <button class="f-chip">Hoje</button>
+            <button class="f-chip">Semana</button>
+            <button class="f-chip">Mês</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Pastas automáticas</span></div>
+        <div class="folders-grid">
+          <div class="folder jur"><div class="folder-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg></div><div class="folder-name">Jurídico</div><div class="folder-count">14 docs <span class="folder-new">2</span></div></div>
+          <div class="folder fin"><div class="folder-ic"><svg class="icn" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="folder-name">Financeiro</div><div class="folder-count">23 docs <span class="folder-new">3</span></div></div>
+          <div class="folder emp"><div class="folder-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg></div><div class="folder-name">Empresas</div><div class="folder-count">18 docs</div></div>
+          <div class="folder pes"><div class="folder-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="folder-name">Pessoal</div><div class="folder-count">9 docs</div></div>
+          <div class="folder gov"><div class="folder-ic"><svg class="icn" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/></svg></div><div class="folder-name">Governo</div><div class="folder-count">7 docs <span class="folder-new">1</span></div></div>
+          <div class="folder sau"><div class="folder-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="folder-name">Saúde</div><div class="folder-count">4 docs</div></div>
+          <div class="folder obr"><div class="folder-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/></svg></div><div class="folder-name">Obras Vimar</div><div class="folder-count">12 docs <span class="folder-new">1</span></div></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-hdr"><span class="sec-title">Recentes (87)</span><button class="f-chip">Mais recente</button></div>
+        <div class="docs-grid">
+
+          <div class="doc-card selected" onclick="selectDoc(this)">
+            <span class="doc-alert"></span>
+            <div class="doc-top">
+              <div class="doc-thumb pdf">PDF</div>
+              <div class="doc-info"><div class="doc-name">Certidao_Negativa_Federal.pdf</div><div class="doc-cat"><span class="cat-dot" style="background:var(--warn)"></span>Governo</div></div>
+            </div>
+            <div class="doc-origin"><span class="origin-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>Upload via hub</div>
+            <div class="doc-tags"><span class="dtag dt-red">Vence 12d</span><span class="dtag dt-gray">OCR</span></div>
+            <div class="doc-bottom"><div class="doc-agent"><span class="ag-mini">🏛️</span>Marcos</div><span>3 dias</span></div>
+          </div>
+
+          <div class="doc-card" onclick="selectDoc(this)">
+            <div class="doc-top">
+              <div class="doc-thumb pdf">PDF</div>
+              <div class="doc-info"><div class="doc-name">Contrato_Locacao_PalharesTech.pdf</div><div class="doc-cat"><span class="cat-dot" style="background:#7c3aed"></span>Jurídico</div></div>
+            </div>
+            <div class="doc-origin"><span class="origin-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>WhatsApp · João Silva</div>
+            <div class="doc-tags"><span class="dtag dt-amber">Vence 12/26</span><span class="dtag dt-gray">OCR</span><span class="dtag dt-indigo">R$ 8.500/mês</span></div>
+            <div class="doc-bottom"><div class="doc-agent"><span class="ag-mini">⚖️</span>Dr. Silva</div><span>2 dias</span></div>
+          </div>
+
+          <div class="doc-card" onclick="selectDoc(this)">
+            <span class="doc-alert"></span>
+            <div class="doc-top">
+              <div class="doc-thumb pdf">PDF</div>
+              <div class="doc-info"><div class="doc-name">Boleto_Nubank_Abril.pdf</div><div class="doc-cat"><span class="cat-dot" style="background:var(--ok)"></span>Financeiro</div></div>
+            </div>
+            <div class="doc-origin"><span class="origin-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>WhatsApp · automático</div>
+            <div class="doc-tags"><span class="dtag dt-red">Vence amanhã</span><span class="dtag dt-indigo">R$ 3.240</span></div>
+            <div class="doc-bottom"><div class="doc-agent"><span class="ag-mini">💰</span>Ricardo</div><span>6h</span></div>
+          </div>
+
+          <div class="doc-card" onclick="selectDoc(this)">
+            <div class="doc-top">
+              <div class="doc-thumb img">DWG</div>
+              <div class="doc-info"><div class="doc-name">Planta_Bloco_C_Vimar_v3.dwg</div><div class="doc-cat"><span class="cat-dot" style="background:#f97316"></span>Obras</div></div>
+            </div>
+            <div class="doc-origin"><span class="origin-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></span>Telegram · 43 MB</div>
+            <div class="doc-tags"><span class="dtag dt-indigo">v3</span><span class="dtag dt-gray">Arquivo grande</span></div>
+            <div class="doc-bottom"><div class="doc-agent"><span class="ag-mini">🏗️</span>Engenheiro</div><span>1 semana</span></div>
+          </div>
+
+          <div class="doc-card" onclick="selectDoc(this)">
+            <div class="doc-top">
+              <div class="doc-thumb img">JPG</div>
+              <div class="doc-info"><div class="doc-name">CNH_Felipe_Frente.jpg</div><div class="doc-cat"><span class="cat-dot" style="background:var(--accent)"></span>Pessoal</div></div>
+            </div>
+            <div class="doc-origin"><span class="origin-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>WhatsApp · foto</div>
+            <div class="doc-tags"><span class="dtag dt-green">OCR extraído</span><span class="dtag dt-amber">Vence 45d</span></div>
+            <div class="doc-bottom"><div class="doc-agent"><span class="ag-mini">🏛️</span>Marcos</div><span>10 dias</span></div>
+          </div>
+
+          <div class="doc-card" onclick="selectDoc(this)">
+            <div class="doc-top">
+              <div class="doc-thumb doc">PDF</div>
+              <div class="doc-info"><div class="doc-name">ATA_Reuniao_Terreno_SP.pdf</div><div class="doc-cat"><span class="cat-dot" style="background:#3b82f6"></span>Empresas</div></div>
+            </div>
+            <div class="doc-origin"><span class="origin-ic"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/></svg></span>Hub · reunião</div>
+            <div class="doc-tags"><span class="dtag dt-indigo">3 participantes</span><span class="dtag dt-green">2 decisões</span></div>
+            <div class="doc-bottom"><div class="doc-agent"><span class="ag-mini">🏢</span>Diretor</div><span>ontem</span></div>
+          </div>
+
+          <div class="doc-card" onclick="selectDoc(this)">
+            <div class="doc-top">
+              <div class="doc-thumb doc">DOC</div>
+              <div class="doc-info"><div class="doc-name">Proposta_Acme_v2.docx</div><div class="doc-cat"><span class="cat-dot" style="background:#3b82f6"></span>Empresas</div></div>
+            </div>
+            <div class="doc-origin"><span class="origin-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>E-mail · joao@acme.com</div>
+            <div class="doc-tags"><span class="dtag dt-indigo">v2</span><span class="dtag dt-amber">Assinatura</span><span class="dtag dt-indigo">R$ 89.000</span></div>
+            <div class="doc-bottom"><div class="doc-agent"><span class="ag-mini">✉️</span>Clara</div><span>2h</span></div>
+          </div>
+
+          <div class="doc-card" onclick="selectDoc(this)">
+            <div class="doc-top">
+              <div class="doc-thumb pdf">PDF</div>
+              <div class="doc-info"><div class="doc-name">Exame_Cardiologico_2026.pdf</div><div class="doc-cat"><span class="cat-dot" style="background:var(--err)"></span>Saúde</div></div>
+            </div>
+            <div class="doc-origin"><span class="origin-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>WhatsApp · laboratório</div>
+            <div class="doc-tags"><span class="dtag dt-green">Normal</span><span class="dtag dt-gray">OCR</span></div>
+            <div class="doc-bottom"><div class="doc-agent"><span class="ag-mini">🩺</span>Dr. Carlos</div><span>2 semanas</span></div>
+          </div>
+
+          <div class="doc-card" onclick="selectDoc(this)">
+            <div class="doc-top">
+              <div class="doc-thumb xls">XLS</div>
+              <div class="doc-info"><div class="doc-name">Fluxo_Caixa_Abril_2026.xlsx</div><div class="doc-cat"><span class="cat-dot" style="background:var(--ok)"></span>Financeiro</div></div>
+            </div>
+            <div class="doc-origin"><span class="origin-ic"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/></svg></span>Hub · automático</div>
+            <div class="doc-tags"><span class="dtag dt-green">R$ 487k</span><span class="dtag dt-gray">24 abas</span></div>
+            <div class="doc-bottom"><div class="doc-agent"><span class="ag-mini">💰</span>Ricardo</div><span>ontem</span></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="col-detail" id="col-detail">
+      <div class="cd-hdr">
+        <div class="cd-ttl">Detalhes do documento</div>
+        <button class="cd-close" onclick="closeDetail()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="cd-body">
+
+        <div class="preview-card">
+          <div class="preview-thumb">PDF</div>
+          <div class="preview-name">Certidao_Negativa_Federal.pdf</div>
+          <div class="preview-meta"><span>2.1 MB</span><span>·</span><span>3 páginas</span></div>
+        </div>
+
+        <div>
+          <div class="cd-sec-t">Classificação</div>
+          <div class="cd-row"><span class="cd-lb">Categoria</span><span class="cd-val"><span class="dtag" style="background:#fffbeb;color:#92400e;border:1px solid #fde68a">Governo</span></span></div>
+          <div class="cd-row"><span class="cd-lb">Classificado por</span><span class="cd-val">Marcos (agente)</span></div>
+          <div class="cd-row"><span class="cd-lb">Confiança</span><span class="cd-val"><span class="dtag dt-green">98%</span></span></div>
+        </div>
+
+        <div>
+          <div class="cd-sec-t">Origem</div>
+          <div class="cd-row"><span class="cd-lb">Canal</span><span class="cd-val">Upload manual</span></div>
+          <div class="cd-row"><span class="cd-lb">Enviado</span><span class="cd-val">20/04/2026 · 14:32</span></div>
+          <div class="cd-row"><span class="cd-lb">Por</span><span class="cd-val">Felipe</span></div>
+        </div>
+
+        <div>
+          <div class="cd-sec-t">Metadados extraídos</div>
+          <div class="cd-row"><span class="cd-lb">Órgão</span><span class="cd-val">Receita Federal</span></div>
+          <div class="cd-row"><span class="cd-lb">CNPJ</span><span class="cd-val" style="font-family:-apple-system-ui-monospace,'SF Mono',monospace;font-size:11px">12.345.678/0001-90</span></div>
+          <div class="cd-row"><span class="cd-lb">Emissão</span><span class="cd-val">03/02/2026</span></div>
+          <div class="cd-row"><span class="cd-lb">Validade</span><span class="cd-val urgent">05/05/2026</span></div>
+          <div class="cd-row"><span class="cd-lb">Situação</span><span class="cd-val"><span class="dtag dt-green">Regular</span></span></div>
+        </div>
+
+        <div>
+          <div class="cd-sec-t"><span class="ocr-tag">OCR</span> Conteúdo pesquisável</div>
+          <div class="ocr-box">"CERTIDÃO NEGATIVA DE DÉBITOS RELATIVOS AOS TRIBUTOS FEDERAIS E À DÍVIDA ATIVA DA UNIÃO. Nome: PALHARESTECH LTDA. CNPJ: 12.345.678/0001-90. Conforme verificação nos sistemas informatizados..."</div>
+        </div>
+
+        <div>
+          <div class="cd-sec-t">Tags</div>
+          <div class="cd-tags">
+            <span class="cd-tag">certidão</span>
+            <span class="cd-tag">receita-federal</span>
+            <span class="cd-tag">palharestech</span>
+            <span class="cd-tag">vence-breve</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="cd-sec-t">Ações</div>
+          <div class="cd-actions">
+            <button class="cd-btn prim">Visualizar</button>
+            <button class="cd-btn">Baixar</button>
+            <button class="cd-btn">Compartilhar</button>
+            <button class="cd-btn">Assinar</button>
+            <button class="cd-btn">Mover</button>
+            <button class="cd-btn">Versões (1)</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="cd-sec-t">Ações programadas · Marcos</div>
+          <div class="agent-note">
+            <b>Alertas</b>
+            • 30/04 · lembrete 5 dias antes<br/>
+            • 02/05 · lembrete 3 dias antes<br/>
+            • 04/05 · lembrete do dia anterior<br/>
+            <br/>
+            <b>Automação</b>
+            Marcos tentará renovar automaticamente no portal e-CAC quando faltarem 5 dias.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+function selectDoc(el){
+  document.querySelectorAll('.doc-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('col-detail').classList.remove('hidden');
+}
+function closeDetail(){
+  document.getElementById('col-detail').classList.add('hidden');
+  document.querySelectorAll('.doc-card').forEach(c => c.classList.remove('selected'));
+}
+document.querySelectorAll('.f-chip').forEach(c => c.addEventListener('click', function(){
+  const group = this.parentElement;
+  group.querySelectorAll('.f-chip').forEach(x => x.classList.remove('active'));
+  this.classList.add('active');
+}));
+document.querySelectorAll('.vt').forEach(b => b.addEventListener('click', function(){
+  document.querySelectorAll('.vt').forEach(x => x.classList.remove('active'));
+  this.classList.add('active');
+}));
+</script>
+</body>
+</html>

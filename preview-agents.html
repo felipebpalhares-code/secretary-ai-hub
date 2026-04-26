@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Felipe Hub — Agentes</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+:root{
+  --bg:#f8fafc;--card:#fff;--ink:#0f172a;--ink-2:#475569;--ink-3:#94a3b8;--ink-4:#cbd5e1;
+  --hair:#e2e8f0;--hair-2:#f1f5f9;
+  --accent:#4f46e5;--accent-hover:#4338ca;--accent-soft:#eef2ff;
+  --ok:#10b981;--warn:#d97706;--err:#dc2626;
+  --shadow-sm:0 1px 3px rgba(15,23,42,.06);
+  --r-sm:8px;--r-md:10px;--r-lg:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;overflow:hidden;font-size:13.5px;letter-spacing:-.05px}
+button{font-family:inherit;letter-spacing:inherit}
+.icn{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.icn-sm{width:13px;height:13px}
+
+/* SIDEBAR (shared) */
+aside{width:236px;min-width:236px;background:#0f172a;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;z-index:10}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:18px 18px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-mark{width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+.sb-brand{font-size:14px;font-weight:700;color:#f1f5f9;letter-spacing:-.25px}
+.sb-tag{font-size:10px;color:#64748b;font-weight:500;margin-top:1px}
+nav{flex:1;padding:10px;overflow-y:auto}
+nav::-webkit-scrollbar{display:none}
+.nv-label{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.07em;padding:12px 12px 4px}
+.nv-item{display:flex;align-items:center;gap:11px;padding:8px 12px;border-radius:7px;color:#94a3b8;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:1px;transition:all .12s}
+.nv-item:hover{background:rgba(255,255,255,.04);color:#e2e8f0}
+.nv-item.active{background:rgba(79,70,229,.15);color:#e0e7ff}
+.nv-item svg{width:15px;height:15px;opacity:.9}
+.nv-count{margin-left:auto;font-size:10.5px;font-weight:600;color:#64748b;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.04)}
+.nv-count.alert{background:rgba(220,38,38,.2);color:#fca5a5}
+.sb-bottom{padding:10px;border-top:1px solid rgba(255,255,255,.06)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer}
+.sb-user-av{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.sb-user-n{font-size:12.5px;font-weight:600;color:#e2e8f0}
+.sb-user-r{font-size:10.5px;color:#64748b;margin-top:1px}
+
+/* MAIN */
+main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--hair);background:var(--card);flex-shrink:0}
+.tb-title{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.4px;line-height:1}
+.tb-sub{font-size:12px;color:var(--ink-3);margin-top:3px;font-weight:500}
+.tb-actions{display:flex;gap:6px}
+.btn-i{width:32px;height:32px;border-radius:7px;border:1px solid var(--hair);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-2);position:relative}
+.btn-i:hover{background:var(--bg);border-color:var(--ink-4)}
+.notif-dot{position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:var(--err);border:1.5px solid var(--card)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid var(--hair);background:var(--card);color:var(--ink);transition:all .15s}
+.btn:hover{background:var(--bg);border-color:var(--ink-4)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+
+.content{flex:1;overflow-y:auto;padding:22px 24px;display:flex;flex-direction:column;gap:20px}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+
+.sec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);margin-bottom:10px}
+
+/* SUMMARY ROW */
+.sum-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.sum-card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-lg);padding:14px 16px;display:flex;align-items:center;gap:12px}
+.sum-ic{width:34px;height:34px;border-radius:8px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:var(--ink-2);flex-shrink:0}
+.sum-ic svg{width:16px;height:16px}
+.sum-v{font-size:19px;font-weight:700;color:var(--ink);line-height:1;font-variant-numeric:tabular-nums}
+.sum-l{font-size:11px;color:var(--ink-3);font-weight:600;margin-top:3px}
+
+/* AGENT CARD */
+.agents-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.agent-card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-lg);padding:16px 18px;display:flex;flex-direction:column;gap:12px;transition:all .15s;border-left:3px solid var(--hair)}
+.agent-card:hover{border-color:var(--ink-4);box-shadow:var(--shadow-sm)}
+.agent-card.c-silva{border-left-color:#7c3aed}
+.agent-card.c-ricardo{border-left-color:var(--ok)}
+.agent-card.c-eng{border-left-color:#f97316}
+.agent-card.c-ana{border-left-color:#ec4899}
+.agent-card.c-diretor{border-left-color:#3b82f6}
+.agent-card.c-marcos{border-left-color:var(--warn)}
+.agent-card.c-clara{border-left-color:var(--accent)}
+.agent-card.c-carlos{border-left-color:var(--err)}
+
+.ac-top{display:flex;align-items:flex-start;gap:11px}
+.ac-av{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;background:var(--bg);border:1px solid var(--hair)}
+.ac-meta{flex:1;min-width:0}
+.ac-name{font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-.25px}
+.ac-title{font-size:11.5px;color:var(--ink-2);margin-top:1px;font-weight:500}
+.ac-badges{display:flex;align-items:center;gap:5px;margin-top:6px;flex-wrap:wrap}
+.spec-badge{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:4px;border:1px solid transparent}
+.sp-silva{background:#f3e8ff;color:#6d28d9;border-color:#e9d5ff}
+.sp-ricardo{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.sp-eng{background:#fff7ed;color:#c2410c;border-color:#fed7aa}
+.sp-ana{background:#fce7f3;color:#be185d;border-color:#fbcfe8}
+.sp-diretor{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+.sp-marcos{background:#fffbeb;color:#b45309;border-color:#fde68a}
+.sp-clara{background:var(--accent-soft);color:var(--accent);border-color:#c7d2fe}
+.sp-carlos{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+
+.level-badge{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--hair-2);color:var(--ink-2);border:1px solid var(--hair)}
+.lv-master{background:#fffbeb;color:#92400e;border-color:#fde68a}
+.lv-expert{background:var(--hair-2);color:var(--ink);border-color:var(--hair)}
+.lv-senior{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.lv-basic{background:var(--bg);color:var(--ink-3);border-color:var(--hair)}
+
+.ac-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.ac-stat{background:var(--bg);border:1px solid var(--hair);border-radius:7px;padding:7px;text-align:center}
+.ac-stat-v{font-size:14px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.ac-stat-l{font-size:9.5px;color:var(--ink-3);font-weight:600;margin-top:1px;text-transform:uppercase;letter-spacing:.04em}
+
+.ac-activity{font-size:11px;color:var(--ink-3);display:flex;align-items:center;gap:5px;font-weight:500}
+.ac-dot{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+.ac-dot.off{background:var(--ink-4)}
+
+.ac-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.btn-chat{padding:7px;border-radius:7px;background:var(--accent);color:#fff;font-size:12px;font-weight:600;border:1px solid var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s}
+.btn-chat:hover{background:var(--accent-hover)}
+.btn-train{padding:7px;border-radius:7px;background:var(--card);color:var(--ink);font-size:12px;font-weight:600;border:1px solid var(--hair);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s}
+.btn-train:hover{background:var(--bg);border-color:var(--ink-4)}
+
+/* TRAINING PANEL */
+.backdrop{position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:99;display:none}
+.backdrop.open{display:block}
+.train-panel{position:fixed;top:0;right:0;height:100vh;width:480px;background:var(--card);z-index:100;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(15,23,42,.12);transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1)}
+.train-panel.open{transform:translateX(0)}
+.tp-header{display:flex;align-items:center;gap:11px;padding:16px 20px;border-bottom:1px solid var(--hair);flex-shrink:0}
+.tp-av{width:36px;height:36px;border-radius:9px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:16px}
+.tp-name{font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-.2px}
+.tp-sub{font-size:11px;color:var(--ink-3);margin-top:1px}
+.tp-close{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--ink-3);padding:4px;border-radius:6px}
+.tp-close:hover{background:var(--bg);color:var(--ink)}
+.tp-close svg{width:16px;height:16px}
+
+.tp-tabs{display:flex;border-bottom:1px solid var(--hair);overflow-x:auto;padding:0 20px;flex-shrink:0}
+.tp-tabs::-webkit-scrollbar{display:none}
+.tp-tab{padding:11px 12px;font-size:11.5px;font-weight:600;color:var(--ink-3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:5px;letter-spacing:-.1px}
+.tp-tab svg{width:13px;height:13px}
+.tp-tab:hover{color:var(--ink-2)}
+.tp-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+.tp-body{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:14px}
+.tp-body::-webkit-scrollbar{width:4px}
+.tp-body::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+.tp-panel{display:none;flex-direction:column;gap:12px}
+.tp-panel.active{display:flex}
+
+.tags-wrap{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.spec-tag{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);border:1px solid #c7d2fe}
+.spec-tag .rm{cursor:pointer;color:var(--accent);font-weight:700;line-height:1;padding-left:2px}
+.tag-input{border:1px dashed var(--ink-4);border-radius:999px;padding:3px 11px;font-size:11.5px;font-weight:600;color:var(--ink);background:none;outline:none;width:140px;font-family:inherit}
+.tag-input:focus{border-color:var(--accent);border-style:solid}
+
+.doc-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg);border:1px solid var(--hair);border-radius:8px}
+.doc-ic{width:28px;height:28px;border-radius:6px;background:var(--card);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:var(--ink-2);flex-shrink:0}
+.doc-ic svg{width:13px;height:13px}
+.doc-name{font-size:12px;font-weight:600;color:var(--ink);flex:1;letter-spacing:-.1px}
+.doc-size{font-size:10.5px;color:var(--ink-3);font-weight:500}
+.doc-rm{background:none;border:none;color:var(--ink-3);cursor:pointer;padding:3px}
+.doc-rm:hover{color:var(--err)}
+.doc-rm svg{width:13px;height:13px}
+
+.upload-zone{border:1px dashed var(--ink-4);border-radius:9px;padding:20px;text-align:center;color:var(--ink-3);font-size:12px;cursor:pointer;background:var(--bg)}
+.upload-zone:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.uz-ic{margin-bottom:6px}
+.uz-ic svg{width:22px;height:22px}
+
+.book-item{padding:12px 14px;background:var(--bg);border:1px solid var(--hair);border-radius:8px}
+.book-title{font-size:12.5px;font-weight:700;color:var(--ink);letter-spacing:-.15px}
+.book-author{font-size:10.5px;color:var(--ink-3);margin-top:1px;font-weight:500}
+.book-learn{font-size:11.5px;color:var(--ink-2);margin-top:6px;line-height:1.5;font-weight:500}
+
+.video-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--bg);border:1px solid var(--hair);border-radius:8px}
+.video-thumb{width:40px;height:28px;border-radius:5px;background:var(--card);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:var(--ink-2);flex-shrink:0}
+.video-thumb svg{width:14px;height:14px}
+.video-title{font-size:12.5px;font-weight:600;color:var(--ink);letter-spacing:-.1px}
+.video-ch{font-size:10.5px;color:var(--ink-3);margin-top:1px;font-weight:500}
+
+.instr-area{width:100%;border:1px solid var(--hair);border-radius:8px;padding:11px 13px;font-size:12.5px;color:var(--ink);line-height:1.55;min-height:120px;outline:none;resize:vertical;font-family:inherit;background:var(--card)}
+.instr-area:focus{border-color:var(--accent)}
+
+.log-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--hair-2);font-size:11.5px}
+.log-item:last-child{border-bottom:none}
+.log-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:5px}
+.log-date{font-size:10.5px;font-weight:600;color:var(--ink-3);width:76px;flex-shrink:0}
+.log-text{font-size:11.5px;color:var(--ink-2);line-height:1.5;font-weight:500}
+
+.prompt-box{background:var(--accent-soft);border:1px solid #c7d2fe;border-radius:8px;padding:11px 13px;font-size:11.5px;color:var(--ink-2);line-height:1.6;font-weight:500}
+.prompt-box strong{color:var(--accent);display:block;margin-bottom:4px;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em}
+
+.subhdr{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);margin-bottom:6px}
+
+.save-bar{border-top:1px solid var(--hair);padding:12px 20px;display:flex;justify-content:flex-end;gap:6px;flex-shrink:0}
+
+/* CHAT MODAL */
+.chat-modal{position:fixed;inset:0;z-index:200;display:none;align-items:flex-end;justify-content:center;padding:20px;background:rgba(15,23,42,.4)}
+.chat-modal.open{display:flex}
+.chat-box{background:var(--card);border-radius:var(--r-lg);width:660px;max-width:100%;height:85vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(15,23,42,.2)}
+.chat-hdr{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--hair);flex-shrink:0}
+.chat-av{width:34px;height:34px;border-radius:9px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.chat-name{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:-.15px}
+.chat-status{font-size:10.5px;color:var(--ok);font-weight:600}
+.chat-close{margin-left:auto;background:none;border:none;color:var(--ink-3);cursor:pointer;padding:4px}
+.chat-close svg{width:16px;height:16px}
+.report-btn{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--accent);background:var(--accent-soft);border:1px solid #c7d2fe;padding:5px 11px;border-radius:7px;cursor:pointer;margin-right:6px}
+
+.chat-msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px}
+.msg-row{display:flex;align-items:flex-start;gap:10px}
+.msg-row.user{flex-direction:row-reverse}
+.msg-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;background:var(--bg);border:1px solid var(--hair)}
+.msg-av.user-av{background:var(--ink);color:#fff;font-weight:700;font-size:12px}
+.bubble{max-width:75%;padding:10px 13px;font-size:12.5px;line-height:1.55;border-radius:var(--r-md)}
+.bubble.agent{background:var(--bg);border:1px solid var(--hair);color:var(--ink)}
+.bubble.user{background:var(--accent);color:#fff}
+.bubble ul{padding-left:16px;margin-top:4px}
+.bubble li{margin-bottom:3px}
+.msg-time{font-size:10px;color:var(--ink-3);margin-top:3px;font-weight:500}
+
+.context-bar{background:var(--accent-soft);border:1px solid #c7d2fe;border-radius:8px;padding:8px 14px;font-size:11px;color:var(--accent);font-weight:600;display:flex;align-items:center;gap:6px;flex-shrink:0;margin:0 18px 4px;letter-spacing:-.05px}
+.context-bar svg{width:13px;height:13px}
+
+.chat-input-wrap{display:flex;gap:6px;padding:12px 18px;border-top:1px solid var(--hair);flex-shrink:0}
+.chat-input{flex:1;border:1px solid var(--hair);border-radius:8px;padding:9px 13px;font-size:12.5px;color:var(--ink);outline:none;font-family:inherit}
+.chat-input:focus{border-color:var(--accent)}
+.send-btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12.5px;font-weight:600;cursor:pointer}
+.send-btn:hover{background:var(--accent-hover)}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="sb-logo"><div class="sb-mark">FH</div><div><div class="sb-brand">Felipe Hub</div><div class="sb-tag">Secretário Pessoal</div></div></div>
+  <nav>
+    <div class="nv-label">Principal</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Quem Sou Eu</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Painel</div>
+    <div class="nv-item active"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>Agentes<span class="nv-count">8</span></div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Bater Papo<span class="nv-count alert">5</span></div>
+    <div class="nv-label">Produtividade</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Finanças</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Contatos</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>Agenda</div>
+    <div class="nv-label">Organização</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/></svg>Bancos</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documentos</div>
+    <div class="nv-label">Sistema</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51"/></svg>Configurações</div>
+  </nav>
+  <div class="sb-bottom"><div class="sb-user"><div class="sb-user-av">F</div><div><div class="sb-user-n">Felipe Palhares</div><div class="sb-user-r">Administrador</div></div></div></div>
+</aside>
+
+<main>
+  <div class="top-bar">
+    <div><div class="tb-title">Agentes</div><div class="tb-sub">Equipe de 8 especialistas</div></div>
+    <div class="tb-actions">
+      <button class="btn-i"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-dot"></span></button>
+      <button class="btn btn-primary"><svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo agente</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="sum-row">
+      <div class="sum-card"><div class="sum-ic"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg></div><div><div class="sum-v">8</div><div class="sum-l">Agentes criados</div></div></div>
+      <div class="sum-card"><div class="sum-ic"><svg class="icn" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="sum-v">6</div><div class="sum-l">Online agora</div></div></div>
+      <div class="sum-card"><div class="sum-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><div class="sum-v">3</div><div class="sum-l">Alertas hoje</div></div></div>
+      <div class="sum-card"><div class="sum-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div><div class="sum-v">28</div><div class="sum-l">Docs treinados</div></div></div>
+    </div>
+
+    <div>
+      <div class="sec-title">Equipe de agentes</div>
+      <div class="agents-grid">
+
+        <div class="agent-card c-silva">
+          <div class="ac-top">
+            <div class="ac-av">⚖️</div>
+            <div class="ac-meta">
+              <div class="ac-name">Dr. Silva</div>
+              <div class="ac-title">Advogado Pessoal</div>
+              <div class="ac-badges"><span class="spec-badge sp-silva">Jurídico</span><span class="level-badge lv-master">Master</span></div>
+            </div>
+          </div>
+          <div class="ac-stats"><div class="ac-stat"><div class="ac-stat-v">12</div><div class="ac-stat-l">Docs</div></div><div class="ac-stat"><div class="ac-stat-v">3</div><div class="ac-stat-l">Livros</div></div><div class="ac-stat"><div class="ac-stat-v">5</div><div class="ac-stat-l">Instruções</div></div></div>
+          <div class="ac-activity"><span class="ac-dot"></span>Ativo · há 2h · prazo processual alertado</div>
+          <div class="ac-actions">
+            <button class="btn-chat" onclick="openChat()"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Conversar</button>
+            <button class="btn-train" onclick="openTrain()"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Treinar</button>
+          </div>
+        </div>
+
+        <div class="agent-card c-ricardo">
+          <div class="ac-top">
+            <div class="ac-av">💰</div>
+            <div class="ac-meta">
+              <div class="ac-name">Ricardo</div>
+              <div class="ac-title">CFO Pessoal</div>
+              <div class="ac-badges"><span class="spec-badge sp-ricardo">Financeiro</span><span class="level-badge lv-expert">Expert</span></div>
+            </div>
+          </div>
+          <div class="ac-stats"><div class="ac-stat"><div class="ac-stat-v">8</div><div class="ac-stat-l">Docs</div></div><div class="ac-stat"><div class="ac-stat-v">4</div><div class="ac-stat-l">Livros</div></div><div class="ac-stat"><div class="ac-stat-v">4</div><div class="ac-stat-l">Instruções</div></div></div>
+          <div class="ac-activity"><span class="ac-dot"></span>Ativo · há 1h · relatório mensal gerado</div>
+          <div class="ac-actions"><button class="btn-chat" onclick="openChat()">Conversar</button><button class="btn-train" onclick="openTrain()">Treinar</button></div>
+        </div>
+
+        <div class="agent-card c-eng">
+          <div class="ac-top">
+            <div class="ac-av">🏗️</div>
+            <div class="ac-meta">
+              <div class="ac-name">Engenheiro</div>
+              <div class="ac-title">Gestor de Obras · Vimar</div>
+              <div class="ac-badges"><span class="spec-badge sp-eng">Construção</span><span class="level-badge lv-senior">Sênior</span></div>
+            </div>
+          </div>
+          <div class="ac-stats"><div class="ac-stat"><div class="ac-stat-v">6</div><div class="ac-stat-l">Docs</div></div><div class="ac-stat"><div class="ac-stat-v">2</div><div class="ac-stat-l">Livros</div></div><div class="ac-stat"><div class="ac-stat-v">3</div><div class="ac-stat-l">Instruções</div></div></div>
+          <div class="ac-activity"><span class="ac-dot"></span>Ativo · ontem · cronograma Bloco C atualizado</div>
+          <div class="ac-actions"><button class="btn-chat" onclick="openChat()">Conversar</button><button class="btn-train" onclick="openTrain()">Treinar</button></div>
+        </div>
+
+        <div class="agent-card c-ana">
+          <div class="ac-top">
+            <div class="ac-av">🌸</div>
+            <div class="ac-meta">
+              <div class="ac-name">Ana</div>
+              <div class="ac-title">Assistente Familiar e Agenda</div>
+              <div class="ac-badges"><span class="spec-badge sp-ana">Família</span><span class="level-badge lv-senior">Sênior</span></div>
+            </div>
+          </div>
+          <div class="ac-stats"><div class="ac-stat"><div class="ac-stat-v">4</div><div class="ac-stat-l">Docs</div></div><div class="ac-stat"><div class="ac-stat-v">1</div><div class="ac-stat-l">Livros</div></div><div class="ac-stat"><div class="ac-stat-v">6</div><div class="ac-stat-l">Instruções</div></div></div>
+          <div class="ac-activity"><span class="ac-dot"></span>Ativo · há 3h · aniversário Ana amanhã lembrado</div>
+          <div class="ac-actions"><button class="btn-chat" onclick="openChat()">Conversar</button><button class="btn-train" onclick="openTrain()">Treinar</button></div>
+        </div>
+
+        <div class="agent-card c-diretor">
+          <div class="ac-top">
+            <div class="ac-av">🏢</div>
+            <div class="ac-meta">
+              <div class="ac-name">Diretor</div>
+              <div class="ac-title">Consultor Empresarial</div>
+              <div class="ac-badges"><span class="spec-badge sp-diretor">Empresas</span><span class="level-badge lv-expert">Expert</span></div>
+            </div>
+          </div>
+          <div class="ac-stats"><div class="ac-stat"><div class="ac-stat-v">9</div><div class="ac-stat-l">Docs</div></div><div class="ac-stat"><div class="ac-stat-v">5</div><div class="ac-stat-l">Livros</div></div><div class="ac-stat"><div class="ac-stat-v">4</div><div class="ac-stat-l">Instruções</div></div></div>
+          <div class="ac-activity"><span class="ac-dot"></span>Ativo · hoje · obrigação societária alertada</div>
+          <div class="ac-actions"><button class="btn-chat" onclick="openChat()">Conversar</button><button class="btn-train" onclick="openTrain()">Treinar</button></div>
+        </div>
+
+        <div class="agent-card c-marcos">
+          <div class="ac-top">
+            <div class="ac-av">🏛️</div>
+            <div class="ac-meta">
+              <div class="ac-name">Marcos</div>
+              <div class="ac-title">Especialista Governamental</div>
+              <div class="ac-badges"><span class="spec-badge sp-marcos">Governo</span><span class="level-badge lv-basic">Básico</span></div>
+            </div>
+          </div>
+          <div class="ac-stats"><div class="ac-stat"><div class="ac-stat-v">2</div><div class="ac-stat-l">Docs</div></div><div class="ac-stat"><div class="ac-stat-v">0</div><div class="ac-stat-l">Livros</div></div><div class="ac-stat"><div class="ac-stat-v">2</div><div class="ac-stat-l">Instruções</div></div></div>
+          <div class="ac-activity"><span class="ac-dot off"></span>Inativo · 3 dias · certidão vencendo em 12d</div>
+          <div class="ac-actions"><button class="btn-chat" onclick="openChat()">Conversar</button><button class="btn-train" onclick="openTrain()">Treinar</button></div>
+        </div>
+
+        <div class="agent-card c-clara">
+          <div class="ac-top">
+            <div class="ac-av">✉️</div>
+            <div class="ac-meta">
+              <div class="ac-name">Clara</div>
+              <div class="ac-title">Assistente de Comunicação</div>
+              <div class="ac-badges"><span class="spec-badge sp-clara">E-mails</span><span class="level-badge lv-senior">Sênior</span></div>
+            </div>
+          </div>
+          <div class="ac-stats"><div class="ac-stat"><div class="ac-stat-v">3</div><div class="ac-stat-l">Docs</div></div><div class="ac-stat"><div class="ac-stat-v">2</div><div class="ac-stat-l">Livros</div></div><div class="ac-stat"><div class="ac-stat-v">5</div><div class="ac-stat-l">Instruções</div></div></div>
+          <div class="ac-activity"><span class="ac-dot"></span>Ativo · há 20min · 3 emails priorizados</div>
+          <div class="ac-actions"><button class="btn-chat" onclick="openChat()">Conversar</button><button class="btn-train" onclick="openTrain()">Treinar</button></div>
+        </div>
+
+        <div class="agent-card c-carlos">
+          <div class="ac-top">
+            <div class="ac-av">🩺</div>
+            <div class="ac-meta">
+              <div class="ac-name">Dr. Carlos</div>
+              <div class="ac-title">Médico de Confiança</div>
+              <div class="ac-badges"><span class="spec-badge sp-carlos">Saúde</span><span class="level-badge lv-basic">Básico</span></div>
+            </div>
+          </div>
+          <div class="ac-stats"><div class="ac-stat"><div class="ac-stat-v">2</div><div class="ac-stat-l">Docs</div></div><div class="ac-stat"><div class="ac-stat-v">1</div><div class="ac-stat-l">Livros</div></div><div class="ac-stat"><div class="ac-stat-v">2</div><div class="ac-stat-l">Instruções</div></div></div>
+          <div class="ac-activity"><span class="ac-dot off"></span>Inativo · 5 dias · check-up anual pendente</div>
+          <div class="ac-actions"><button class="btn-chat" onclick="openChat()">Conversar</button><button class="btn-train" onclick="openTrain()">Treinar</button></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- TRAINING PANEL -->
+<div class="backdrop" id="backdrop" onclick="closeAll()"></div>
+<div class="train-panel" id="train-panel">
+  <div class="tp-header">
+    <div class="tp-av">⚖️</div>
+    <div><div class="tp-name">Dr. Silva</div><div class="tp-sub">Advogado Pessoal · Master</div></div>
+    <button class="tp-close" onclick="closeTrain()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+
+  <div class="tp-tabs">
+    <button class="tp-tab active" onclick="switchTp('sp')"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Especialidades</button>
+    <button class="tp-tab" onclick="switchTp('dc')"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>Documentos</button>
+    <button class="tp-tab" onclick="switchTp('bk')"><svg class="icn" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Livros</button>
+    <button class="tp-tab" onclick="switchTp('vd')"><svg class="icn" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Vídeos</button>
+    <button class="tp-tab" onclick="switchTp('in')"><svg class="icn" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>Instruções</button>
+    <button class="tp-tab" onclick="switchTp('lg')"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Histórico</button>
+  </div>
+
+  <div class="tp-body">
+
+    <div class="tp-panel active" id="tp-sp">
+      <p style="font-size:11.5px;color:var(--ink-2);line-height:1.5;font-weight:500">Adicione especialidades e elas serão injetadas automaticamente no system prompt do agente.</p>
+      <div class="tags-wrap" id="tags-wrap">
+        <span class="spec-tag">Direito Civil <span class="rm" onclick="rmTag(this)">×</span></span>
+        <span class="spec-tag">Contratos <span class="rm" onclick="rmTag(this)">×</span></span>
+        <span class="spec-tag">Prazos Judiciais <span class="rm" onclick="rmTag(this)">×</span></span>
+        <span class="spec-tag">Direito Trabalhista <span class="rm" onclick="rmTag(this)">×</span></span>
+        <span class="spec-tag">Direito Imobiliário <span class="rm" onclick="rmTag(this)">×</span></span>
+        <input class="tag-input" id="tag-input" placeholder="+ Especialidade..." onkeydown="addTag(event)"/>
+      </div>
+      <div class="prompt-box">
+        <strong>System prompt atual</strong>
+        "Você é Dr. Silva, advogado pessoal de Felipe Palhares. Especialidades: Direito Civil, Contratos, Prazos Judiciais, Direito Trabalhista, Direito Imobiliário. Traduz juridiquês para português simples. Alerta sobre prazos críticos com 30, 15 e 7 dias de antecedência."
+      </div>
+    </div>
+
+    <div class="tp-panel" id="tp-dc">
+      <div style="display:flex;align-items:center;justify-content:space-between"><div class="subhdr">12 documentos</div><button class="btn"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload</button></div>
+      <div class="doc-item"><div class="doc-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div class="doc-name">Proc_0001234_Trabalhista.pdf</div><div class="doc-size">2,4 MB</div><button class="doc-rm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div>
+      <div class="doc-item"><div class="doc-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div class="doc-name">Proc_0005678_Civel.pdf</div><div class="doc-size">1,8 MB</div><button class="doc-rm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/></svg></button></div>
+      <div class="doc-item"><div class="doc-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div class="doc-name">Contrato_Locacao_PalharesTech.pdf</div><div class="doc-size">890 KB</div><button class="doc-rm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/></svg></button></div>
+      <div class="doc-item"><div class="doc-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div class="doc-name">CPC_Anotado_2024.pdf</div><div class="doc-size">12,1 MB</div><button class="doc-rm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/></svg></button></div>
+      <div class="upload-zone">
+        <div class="uz-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+        Arraste PDFs ou clique para selecionar · máx. 50 MB
+      </div>
+    </div>
+
+    <div class="tp-panel" id="tp-bk">
+      <div style="display:flex;align-items:center;justify-content:space-between"><div class="subhdr">Referências bibliográficas</div><button class="btn"><svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar</button></div>
+      <div class="book-item"><div class="book-title">Manual de Direito Civil — Vol. 1 a 6</div><div class="book-author">Flávio Tartuce · Ed. Método, 2024</div><div class="book-learn">Base doutrinária para contratos, responsabilidade civil e direitos reais. Aplicado ao contexto das empresas do Felipe.</div></div>
+      <div class="book-item"><div class="book-title">Código de Processo Civil Comentado</div><div class="book-author">Humberto Theodoro Jr · Ed. Forense, 2024</div><div class="book-learn">Referência para prazos processuais, recursos e execuções. Fundamental para alertas de prazo.</div></div>
+      <div class="book-item"><div class="book-title">CLT Consolidada</div><div class="book-author">Texto oficial atualizado 2025</div><div class="book-learn">Base para o processo trabalhista ativo (Proc. 0001234). Referência para relações de emprego nas empresas.</div></div>
+    </div>
+
+    <div class="tp-panel" id="tp-vd">
+      <div style="display:flex;align-items:center;justify-content:space-between"><div class="subhdr">Cursos e canais</div><button class="btn">Adicionar</button></div>
+      <div class="video-item"><div class="video-thumb"><svg class="icn" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><div><div class="video-title">Direito para Empreendedores — T2</div><div class="video-ch">Canal Dr. Felipe Valim · YouTube · 24 episódios</div></div></div>
+      <div class="video-item"><div class="video-thumb"><svg class="icn" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><div><div class="video-title">Gestão de Contratos Empresariais</div><div class="video-ch">Coursera · FGV · 12h</div></div></div>
+      <div class="video-item"><div class="video-thumb"><svg class="icn" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><div><div class="video-title">Trabalhista para Empresários</div><div class="video-ch">Canal Migalhas · YouTube · 3h</div></div></div>
+    </div>
+
+    <div class="tp-panel" id="tp-in">
+      <p style="font-size:11.5px;color:var(--ink-2);line-height:1.5;font-weight:500">Comportamentos específicos injetados no system prompt. Seja detalhado.</p>
+      <textarea class="instr-area">- Sempre me avise com 30, 15 e 7 dias de antecedência sobre qualquer prazo processual
+- Quando citar um processo, sempre inclua o número completo e a vara
+- Nunca dê parecer definitivo — termine com "consulte presencialmente o advogado"
+- Quando houver contradição entre meus interesses e a lei, me avise claramente
+- Traduza sempre o juridiquês para linguagem simples ao final de cada resposta</textarea>
+      <div style="font-size:11px;color:var(--ink-3);font-weight:500">Sugestões: "Me avise X dias antes" · "Cite o artigo de lei" · "Compare com precedentes"</div>
+    </div>
+
+    <div class="tp-panel" id="tp-lg">
+      <div class="subhdr">Log de treinamento</div>
+      <div>
+        <div class="log-item"><div class="log-dot"></div><div class="log-date">23/04/2026</div><div class="log-text">Documento carregado: <strong>Proc_0001234_Trabalhista.pdf</strong></div></div>
+        <div class="log-item"><div class="log-dot"></div><div class="log-date">22/04/2026</div><div class="log-text">Nova instrução: alertas 30/15/7 dias antes</div></div>
+        <div class="log-item"><div class="log-dot"></div><div class="log-date">20/04/2026</div><div class="log-text">Livro adicionado: <strong>CPC Comentado — Theodoro Jr.</strong></div></div>
+        <div class="log-item"><div class="log-dot"></div><div class="log-date">18/04/2026</div><div class="log-text">Nova especialidade: <strong>Direito Imobiliário</strong></div></div>
+        <div class="log-item"><div class="log-dot"></div><div class="log-date">15/04/2026</div><div class="log-text">Documento carregado: <strong>Contrato_Locacao_PalharesTech.pdf</strong></div></div>
+        <div class="log-item"><div class="log-dot"></div><div class="log-date">10/04/2026</div><div class="log-text">Vídeo adicionado: <strong>Direito para Empreendedores T.2</strong></div></div>
+        <div class="log-item"><div class="log-dot"></div><div class="log-date">01/04/2026</div><div class="log-text">Agente criado com especialidades base</div></div>
+      </div>
+    </div>
+
+  </div>
+  <div class="save-bar"><button class="btn" onclick="closeTrain()">Fechar</button><button class="btn btn-primary">Salvar treinamento</button></div>
+</div>
+
+<!-- CHAT MODAL -->
+<div class="chat-modal" id="chat-modal">
+  <div class="chat-box">
+    <div class="chat-hdr">
+      <div class="chat-av">⚖️</div>
+      <div><div class="chat-name">Dr. Silva · Advogado Pessoal</div><div class="chat-status">● Online</div></div>
+      <button class="report-btn" style="margin-left:auto"><svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Relatório Semanal</button>
+      <button class="chat-close" onclick="closeChat()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="context-bar"><svg class="icn" viewBox="0 0 24 24"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-4"/><path d="M9 15L20.5 3.5a2.1 2.1 0 0 1 3 3L12 18l-5 1 1-5z"/></svg>Contexto: Perfil de Felipe + 12 documentos + 5 instruções</div>
+
+    <div class="chat-msgs">
+      <div class="msg-row">
+        <div class="msg-av">⚖️</div>
+        <div>
+          <div class="bubble agent">Bom dia, Felipe! Tenho <strong>2 alertas importantes</strong>:<br/><ul><li><strong>Proc. 0001234 (Trabalhista)</strong> — prazo em <strong>12 dias</strong> (05/05/2026). Dr. Carlos Lima precisa protocolar a contestação.</li><li><strong>Contrato de Locação PalharesTech</strong> — vence em <strong>30 dias</strong>. Renovar ou notificar?</li></ul>Como prefere prosseguir?</div>
+          <div class="msg-time">07:00</div>
+        </div>
+      </div>
+
+      <div class="msg-row user">
+        <div class="msg-av user-av">F</div>
+        <div>
+          <div class="bubble user">Dr. Silva, me explica em linguagem simples o que acontece se perdermos o prazo do processo trabalhista.</div>
+          <div class="msg-time">08:32</div>
+        </div>
+      </div>
+
+      <div class="msg-row">
+        <div class="msg-av">⚖️</div>
+        <div>
+          <div class="bubble agent">Claro, Felipe. Em termos simples:<br/><br/>Se perdermos o prazo (05/05), o juiz pode declarar <strong>revelia</strong> — aceita como verdade tudo que o reclamante disse, sem você poder se defender.<br/><br/><strong>Na prática:</strong><ul><li>Condena automaticamente sem análise</li><li>O valor pedido (R$ 45.000) pode ser integralmente concedido</li><li>Muito difícil reverter em recurso</li></ul><strong>Ação necessária:</strong> ligue hoje para o Dr. Carlos Lima e confirme que a contestação está sendo preparada. Consulte presencialmente o advogado para decisão final.</div>
+          <div class="msg-time">08:33</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-wrap">
+      <input class="chat-input" placeholder="Pergunte ao Dr. Silva..."/>
+      <button class="send-btn">Enviar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openTrain(){document.getElementById('train-panel').classList.add('open');document.getElementById('backdrop').classList.add('open')}
+function closeTrain(){document.getElementById('train-panel').classList.remove('open');document.getElementById('backdrop').classList.remove('open')}
+function openChat(){document.getElementById('chat-modal').classList.add('open')}
+function closeChat(){document.getElementById('chat-modal').classList.remove('open')}
+function closeAll(){closeTrain()}
+function switchTp(id){
+  document.querySelectorAll('.tp-tab').forEach((b,i)=>{const ids=['sp','dc','bk','vd','in','lg'];b.classList.toggle('active',ids[i]===id)});
+  document.querySelectorAll('.tp-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tp-'+id).classList.add('active');
+}
+function rmTag(btn){btn.closest('.spec-tag').remove()}
+function addTag(e){
+  if(e.key!=='Enter')return;
+  const input=document.getElementById('tag-input');const val=input.value.trim();if(!val)return;
+  const wrap=document.getElementById('tags-wrap');
+  const tag=document.createElement('span');tag.className='spec-tag';
+  tag.innerHTML=val+' <span class="rm" onclick="rmTag(this)">×</span>';
+  wrap.insertBefore(tag,input);input.value='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeTrain();closeChat()}});
+</script>
+</body>
+</html>

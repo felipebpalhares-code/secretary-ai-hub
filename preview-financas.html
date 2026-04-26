@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Felipe Hub — Finanças</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+:root{
+  --bg:#f8fafc;--card:#fff;--ink:#0f172a;--ink-2:#475569;--ink-3:#94a3b8;--ink-4:#cbd5e1;
+  --hair:#e2e8f0;--hair-2:#f1f5f9;
+  --accent:#4f46e5;--accent-hover:#4338ca;--accent-soft:#eef2ff;
+  --ok:#10b981;--warn:#d97706;--err:#dc2626;
+  --shadow-sm:0 1px 3px rgba(15,23,42,.06);
+  --r-sm:8px;--r-md:10px;--r-lg:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;overflow:hidden;font-size:13.5px;letter-spacing:-.05px}
+button{font-family:inherit;letter-spacing:inherit}
+.mono{font-family:-apple-system-ui-monospace,"SF Mono",monospace;font-variant-numeric:tabular-nums}
+.icn{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.icn-sm{width:13px;height:13px}
+
+/* SIDEBAR */
+aside{width:236px;min-width:236px;background:#0f172a;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:18px 18px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-mark{width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+.sb-brand{font-size:14px;font-weight:700;color:#f1f5f9;letter-spacing:-.25px}
+.sb-tag{font-size:10px;color:#64748b;font-weight:500;margin-top:1px}
+nav{flex:1;padding:10px;overflow-y:auto}
+nav::-webkit-scrollbar{display:none}
+.nv-label{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.07em;padding:12px 12px 4px}
+.nv-item{display:flex;align-items:center;gap:11px;padding:8px 12px;border-radius:7px;color:#94a3b8;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:1px;transition:all .12s}
+.nv-item:hover{background:rgba(255,255,255,.04);color:#e2e8f0}
+.nv-item.active{background:rgba(79,70,229,.15);color:#e0e7ff}
+.nv-item svg{width:15px;height:15px;opacity:.9}
+.nv-count{margin-left:auto;font-size:10.5px;font-weight:600;color:#64748b;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.04)}
+.nv-count.alert{background:rgba(220,38,38,.2);color:#fca5a5}
+.sb-bottom{padding:10px;border-top:1px solid rgba(255,255,255,.06)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer}
+.sb-user-av{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.sb-user-n{font-size:12.5px;font-weight:600;color:#e2e8f0}
+.sb-user-r{font-size:10.5px;color:#64748b;margin-top:1px}
+
+/* MAIN */
+main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--hair);background:var(--card);flex-shrink:0}
+.tb-title{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.4px;line-height:1}
+.tb-sub{font-size:12px;color:var(--ink-3);margin-top:3px;font-weight:500}
+.tb-actions{display:flex;gap:6px}
+.btn-i{width:32px;height:32px;border-radius:7px;border:1px solid var(--hair);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-2)}
+.btn-i:hover{background:var(--bg);border-color:var(--ink-4)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid var(--hair);background:var(--card);color:var(--ink);transition:all .15s}
+.btn:hover{background:var(--bg);border-color:var(--ink-4)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+
+.hub{flex:1;display:flex;overflow:hidden;min-width:0}
+
+/* TREE PANEL */
+.tree-panel{width:284px;min-width:284px;background:var(--card);border-right:1px solid var(--hair);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.tp-hdr{padding:14px 14px 10px;flex-shrink:0;border-bottom:1px solid var(--hair)}
+.tp-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;letter-spacing:-.2px}
+.btn-new-ent{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--accent);color:#fff;font-size:11px;font-weight:600;border-radius:6px;border:none;cursor:pointer}
+.btn-new-ent svg{width:11px;height:11px}
+.tp-search{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--hair);border-radius:6px;padding:6px 10px}
+.tp-search svg{color:var(--ink-3);width:13px;height:13px}
+.tp-search input{border:none;background:none;flex:1;font-size:12px;outline:none;color:var(--ink);font-family:inherit}
+.tp-search input::placeholder{color:var(--ink-3)}
+
+.tp-tree{flex:1;overflow-y:auto;padding:6px 8px}
+.tp-tree::-webkit-scrollbar{width:3px}
+.tp-tree::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+.tr-section{margin:8px 0 4px;padding:0 10px;font-size:10px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
+
+.tn{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;cursor:pointer;color:var(--ink-2);font-size:12.5px;transition:background .1s;position:relative}
+.tn:hover{background:var(--bg)}
+.tn.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.tn-caret{width:12px;font-size:10px;color:var(--ink-3);flex-shrink:0;text-align:center;transition:transform .15s}
+.tn.expanded .tn-caret{transform:rotate(90deg)}
+.tn-ic{width:16px;text-align:center;font-size:12px;flex-shrink:0}
+.tn-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.tn.active .tn-name{font-weight:600}
+.tn-meta{font-size:10.5px;color:var(--ink-3);font-weight:500}
+.tn-bdg{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;text-transform:uppercase;letter-spacing:.03em;border:1px solid transparent}
+.bd-pf{background:var(--accent-soft);color:var(--accent);border-color:#c7d2fe}
+.bd-pj{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.bd-hold{background:#fffbeb;color:#92400e;border-color:#fde68a}
+.bd-obra{background:#fff7ed;color:#c2410c;border-color:#fed7aa}
+.bd-cc{background:var(--hair-2);color:var(--ink-3);border-color:var(--hair)}
+.bd-carta{background:#f3e8ff;color:#6d28d9;border-color:#e9d5ff}
+.bd-contemp{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.bd-lance{background:#fffbeb;color:#92400e;border-color:#fde68a}
+
+.tn-children{display:none;padding-left:18px;margin-left:5px;border-left:1px dashed var(--hair)}
+.tn-children.open{display:block}
+
+.tn-add{color:var(--accent);font-weight:500;font-size:11.5px;padding:6px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:5px;border:1px dashed transparent}
+.tn-add:hover{background:var(--accent-soft);border-color:#c7d2fe}
+.tn-add svg{width:11px;height:11px}
+
+/* CONTENT */
+.content-area{flex:1;overflow-y:auto;display:flex;flex-direction:column;min-width:0;background:var(--bg)}
+.content-area::-webkit-scrollbar{width:4px}
+.content-area::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+
+.ent-hdr{background:var(--card);padding:16px 22px;border-bottom:1px solid var(--hair)}
+.bread{font-size:11px;color:var(--ink-3);margin-bottom:6px;font-weight:500}
+.bread span.end{color:var(--ink);font-weight:600}
+.ent-row{display:flex;align-items:center;gap:14px}
+.ent-ic{width:44px;height:44px;border-radius:11px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.ent-name{font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.3px}
+.ent-sub{font-size:11.5px;color:var(--ink-2);margin-top:2px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:500}
+.ent-actions{margin-left:auto;display:flex;gap:6px}
+
+/* Phases */
+.phases-row{display:flex;gap:4px;margin-top:12px}
+.phase{flex:1;padding:7px 5px;border-radius:6px;text-align:center;font-size:10.5px;font-weight:700;letter-spacing:-.05px;border:1px solid transparent}
+.ph-done{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.ph-doing{background:#fffbeb;color:#92400e;border-color:#fcd34d}
+.ph-todo{background:var(--hair-2);color:var(--ink-3);border-color:var(--hair)}
+
+/* Stats row */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 22px 0}
+.stat-card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-md);padding:12px 14px;display:flex;flex-direction:column;gap:4px;border-left:3px solid var(--hair)}
+.stat-card.green{border-left-color:var(--ok)}
+.stat-card.red{border-left-color:var(--err)}
+.stat-card.amber{border-left-color:var(--warn)}
+.stat-card.indigo{border-left-color:var(--accent)}
+.stat-ttl{font-size:10.5px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em}
+.stat-val{font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.4px;font-variant-numeric:tabular-nums}
+.stat-sub{font-size:10.5px;color:var(--ink-2);font-weight:500}
+.stat-sub.up{color:var(--ok)}
+.stat-sub.down{color:var(--err)}
+
+/* Tabs */
+.tabs-row{display:flex;gap:0;padding:12px 22px 0;border-bottom:1px solid var(--hair);background:var(--card);margin-top:16px;overflow-x:auto}
+.tabs-row::-webkit-scrollbar{display:none}
+.tab-btn{padding:10px 13px;font-size:12px;font-weight:600;color:var(--ink-3);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:color .12s;letter-spacing:-.1px;display:flex;align-items:center;gap:5px}
+.tab-btn svg{width:13px;height:13px}
+.tab-btn:hover{color:var(--ink-2)}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+.cbody{padding:18px 22px;display:flex;flex-direction:column;gap:18px}
+
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sec-ttl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3)}
+.add-link{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;color:var(--accent);background:var(--accent-soft);border:1px solid #c7d2fe;padding:4px 10px;border-radius:6px;cursor:pointer}
+.add-link svg{width:11px;height:11px}
+
+/* Budget card */
+.budget-card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-md);padding:14px 16px}
+.bc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.bc-ttl{font-size:12.5px;font-weight:700;color:var(--ink);letter-spacing:-.15px;display:flex;align-items:center;gap:7px}
+.bc-ttl svg{width:14px;height:14px;color:var(--ink-2)}
+
+.cc-list{display:flex;flex-direction:column;gap:8px}
+.cc-item{padding:11px 13px;background:var(--bg);border:1px solid var(--hair);border-radius:var(--r-md)}
+.cc-row1{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.cc-ic{width:28px;height:28px;border-radius:7px;background:var(--card);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:var(--ink-2);flex-shrink:0}
+.cc-ic svg{width:13px;height:13px}
+.cc-name{font-size:12.5px;font-weight:700;color:var(--ink);flex:1;letter-spacing:-.15px}
+.cc-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.02em;border:1px solid transparent}
+.cc-tag.ok{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.cc-tag.warn{background:#fffbeb;color:#b45309;border-color:#fde68a}
+.cc-tag.bad{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.cc-row2{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;font-size:11px;align-items:center}
+.cc-col{display:flex;flex-direction:column;gap:1px}
+.cc-lbl{color:var(--ink-3);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.cc-val{color:var(--ink);font-weight:700;font-size:12.5px;font-variant-numeric:tabular-nums}
+.cc-val.red{color:var(--err)}
+.cc-val.green{color:var(--ok)}
+.cc-bar{height:4px;background:var(--hair);border-radius:99px;overflow:hidden;margin-top:7px}
+.cc-bar-fill{height:100%;border-radius:99px}
+.bf-ok{background:var(--ok)}
+.bf-warn{background:var(--warn)}
+.bf-bad{background:var(--err)}
+
+/* Banks */
+.banks-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.bank-card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-md);padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.bank-top{display:flex;align-items:center;gap:10px}
+.bank-ic{width:30px;height:30px;border-radius:7px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:var(--ink-2);flex-shrink:0}
+.bank-ic svg{width:14px;height:14px}
+.bank-name{font-size:12.5px;font-weight:700;color:var(--ink);letter-spacing:-.15px}
+.bank-sub{font-size:10.5px;color:var(--ink-3);font-family:-apple-system-ui-monospace,"SF Mono",monospace;font-weight:500}
+.bank-status{margin-left:auto;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:4px;letter-spacing:.02em;border:1px solid transparent}
+.bs-on{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.bs-sync{background:var(--accent-soft);color:var(--accent);border-color:#c7d2fe}
+.bank-bal{display:flex;align-items:baseline;gap:6px}
+.bb-v{font-size:16px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.bb-l{font-size:10px;color:var(--ink-3);font-weight:600}
+.bank-foot{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-3);font-weight:500}
+.bank-foot b{color:var(--ink);font-weight:700}
+
+/* Cartas */
+.carta-card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-md);padding:14px 16px;border-left:3px solid #6d28d9;margin-bottom:8px}
+.carta-card.contemp{border-left-color:var(--ok)}
+.carta-card.lance{border-left-color:var(--warn)}
+.ca-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ca-adm{width:30px;height:30px;border-radius:7px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:var(--ink-2);flex-shrink:0}
+.ca-adm svg{width:14px;height:14px}
+.ca-ttl{font-size:12.5px;font-weight:700;color:var(--ink);letter-spacing:-.15px}
+.ca-sub{font-size:10.5px;color:var(--ink-3);font-weight:500;margin-top:1px}
+.ca-st{margin-left:auto;font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:4px;border:1px solid transparent;letter-spacing:.02em}
+.cas-ativa{background:var(--accent-soft);color:var(--accent);border-color:#c7d2fe}
+.cas-lance{background:#fffbeb;color:#b45309;border-color:#fde68a}
+.cas-contemp{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.ca-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;font-size:11px}
+.ca-field{display:flex;flex-direction:column;gap:1px}
+.ca-lb{color:var(--ink-3);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.ca-v{color:var(--ink);font-weight:700;font-size:12.5px;font-variant-numeric:tabular-nums}
+.ca-v.big{font-size:14px;color:#6d28d9}
+.ca-progress{margin-top:10px}
+.ca-pf-row{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-3);margin-bottom:4px;font-weight:500}
+
+/* Planilhas */
+.plan-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.plan-card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-md);padding:12px 14px;cursor:pointer;transition:all .12s}
+.plan-card:hover{border-color:var(--ink-4);box-shadow:var(--shadow-sm)}
+.plan-ic{width:30px;height:36px;background:#ecfdf5;color:#047857;border-radius:5px;border:1px solid #a7f3d0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-bottom:8px;letter-spacing:.02em}
+.plan-name{font-size:12px;font-weight:700;color:var(--ink);letter-spacing:-.15px}
+.plan-meta{font-size:10.5px;color:var(--ink-3);margin-top:3px;display:flex;justify-content:space-between;font-weight:500}
+
+/* Lançamentos */
+.launches{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-md);overflow:hidden}
+.l-row{display:grid;grid-template-columns:64px 1fr 150px 100px 130px;gap:10px;padding:9px 14px;font-size:12px;align-items:center;border-bottom:1px solid var(--hair-2)}
+.l-row.head{background:var(--bg);font-size:10px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em}
+.l-row:last-child{border-bottom:none}
+.l-row:hover:not(.head){background:var(--bg)}
+.l-date{color:var(--ink-2);font-weight:600;font-size:11.5px}
+.l-desc{font-weight:700;color:var(--ink);letter-spacing:-.1px}
+.l-cc{font-size:10.5px;color:var(--ink-3);font-weight:500;margin-top:1px}
+.l-meta{font-size:11px;color:var(--ink-2);font-weight:500}
+.l-val{text-align:right;font-weight:700;font-family:-apple-system-ui-monospace,"SF Mono",monospace;font-variant-numeric:tabular-nums}
+.l-val.in{color:var(--ok)}
+.l-val.out{color:var(--err)}
+
+/* Ricardo alerts */
+.ric-alert{background:var(--card);border:1px solid var(--hair);border-left:3px solid var(--ok);border-radius:var(--r-md);padding:11px 14px;display:flex;gap:11px;align-items:flex-start;margin-bottom:8px}
+.ric-alert.warn{border-left-color:var(--warn)}
+.ric-alert.danger{border-left-color:var(--err)}
+.ra-av{width:28px;height:28px;border-radius:7px;background:#ecfdf5;color:var(--ok);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700}
+.ric-alert.warn .ra-av{background:#fffbeb;color:var(--warn)}
+.ric-alert.danger .ra-av{background:#fef2f2;color:var(--err)}
+.ra-body{flex:1}
+.ra-ttl{font-size:12px;font-weight:700;color:var(--ink);letter-spacing:-.1px}
+.ra-msg{font-size:11px;color:var(--ink-2);line-height:1.5;margin-top:2px;font-weight:500}
+
+.badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid transparent}
+.b-green{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.b-amber{background:#fffbeb;color:#b45309;border-color:#fde68a}
+.b-red{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="sb-logo"><div class="sb-mark">FH</div><div><div class="sb-brand">Felipe Hub</div><div class="sb-tag">Secretário Pessoal</div></div></div>
+  <nav>
+    <div class="nv-label">Principal</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Quem Sou Eu</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Painel</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>Agentes<span class="nv-count">8</span></div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Bater Papo<span class="nv-count alert">5</span></div>
+    <div class="nv-label">Produtividade</div>
+    <div class="nv-item active"><svg class="icn" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Finanças</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Contatos</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>Agenda</div>
+    <div class="nv-label">Organização</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/></svg>Bancos</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documentos</div>
+    <div class="nv-label">Sistema</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51"/></svg>Configurações</div>
+  </nav>
+  <div class="sb-bottom"><div class="sb-user"><div class="sb-user-av">F</div><div><div class="sb-user-n">Felipe Palhares</div><div class="sb-user-r">Administrador</div></div></div></div>
+</aside>
+
+<main>
+  <div class="top-bar">
+    <div><div class="tb-title">Finanças</div><div class="tb-sub">Controles paralelos · entidades + cartas de crédito</div></div>
+    <div class="tb-actions">
+      <button class="btn"><svg class="icn icn-sm" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Sincronizar</button>
+      <button class="btn btn-primary"><svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo lançamento</button>
+    </div>
+  </div>
+
+  <div class="hub">
+
+    <div class="tree-panel">
+      <div class="tp-hdr">
+        <div class="tp-title">Estrutura
+          <button class="btn-new-ent"><svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Entidade</button>
+        </div>
+        <div class="tp-search"><svg class="icn icn-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Buscar entidade, CC..."/></div>
+      </div>
+
+      <div class="tp-tree">
+        <div class="tr-section">Consolidado</div>
+        <div class="tn" onclick="selectNode(this)">
+          <span class="tn-caret">▸</span>
+          <span class="tn-ic">▦</span>
+          <span class="tn-name">Visão Geral</span>
+          <span class="tn-meta mono">R$ 3,2M</span>
+        </div>
+
+        <div class="tr-section">Pessoa Física</div>
+        <div class="tn expanded" onclick="toggleNode(this)">
+          <span class="tn-caret">▸</span>
+          <span class="tn-ic">●</span>
+          <span class="tn-name">Felipe Palhares</span>
+          <span class="tn-bdg bd-pf">PF</span>
+        </div>
+        <div class="tn-children open">
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Moradia</span><span class="tn-bdg bd-cc">CC</span></div>
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Família</span><span class="tn-bdg bd-cc">CC</span></div>
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Saúde</span><span class="tn-bdg bd-cc">CC</span></div>
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Lazer</span><span class="tn-bdg bd-cc">CC</span></div>
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Investimentos</span><span class="tn-bdg bd-cc">CC</span></div>
+          <div class="tn-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>novo CC</div>
+        </div>
+
+        <div class="tr-section">Empresas</div>
+        <div class="tn expanded" onclick="toggleNode(this)">
+          <span class="tn-caret">▸</span>
+          <span class="tn-ic">●</span>
+          <span class="tn-name">PalharesTech</span>
+          <span class="tn-bdg bd-pj">PJ</span>
+        </div>
+        <div class="tn-children open">
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Dev</span><span class="tn-bdg bd-cc">CC</span></div>
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Marketing</span><span class="tn-bdg bd-cc">CC</span></div>
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Vendas</span><span class="tn-bdg bd-cc">CC</span></div>
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Admin</span><span class="tn-bdg bd-cc">CC</span></div>
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Infra / Cloud</span><span class="tn-bdg bd-cc">CC</span></div>
+          <div class="tn-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>novo CC</div>
+        </div>
+
+        <div class="tn" onclick="toggleNode(this)">
+          <span class="tn-caret">▸</span>
+          <span class="tn-ic">●</span>
+          <span class="tn-name">Distribuidora Braz</span>
+          <span class="tn-bdg bd-pj">PJ</span>
+        </div>
+        <div class="tn-children">
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Logística</span><span class="tn-bdg bd-cc">CC</span></div>
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Armazém</span><span class="tn-bdg bd-cc">CC</span></div>
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Vendas</span><span class="tn-bdg bd-cc">CC</span></div>
+        </div>
+
+        <div class="tn-add" style="margin:2px 8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>nova empresa</div>
+
+        <div class="tr-section">Holding de Obras</div>
+        <div class="tn expanded" onclick="toggleNode(this)">
+          <span class="tn-caret">▸</span>
+          <span class="tn-ic">●</span>
+          <span class="tn-name">Vimar Empreendimentos</span>
+          <span class="tn-bdg bd-hold">HOLD</span>
+        </div>
+        <div class="tn-children open">
+          <div class="tn active" onclick="event.stopPropagation();selectNode(this)">
+            <span class="tn-ic">●</span><span class="tn-name">Bloco A · Residencial</span><span class="tn-bdg bd-obra">OBRA</span>
+          </div>
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Bloco B · Comercial SP</span><span class="tn-bdg bd-obra">OBRA</span></div>
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Bloco C · Condomínio</span><span class="tn-bdg bd-obra">OBRA</span></div>
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Bloco D · Praia</span><span class="tn-bdg bd-obra">OBRA</span></div>
+          <div class="tn-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>nova obra</div>
+        </div>
+
+        <div class="tr-section">Cartas de Crédito</div>
+        <div class="tn expanded" onclick="toggleNode(this)">
+          <span class="tn-caret">▸</span>
+          <span class="tn-ic">●</span>
+          <span class="tn-name">Consórcios ativos</span>
+          <span class="tn-meta">4</span>
+        </div>
+        <div class="tn-children open">
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Porto Seguro #8472</span><span class="tn-bdg bd-lance">LANCE</span></div>
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">BB Consórcio #1023</span><span class="tn-bdg bd-contemp">CONT</span></div>
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Itaú Imóveis #5501</span><span class="tn-bdg bd-carta">ATIVA</span></div>
+          <div class="tn"><span class="tn-ic">·</span><span class="tn-name">Bradesco Veículos #332</span><span class="tn-bdg bd-carta">ATIVA</span></div>
+          <div class="tn-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>nova carta</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-area">
+
+      <div class="ent-hdr">
+        <div class="bread">Finanças › Vimar › <span class="end">Obra Bloco A · Residencial</span></div>
+        <div class="ent-row">
+          <div class="ent-ic">🏠</div>
+          <div>
+            <div class="ent-name">Bloco A · Residencial Curitiba</div>
+            <div class="ent-sub">
+              <span>Av. Batel, 2341</span><span>·</span>
+              <span>Início 03/2024</span><span>·</span>
+              <span>Entrega 11/2026</span><span>·</span>
+              <span style="color:var(--warn);font-weight:700">67% concluída</span>
+            </div>
+          </div>
+          <div class="ent-actions">
+            <button class="btn">Editar</button>
+            <button class="btn">Relatório</button>
+            <button class="btn btn-primary">Novo CC</button>
+          </div>
+        </div>
+        <div class="phases-row">
+          <div class="phase ph-done">Projeto</div>
+          <div class="phase ph-done">Fundação</div>
+          <div class="phase ph-done">Estrutura</div>
+          <div class="phase ph-doing">Alvenaria</div>
+          <div class="phase ph-todo">Acabamento</div>
+          <div class="phase ph-todo">Entrega</div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-ttl">Orçado total</div><div class="stat-val">R$ 4,2M</div><div class="stat-sub">24 meses de obra</div></div>
+        <div class="stat-card amber"><div class="stat-ttl">Realizado</div><div class="stat-val">R$ 2,82M</div><div class="stat-sub down">+8% acima do previsto (67%)</div></div>
+        <div class="stat-card green"><div class="stat-ttl">Vendas unidades</div><div class="stat-val">R$ 3,1M</div><div class="stat-sub up">12 de 18 unidades</div></div>
+        <div class="stat-card red"><div class="stat-ttl">Desvio</div><div class="stat-val">+R$ 208k</div><div class="stat-sub down">material acima · empreiteiro</div></div>
+      </div>
+
+      <div class="tabs-row">
+        <button class="tab-btn active">Visão Geral</button>
+        <button class="tab-btn">Centros de Custo</button>
+        <button class="tab-btn">Bancos</button>
+        <button class="tab-btn">Lançamentos</button>
+        <button class="tab-btn">Planilhas</button>
+        <button class="tab-btn">Fornecedores</button>
+        <button class="tab-btn">Unidades</button>
+      </div>
+
+      <div class="cbody">
+
+        <div>
+          <div class="sec-hdr"><span class="sec-ttl">Alertas do Ricardo · CFO</span></div>
+          <div class="ric-alert danger">
+            <div class="ra-av">!</div>
+            <div class="ra-body"><div class="ra-ttl">CC "Material" 12% acima (R$ +96k)</div><div class="ra-msg">Aumento concentrado em aço e cimento (+14% vs 03/2026). Engenheiro recomenda renegociar com Siderúrgica SP. Agendar reunião?</div></div>
+          </div>
+          <div class="ric-alert warn">
+            <div class="ra-av">!</div>
+            <div class="ra-body"><div class="ra-ttl">3 boletos da obra vencem esta semana · R$ 84.200</div><div class="ra-msg">ArtCasa R$32k · Hidráulica Sul R$18k · Empreiteiro R$34k. Fluxo OK · posso agendar?</div></div>
+          </div>
+          <div class="ric-alert">
+            <div class="ra-av">✓</div>
+            <div class="ra-body"><div class="ra-ttl">Venda 2 unidades confirmada · entrada R$ 180k</div><div class="ra-msg">401 e 703 vendidas este mês. Saldo Vimar: R$ 487.000.</div></div>
+          </div>
+        </div>
+
+        <div class="budget-card">
+          <div class="bc-head">
+            <div class="bc-ttl"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Centros de custo · Orçado × Realizado</div>
+            <button class="add-link"><svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo CC</button>
+          </div>
+          <div class="cc-list">
+
+            <div class="cc-item">
+              <div class="cc-row1">
+                <div class="cc-ic"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>
+                <div class="cc-name">Material (aço, cimento, tijolo)</div>
+                <span class="cc-tag bad">+12% acima</span>
+              </div>
+              <div class="cc-row2">
+                <div class="cc-col"><span class="cc-lbl">Orçado</span><span class="cc-val mono">R$ 800.000</span></div>
+                <div class="cc-col"><span class="cc-lbl">Realizado</span><span class="cc-val red mono">R$ 896.200</span></div>
+                <div class="cc-col"><span class="cc-lbl">Diferença</span><span class="cc-val red mono">+R$ 96.200</span></div>
+                <div class="cc-col" style="text-align:right"><span class="cc-lbl">%</span><span class="cc-val mono">112%</span></div>
+              </div>
+              <div class="cc-bar"><div class="cc-bar-fill bf-bad" style="width:100%"></div></div>
+            </div>
+
+            <div class="cc-item">
+              <div class="cc-row1">
+                <div class="cc-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+                <div class="cc-name">Mão de obra / empreiteiro</div>
+                <span class="cc-tag warn">+4% acima</span>
+              </div>
+              <div class="cc-row2">
+                <div class="cc-col"><span class="cc-lbl">Orçado</span><span class="cc-val mono">R$ 1.100.000</span></div>
+                <div class="cc-col"><span class="cc-lbl">Realizado</span><span class="cc-val mono">R$ 1.144.000</span></div>
+                <div class="cc-col"><span class="cc-lbl">Diferença</span><span class="cc-val red mono">+R$ 44.000</span></div>
+                <div class="cc-col" style="text-align:right"><span class="cc-lbl">%</span><span class="cc-val mono">104%</span></div>
+              </div>
+              <div class="cc-bar"><div class="cc-bar-fill bf-warn" style="width:100%"></div></div>
+            </div>
+
+            <div class="cc-item">
+              <div class="cc-row1">
+                <div class="cc-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+                <div class="cc-name">Projetos e engenharia</div>
+                <span class="cc-tag ok">Dentro</span>
+              </div>
+              <div class="cc-row2">
+                <div class="cc-col"><span class="cc-lbl">Orçado</span><span class="cc-val mono">R$ 280.000</span></div>
+                <div class="cc-col"><span class="cc-lbl">Realizado</span><span class="cc-val green mono">R$ 268.000</span></div>
+                <div class="cc-col"><span class="cc-lbl">Diferença</span><span class="cc-val green mono">-R$ 12.000</span></div>
+                <div class="cc-col" style="text-align:right"><span class="cc-lbl">%</span><span class="cc-val mono">96%</span></div>
+              </div>
+              <div class="cc-bar"><div class="cc-bar-fill bf-ok" style="width:96%"></div></div>
+            </div>
+
+            <div class="cc-item">
+              <div class="cc-row1">
+                <div class="cc-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/></svg></div>
+                <div class="cc-name">Equipamentos e locações</div>
+                <span class="cc-tag ok">Dentro</span>
+              </div>
+              <div class="cc-row2">
+                <div class="cc-col"><span class="cc-lbl">Orçado</span><span class="cc-val mono">R$ 340.000</span></div>
+                <div class="cc-col"><span class="cc-lbl">Realizado</span><span class="cc-val mono">R$ 241.000</span></div>
+                <div class="cc-col"><span class="cc-lbl">Diferença</span><span class="cc-val green mono">-R$ 99.000</span></div>
+                <div class="cc-col" style="text-align:right"><span class="cc-lbl">%</span><span class="cc-val mono">71%</span></div>
+              </div>
+              <div class="cc-bar"><div class="cc-bar-fill bf-ok" style="width:71%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sec-hdr"><span class="sec-ttl">Contas conectadas · Pluggy Open Finance</span><button class="add-link"><svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Conectar</button></div>
+          <div class="banks-row">
+            <div class="bank-card">
+              <div class="bank-top">
+                <div class="bank-ic"><svg class="icn" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/></svg></div>
+                <div><div class="bank-name">Itaú PJ · Vimar</div><div class="bank-sub">Ag 0001 · CC 45678-9</div></div>
+                <span class="bank-status bs-on">Sync</span>
+              </div>
+              <div class="bank-bal"><span class="bb-v mono">R$ 487.320</span><span class="bb-l">saldo</span></div>
+              <div class="bank-foot"><span>Último sync <b>2 min</b></span><span>12 lanç hoje</span></div>
+            </div>
+            <div class="bank-card">
+              <div class="bank-top">
+                <div class="bank-ic"><svg class="icn" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/></svg></div>
+                <div><div class="bank-name">Bradesco PJ · Obras</div><div class="bank-sub">Ag 0567 · CC 12345-0</div></div>
+                <span class="bank-status bs-on">Sync</span>
+              </div>
+              <div class="bank-bal"><span class="bb-v mono">R$ 182.100</span><span class="bb-l">saldo</span></div>
+              <div class="bank-foot"><span>Último sync <b>4 min</b></span><span>4 lanç hoje</span></div>
+            </div>
+            <div class="bank-card">
+              <div class="bank-top">
+                <div class="bank-ic"><svg class="icn" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/></svg></div>
+                <div><div class="bank-name">BB PJ · Poupança</div><div class="bank-sub">Ag 3214 · CP 98765-2</div></div>
+                <span class="bank-status bs-sync">Sync...</span>
+              </div>
+              <div class="bank-bal"><span class="bb-v mono">R$ 64.500</span><span class="bb-l">saldo</span></div>
+              <div class="bank-foot"><span>Último sync <b>12h</b></span><span>0 lanç hoje</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sec-hdr"><span class="sec-ttl">Cartas de crédito · consórcios</span><button class="add-link"><svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nova</button></div>
+
+          <div class="carta-card lance">
+            <div class="ca-top">
+              <div class="ca-adm"><svg class="icn" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/></svg></div>
+              <div><div class="ca-ttl">Porto Seguro · Imóveis</div><div class="ca-sub">Grupo 8472 · Cota 023</div></div>
+              <span class="ca-st cas-lance">Em lance</span>
+            </div>
+            <div class="ca-grid">
+              <div class="ca-field"><span class="ca-lb">Valor</span><span class="ca-v big mono">R$ 600.000</span></div>
+              <div class="ca-field"><span class="ca-lb">Parcela</span><span class="ca-v mono">R$ 3.870/mês</span></div>
+              <div class="ca-field"><span class="ca-lb">Já pago</span><span class="ca-v mono">R$ 147.060 (38%)</span></div>
+              <div class="ca-field"><span class="ca-lb">Uso</span><span class="ca-v">Terreno Obra E</span></div>
+            </div>
+            <div class="ca-progress">
+              <div class="ca-pf-row"><span>38 de 100 parcelas</span><span>Próx assembleia 15/05</span></div>
+              <div class="cc-bar"><div class="cc-bar-fill bf-warn" style="width:38%"></div></div>
+            </div>
+          </div>
+
+          <div class="carta-card contemp">
+            <div class="ca-top">
+              <div class="ca-adm"><svg class="icn" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/></svg></div>
+              <div><div class="ca-ttl">BB Consórcio · Imóveis</div><div class="ca-sub">Grupo 1023 · Cota 087</div></div>
+              <span class="ca-st cas-contemp">Contemplada</span>
+            </div>
+            <div class="ca-grid">
+              <div class="ca-field"><span class="ca-lb">Valor</span><span class="ca-v big mono">R$ 450.000</span></div>
+              <div class="ca-field"><span class="ca-lb">Contemplada</span><span class="ca-v">12/03/2026</span></div>
+              <div class="ca-field"><span class="ca-lb">Usada em</span><span class="ca-v">Obra Bloco A</span></div>
+              <div class="ca-field"><span class="ca-lb">Saldo devedor</span><span class="ca-v mono" style="color:var(--err)">R$ 198.200</span></div>
+            </div>
+          </div>
+
+          <div class="carta-card">
+            <div class="ca-top">
+              <div class="ca-adm"><svg class="icn" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/></svg></div>
+              <div><div class="ca-ttl">Itaú · Imóveis Premium</div><div class="ca-sub">Grupo 5501 · Cota 014</div></div>
+              <span class="ca-st cas-ativa">Ativa</span>
+            </div>
+            <div class="ca-grid">
+              <div class="ca-field"><span class="ca-lb">Valor</span><span class="ca-v big mono">R$ 800.000</span></div>
+              <div class="ca-field"><span class="ca-lb">Parcela</span><span class="ca-v mono">R$ 4.920/mês</span></div>
+              <div class="ca-field"><span class="ca-lb">Já pago</span><span class="ca-v mono">R$ 59.040 (8%)</span></div>
+              <div class="ca-field"><span class="ca-lb">Uso</span><span class="ca-v">Obra Bloco F</span></div>
+            </div>
+            <div class="ca-progress">
+              <div class="ca-pf-row"><span>12 de 150 parcelas</span><span>Próx 22/05</span></div>
+              <div class="cc-bar"><div class="cc-bar-fill bf-ok" style="width:8%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sec-hdr"><span class="sec-ttl">Últimos lançamentos</span><button class="add-link">Ver todos (247)</button></div>
+          <div class="launches">
+            <div class="l-row head"><div>Data</div><div>Descrição</div><div>Centro</div><div>Banco</div><div>Valor</div></div>
+            <div class="l-row">
+              <div class="l-date">23/04</div>
+              <div><div class="l-desc">Venda Unidade 401 · entrada</div><div class="l-cc">Receita de vendas</div></div>
+              <div class="l-meta">Receita / Unidades</div>
+              <div class="l-meta">Itaú PJ</div>
+              <div class="l-val in">+R$ 90.000</div>
+            </div>
+            <div class="l-row">
+              <div class="l-date">23/04</div>
+              <div><div class="l-desc">Siderúrgica SP · aço CA-50</div><div class="l-cc">NF 87234 · 1,2t</div></div>
+              <div class="l-meta">Material</div>
+              <div class="l-meta">Itaú PJ</div>
+              <div class="l-val out">-R$ 24.800</div>
+            </div>
+            <div class="l-row">
+              <div class="l-date">22/04</div>
+              <div><div class="l-desc">Empreiteiro · folha quinzenal</div><div class="l-cc">18 colaboradores</div></div>
+              <div class="l-meta">Mão de obra</div>
+              <div class="l-meta">Bradesco PJ</div>
+              <div class="l-val out">-R$ 34.200</div>
+            </div>
+            <div class="l-row">
+              <div class="l-date">22/04</div>
+              <div><div class="l-desc">Venda Unidade 703 · entrada</div><div class="l-cc">Receita de vendas</div></div>
+              <div class="l-meta">Receita / Unidades</div>
+              <div class="l-meta">Itaú PJ</div>
+              <div class="l-val in">+R$ 90.000</div>
+            </div>
+            <div class="l-row">
+              <div class="l-date">20/04</div>
+              <div><div class="l-desc">ArtCasa · esquadrias alumínio</div><div class="l-cc">NF 4421</div></div>
+              <div class="l-meta">Material</div>
+              <div class="l-meta">Itaú PJ</div>
+              <div class="l-val out">-R$ 32.400</div>
+            </div>
+            <div class="l-row">
+              <div class="l-date">19/04</div>
+              <div><div class="l-desc">Parcela consórcio Porto</div><div class="l-cc">Grupo 8472</div></div>
+              <div class="l-meta">Carta de crédito</div>
+              <div class="l-meta">Itaú PJ</div>
+              <div class="l-val out">-R$ 3.870</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sec-hdr"><span class="sec-ttl">Planilhas geradas pelo Ricardo</span><button class="add-link"><svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Gerar</button></div>
+          <div class="plan-row">
+            <div class="plan-card"><div class="plan-ic">XLS</div><div class="plan-name">Fluxo_Caixa_Bloco_A_Abril.xlsx</div><div class="plan-meta"><span>247 lanç</span><span>há 2h</span></div></div>
+            <div class="plan-card"><div class="plan-ic">XLS</div><div class="plan-name">Orcado_vs_Realizado_Bloco_A.xlsx</div><div class="plan-meta"><span>5 CCs</span><span>ontem</span></div></div>
+            <div class="plan-card"><div class="plan-ic">XLS</div><div class="plan-name">Patrimonio_Consolidado_2026.xlsx</div><div class="plan-meta"><span>Todas</span><span>3d atrás</span></div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+function toggleNode(el){
+  const children = el.nextElementSibling;
+  if(!children || !children.classList.contains('tn-children')) return;
+  children.classList.toggle('open');
+  el.classList.toggle('expanded');
+}
+function selectNode(el){
+  document.querySelectorAll('.tn').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+}
+document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', function(){
+  document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+  this.classList.add('active');
+}));
+</script>
+</body>
+</html>

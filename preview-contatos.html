@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Felipe Hub — Contatos</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+:root{
+  --bg:#f8fafc;
+  --card:#fff;
+  --ink:#0f172a;
+  --ink-2:#475569;
+  --ink-3:#94a3b8;
+  --ink-4:#cbd5e1;
+  --hair:#e2e8f0;
+  --hair-2:#f1f5f9;
+  --accent:#4f46e5;
+  --accent-hover:#4338ca;
+  --accent-soft:#eef2ff;
+  --ok:#10b981;
+  --warn:#d97706;
+  --err:#dc2626;
+  --shadow-xs:0 1px 2px rgba(15,23,42,.04);
+  --shadow-sm:0 1px 3px rgba(15,23,42,.06);
+  --r-sm:8px; --r-md:10px; --r-lg:12px; --r-xl:16px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;overflow:hidden;font-size:13.5px;letter-spacing:-.05px;font-feature-settings:"ss01","cv11"}
+button{font-family:inherit;letter-spacing:inherit}
+
+/* SVG inline helper */
+.icn{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.icn-sm{width:14px;height:14px}
+.icn-lg{width:20px;height:20px}
+
+/* ── SIDEBAR ── */
+aside{width:236px;min-width:236px;background:#0f172a;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:18px 18px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-mark{width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;letter-spacing:-.3px}
+.sb-brand{font-size:14px;font-weight:700;color:#f1f5f9;letter-spacing:-.25px;line-height:1.1}
+.sb-tag{font-size:10px;color:#64748b;font-weight:500;margin-top:1px;letter-spacing:.02em}
+
+nav{flex:1;padding:10px 10px;overflow-y:auto}
+nav::-webkit-scrollbar{display:none}
+.nv-label{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.07em;padding:12px 12px 4px}
+.nv-item{display:flex;align-items:center;gap:11px;padding:8px 12px;border-radius:7px;color:#94a3b8;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:1px;transition:background .12s,color .12s;letter-spacing:-.1px}
+.nv-item:hover{background:rgba(255,255,255,.04);color:#e2e8f0}
+.nv-item.active{background:rgba(79,70,229,.15);color:#e0e7ff}
+.nv-item svg{width:15px;height:15px;opacity:.9}
+.nv-count{margin-left:auto;font-size:10.5px;font-weight:600;color:#64748b;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.04)}
+.nv-count.alert{background:rgba(220,38,38,.2);color:#fca5a5}
+.nv-count.notice{background:rgba(217,119,6,.2);color:#fcd34d}
+
+.sb-bottom{padding:10px;border-top:1px solid rgba(255,255,255,.06)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .12s}
+.sb-user:hover{background:rgba(255,255,255,.04)}
+.sb-user-av{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.sb-user-n{font-size:12.5px;font-weight:600;color:#e2e8f0;letter-spacing:-.1px}
+.sb-user-r{font-size:10.5px;color:#64748b;font-weight:500;margin-top:1px}
+
+/* ── MAIN ── */
+main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--hair);background:var(--card);flex-shrink:0}
+.tb-title{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.4px;line-height:1}
+.tb-sub{font-size:12px;color:var(--ink-3);margin-top:3px;font-weight:500}
+.tb-actions{display:flex;align-items:center;gap:6px}
+.btn-i{width:32px;height:32px;border-radius:7px;border:1px solid var(--hair);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-2);transition:all .15s}
+.btn-i:hover{background:var(--bg);color:var(--ink);border-color:var(--ink-4)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid var(--hair);background:var(--card);color:var(--ink);transition:all .15s;letter-spacing:-.1px}
+.btn:hover{background:var(--bg);border-color:var(--ink-4)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+
+/* ── HUB ── */
+.hub{flex:1;display:flex;overflow:hidden;min-width:0}
+
+/* ═══ LEFT PANEL ═══ */
+.filter-panel{width:240px;min-width:240px;background:var(--card);border-right:1px solid var(--hair);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.fp-hdr{padding:14px 14px 10px;flex-shrink:0;border-bottom:1px solid var(--hair-2)}
+.fp-title{font-size:12px;font-weight:700;color:var(--ink-2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.fp-search{display:flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--hair);border-radius:6px;padding:6px 10px;transition:all .15s}
+.fp-search:focus-within{border-color:var(--accent);background:#fff}
+.fp-search svg{color:var(--ink-3);width:13px;height:13px}
+.fp-search input{border:none;background:none;flex:1;font-size:12.5px;outline:none;color:var(--ink);font-family:inherit;letter-spacing:-.1px}
+.fp-search input::placeholder{color:var(--ink-3)}
+
+.fp-body{flex:1;overflow-y:auto;padding:8px 8px 14px}
+.fp-body::-webkit-scrollbar{width:4px}
+.fp-body::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+
+.fp-sec{margin:14px 0 6px;padding:0 8px;font-size:10px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.07em;display:flex;justify-content:space-between;align-items:center}
+.fp-sec .add{width:18px;height:18px;border-radius:5px;border:1px solid var(--hair);background:#fff;color:var(--ink-2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s}
+.fp-sec .add:hover{border-color:var(--accent);color:var(--accent)}
+
+.fp-item{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--ink-2);transition:background .12s;margin-bottom:1px;font-weight:500}
+.fp-item:hover{background:var(--bg)}
+.fp-item.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.fp-item svg{width:14px;height:14px;flex-shrink:0;color:var(--ink-3)}
+.fp-item.active svg{color:var(--accent)}
+.fp-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fp-count{font-size:10.5px;color:var(--ink-3);font-weight:600;padding:1px 6px;border-radius:999px;background:var(--hair-2);letter-spacing:-.05px}
+.fp-item.active .fp-count{background:#fff;color:var(--accent)}
+
+.fp-sub{padding-left:7px;margin:1px 0 4px 20px;display:none;border-left:1px solid var(--hair)}
+.fp-sub.open{display:block}
+
+.dot-sq{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* ═══ CENTER ═══ */
+.center-col{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:16px;min-width:0;padding:18px 24px}
+.center-col::-webkit-scrollbar{width:4px}
+.center-col::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+
+/* Search row */
+.search-row{display:flex;gap:8px;align-items:center}
+.search-main{flex:1;display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--hair);border-radius:8px;padding:9px 14px;transition:all .15s}
+.search-main:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,.08)}
+.search-main svg{color:var(--ink-3);width:15px;height:15px}
+.search-main input{flex:1;border:none;background:none;font-size:13px;outline:none;color:var(--ink);font-family:inherit;letter-spacing:-.1px}
+.search-main input::placeholder{color:var(--ink-3)}
+.kbd{font-size:10px;color:var(--ink-3);background:var(--bg);border:1px solid var(--hair);padding:2px 6px;border-radius:4px;font-weight:600;font-family:-apple-system-ui-monospace,"SF Mono",monospace}
+
+.view-switch{display:flex;gap:0;background:var(--card);border:1px solid var(--hair);border-radius:7px;padding:2px}
+.vs{padding:6px 10px;border-radius:5px;border:none;background:transparent;font-size:12px;font-weight:600;color:var(--ink-3);cursor:pointer;letter-spacing:-.1px;transition:all .12s;display:flex;align-items:center;gap:4px}
+.vs.active{background:var(--bg);color:var(--ink)}
+.vs svg{width:13px;height:13px}
+
+/* Filter chips */
+.chip-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip-label{font-size:10.5px;color:var(--ink-3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-right:4px}
+.chip{padding:5px 11px;border-radius:999px;border:1px solid var(--hair);background:var(--card);font-size:12px;font-weight:600;color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .12s;letter-spacing:-.1px}
+.chip:hover{border-color:var(--ink-4)}
+.chip.active{background:var(--accent-soft);border-color:#c7d2fe;color:var(--accent)}
+.chip svg{width:12px;height:12px}
+.chip .x{font-size:13px;line-height:1;opacity:.7}
+
+/* Highlight card (birthdays) */
+.notice-card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-lg);padding:14px 18px;display:flex;gap:14px;align-items:center}
+.notice-ic{width:36px;height:36px;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notice-ic svg{width:17px;height:17px}
+.notice-body{flex:1}
+.notice-ttl{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:-.15px}
+.notice-sub{font-size:11.5px;color:var(--ink-2);margin-top:2px;font-weight:500}
+.notice-actions{display:flex;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 5px;border-radius:999px;background:var(--bg);border:1px solid var(--hair);font-size:11.5px;font-weight:600;color:var(--ink);cursor:pointer;transition:all .12s;letter-spacing:-.1px}
+.pill:hover{border-color:var(--ink-4)}
+.pill-av{width:20px;height:20px;border-radius:50%;background:var(--ink-2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+
+/* Section headers */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 2px}
+.sec-ttl{font-size:13.5px;font-weight:700;color:var(--ink);letter-spacing:-.25px;display:flex;align-items:center;gap:8px}
+.sec-cnt{font-size:11px;color:var(--ink-3);font-weight:600;padding:1px 7px;border-radius:999px;background:var(--hair-2)}
+.sec-link{font-size:11.5px;font-weight:600;color:var(--accent);cursor:pointer;background:none;border:none;letter-spacing:-.1px;display:inline-flex;align-items:center;gap:3px}
+.sec-link:hover{color:var(--accent-hover)}
+
+/* ═══ CONTACT CARDS ═══ */
+.contacts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.c-card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-lg);padding:12px 14px;cursor:pointer;display:flex;gap:12px;align-items:center;transition:all .15s;position:relative}
+.c-card:hover{border-color:var(--ink-4);box-shadow:var(--shadow-sm)}
+.c-card.selected{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 3px rgba(79,70,229,.08)}
+
+.c-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;position:relative;letter-spacing:-.2px}
+.c-av::after{content:"";position:absolute;bottom:-1px;right:-1px;width:11px;height:11px;border-radius:50%;border:2px solid var(--card)}
+.c-card.selected .c-av::after{border-color:var(--accent-soft)}
+.c-av.on::after{background:var(--ok)}
+.c-av.off::after{background:var(--ink-4)}
+
+.c-body{flex:1;min-width:0}
+.c-name{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:-.2px;display:flex;align-items:center;gap:4px}
+.c-name .star{color:var(--warn);font-size:10px}
+.c-role{font-size:11.5px;color:var(--ink-2);margin-top:1px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.05px}
+.c-tags{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.ctag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;letter-spacing:.01em;border:1px solid transparent}
+.ct-neutral{background:var(--hair-2);color:var(--ink-2);border-color:var(--hair)}
+.ct-indigo{background:var(--accent-soft);color:var(--accent);border-color:#c7d2fe}
+.ct-green{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.ct-amber{background:#fffbeb;color:#b45309;border-color:#fde68a}
+.ct-red{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.c-last{font-size:10.5px;color:var(--ink-3);display:flex;align-items:center;gap:4px;margin-top:5px;font-weight:500}
+.c-last svg{width:11px;height:11px}
+
+.c-actions{display:flex;gap:4px;flex-shrink:0}
+.c-ab{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;border:1px solid var(--hair);background:var(--card);cursor:pointer;transition:all .12s;color:var(--ink-2)}
+.c-ab:hover{border-color:var(--ink-4);color:var(--ink)}
+.c-ab svg{width:13px;height:13px}
+
+/* Avatar colors — neutral slate palette */
+.av-slate{background:#334155}
+.av-slate-2{background:#475569}
+.av-slate-3{background:#64748b}
+.av-slate-4{background:#94a3b8}
+.av-indigo{background:#4f46e5}
+.av-indigo-2{background:#4338ca}
+.av-emerald{background:#10b981}
+.av-emerald-2{background:#059669}
+.av-zinc{background:#52525b}
+.av-zinc-2{background:#3f3f46}
+
+/* ═══ RIGHT DETAIL ═══ */
+.detail-col{width:340px;min-width:340px;background:var(--card);border-left:1px solid var(--hair);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+
+.dc-hero{position:relative;padding:24px 20px 18px;border-bottom:1px solid var(--hair);display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:var(--bg)}
+.dc-close{position:absolute;top:12px;right:12px;width:26px;height:26px;border-radius:6px;border:1px solid var(--hair);background:#fff;cursor:pointer;color:var(--ink-2);display:flex;align-items:center;justify-content:center;transition:all .12s}
+.dc-close:hover{border-color:var(--ink-4);color:var(--ink)}
+.dc-close svg{width:13px;height:13px}
+
+.dc-av-xl{width:70px;height:70px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#fff;letter-spacing:-.4px}
+.dc-name{font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.3px;margin-top:6px;display:flex;align-items:center;gap:6px}
+.dc-role{font-size:12px;color:var(--ink-2);font-weight:500;letter-spacing:-.05px}
+
+.dc-quick{display:flex;gap:5px;margin-top:10px;width:100%}
+.dc-q{flex:1;padding:8px;border-radius:7px;border:1px solid var(--hair);background:#fff;font-size:11.5px;font-weight:600;color:var(--ink);cursor:pointer;transition:all .12s;letter-spacing:-.1px;display:flex;align-items:center;justify-content:center;gap:5px}
+.dc-q:hover{border-color:var(--ink-4)}
+.dc-q svg{width:13px;height:13px}
+.dc-q.prim{background:var(--accent);color:#fff;border-color:var(--accent)}
+.dc-q.prim:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+
+.dc-body{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:18px}
+.dc-body::-webkit-scrollbar{width:4px}
+.dc-body::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+
+.dc-sec-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin-bottom:6px}
+
+.info-list{display:flex;flex-direction:column;gap:0}
+.info-row{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:12.5px;border-bottom:1px solid var(--hair-2)}
+.info-row:last-child{border-bottom:none}
+.info-ic{width:14px;color:var(--ink-3);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.info-ic svg{width:13px;height:13px}
+.info-lb{color:var(--ink-3);font-size:11px;width:72px;flex-shrink:0;font-weight:500}
+.info-val{color:var(--ink);font-weight:600;flex:1;word-break:break-word;letter-spacing:-.1px}
+.info-val.urgent{color:var(--err)}
+.copy-b{background:none;border:none;padding:3px;border-radius:4px;color:var(--ink-3);cursor:pointer;transition:color .12s}
+.copy-b:hover{color:var(--accent)}
+.copy-b svg{width:12px;height:12px}
+
+.tags-row{display:flex;flex-wrap:wrap;gap:4px}
+.ctag.add{background:var(--card);border:1px dashed var(--hair);color:var(--ink-3);cursor:pointer}
+.ctag.add:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Timeline */
+.tl-item{display:flex;gap:10px;padding:9px 0;font-size:12px;border-bottom:1px solid var(--hair-2);cursor:pointer;transition:background .12s}
+.tl-item:last-child{border-bottom:none}
+.tl-item:hover{background:var(--bg);margin:0 -10px;padding:9px 10px;border-radius:6px}
+.tl-ic{width:28px;height:28px;border-radius:6px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--ink-2)}
+.tl-ic svg{width:13px;height:13px}
+.tl-body{flex:1;min-width:0}
+.tl-ttl{font-weight:600;color:var(--ink);font-size:12px;letter-spacing:-.1px}
+.tl-sub{color:var(--ink-2);font-size:11px;margin-top:1px;line-height:1.4;font-weight:500}
+.tl-time{color:var(--ink-3);font-size:10.5px;margin-top:3px;font-weight:500}
+
+/* Links */
+.link-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--hair);border-radius:8px;font-size:12px;cursor:pointer;transition:all .12s;margin-bottom:5px;background:#fff}
+.link-item:hover{border-color:var(--accent);background:var(--accent-soft)}
+.link-ic{width:26px;height:26px;border-radius:6px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--ink-2)}
+.link-ic svg{width:13px;height:13px}
+.link-n{flex:1;font-weight:600;color:var(--ink);letter-spacing:-.1px}
+.link-m{font-size:10.5px;color:var(--ink-3);margin-top:1px;font-weight:500}
+.link-arr{color:var(--ink-4)}
+.link-arr svg{width:13px;height:13px}
+
+/* Agent card */
+.agent-card{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--bg);border:1px solid var(--hair);border-radius:8px}
+.agent-av{width:32px;height:32px;border-radius:8px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.agent-n{font-weight:700;color:var(--ink);font-size:12.5px;letter-spacing:-.15px}
+.agent-r{font-size:11px;color:var(--ink-2);margin-top:1px;font-weight:500;line-height:1.5}
+
+/* Notes */
+.notes-box{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;font-size:12px;color:#78350f;line-height:1.55;font-weight:500}
+.notes-lb{font-size:10px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+</style>
+</head>
+<body>
+
+<!-- ════ SIDEBAR ════ -->
+<aside>
+  <div class="sb-logo">
+    <div class="sb-mark">FH</div>
+    <div><div class="sb-brand">Felipe Hub</div><div class="sb-tag">Secretário Pessoal</div></div>
+  </div>
+  <nav>
+    <div class="nv-label">Principal</div>
+    <div class="nv-item">
+      <svg class="icn" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Quem Sou Eu
+    </div>
+    <div class="nv-item">
+      <svg class="icn" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Painel
+    </div>
+    <div class="nv-item">
+      <svg class="icn" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>
+      Agentes<span class="nv-count">8</span>
+    </div>
+    <div class="nv-item">
+      <svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Bater Papo<span class="nv-count alert">5</span>
+    </div>
+
+    <div class="nv-label">Produtividade</div>
+    <div class="nv-item">
+      <svg class="icn" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Finanças
+    </div>
+    <div class="nv-item active">
+      <svg class="icn" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Contatos<span class="nv-count notice">2</span>
+    </div>
+    <div class="nv-item">
+      <svg class="icn" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Agenda
+    </div>
+
+    <div class="nv-label">Organização</div>
+    <div class="nv-item">
+      <svg class="icn" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/><line x1="4" y1="10" x2="4" y2="21"/><line x1="20" y1="10" x2="20" y2="21"/><line x1="8" y1="14" x2="8" y2="17"/><line x1="12" y1="14" x2="12" y2="17"/><line x1="16" y1="14" x2="16" y2="17"/></svg>
+      Bancos
+    </div>
+    <div class="nv-item">
+      <svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Documentos
+    </div>
+
+    <div class="nv-label">Sistema</div>
+    <div class="nv-item">
+      <svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Configurações
+    </div>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-user">
+      <div class="sb-user-av">F</div>
+      <div><div class="sb-user-n">Felipe Palhares</div><div class="sb-user-r">Administrador</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ════ MAIN ════ -->
+<main>
+
+  <div class="top-bar">
+    <div>
+      <div class="tb-title">Contatos</div>
+      <div class="tb-sub">247 contatos na rede</div>
+    </div>
+    <div class="tb-actions">
+      <button class="btn-i" title="Buscar">
+        <svg class="icn icn-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <button class="btn">
+        <svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Importar
+      </button>
+      <button class="btn">
+        <svg class="icn icn-sm" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Sync Google
+      </button>
+      <button class="btn btn-primary">
+        <svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Novo contato
+      </button>
+    </div>
+  </div>
+
+  <div class="hub">
+
+    <!-- ═══ LEFT FILTER ═══ -->
+    <div class="filter-panel">
+      <div class="fp-hdr">
+        <div class="fp-title">Filtros</div>
+        <div class="fp-search">
+          <svg class="icn icn-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input placeholder="Buscar filtro..."/>
+        </div>
+      </div>
+      <div class="fp-body">
+
+        <div class="fp-item active">
+          <svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M20 7h-3a2 2 0 0 1-2-2V2"/><path d="M9 18a2 2 0 0 1-2 2H3"/><path d="M9 8a2 2 0 0 0 2-2V2"/><rect x="15" y="14" width="6" height="6" rx="1"/><rect x="3" y="10" width="6" height="6" rx="1"/></svg>
+          <span class="fp-name">Todos</span><span class="fp-count">247</span>
+        </div>
+        <div class="fp-item">
+          <svg class="icn icn-sm" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+          <span class="fp-name">VIP</span><span class="fp-count">18</span>
+        </div>
+        <div class="fp-item">
+          <svg class="icn icn-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span class="fp-name">Recentes</span><span class="fp-count">42</span>
+        </div>
+        <div class="fp-item">
+          <svg class="icn icn-sm" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+          <span class="fp-name">Aniversários</span><span class="fp-count">5</span>
+        </div>
+
+        <div class="fp-sec">Categorias <span class="add">＋</span></div>
+        <div class="fp-item">
+          <svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="fp-name">Família</span><span class="fp-count">12</span>
+        </div>
+        <div class="fp-item">
+          <svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="fp-name">Sócios</span><span class="fp-count">3</span>
+        </div>
+        <div class="fp-item" onclick="toggleSub(this)">
+          <svg class="icn icn-sm" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          <span class="fp-name">Profissionais</span><span class="fp-count">18</span>
+        </div>
+        <div class="fp-sub open">
+          <div class="fp-item"><span class="dot-sq" style="background:var(--ok)"></span><span class="fp-name">Contadores</span><span class="fp-count">2</span></div>
+          <div class="fp-item"><span class="dot-sq" style="background:#7c3aed"></span><span class="fp-name">Advogados</span><span class="fp-count">4</span></div>
+          <div class="fp-item"><span class="dot-sq" style="background:var(--err)"></span><span class="fp-name">Médicos</span><span class="fp-count">9</span></div>
+          <div class="fp-item"><span class="dot-sq" style="background:var(--warn)"></span><span class="fp-name">Corretores</span><span class="fp-count">3</span></div>
+        </div>
+        <div class="fp-item">
+          <svg class="icn icn-sm" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <span class="fp-name">Clientes</span><span class="fp-count">42</span>
+        </div>
+        <div class="fp-item">
+          <svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          <span class="fp-name">Fornecedores</span><span class="fp-count">67</span>
+        </div>
+        <div class="fp-item">
+          <svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          <span class="fp-name">Funcionários</span><span class="fp-count">24</span>
+        </div>
+        <div class="fp-item">
+          <svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/></svg>
+          <span class="fp-name">Governo</span><span class="fp-count">7</span>
+        </div>
+
+        <div class="fp-sec">Empresas <span class="add">＋</span></div>
+        <div class="fp-item"><span class="dot-sq" style="background:var(--accent)"></span><span class="fp-name">PalharesTech</span><span class="fp-count">35</span></div>
+        <div class="fp-item"><span class="dot-sq" style="background:var(--ok)"></span><span class="fp-name">Distribuidora Braz</span><span class="fp-count">48</span></div>
+        <div class="fp-item"><span class="dot-sq" style="background:var(--warn)"></span><span class="fp-name">Vimar</span><span class="fp-count">52</span></div>
+
+        <div class="fp-sec">Tags <span class="add">＋</span></div>
+        <div class="fp-item"><span class="dot-sq" style="background:var(--warn)"></span><span class="fp-name">VIP</span><span class="fp-count">18</span></div>
+        <div class="fp-item"><span class="dot-sq" style="background:var(--ok)"></span><span class="fp-name">Novos</span><span class="fp-count">7</span></div>
+        <div class="fp-item"><span class="dot-sq" style="background:var(--err)"></span><span class="fp-name">Atenção</span><span class="fp-count">3</span></div>
+      </div>
+    </div>
+
+    <!-- ═══ CENTER ═══ -->
+    <div class="center-col">
+
+      <div class="search-row">
+        <div class="search-main">
+          <svg class="icn" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input placeholder="Buscar por nome, empresa, telefone, email..."/>
+          <span class="kbd">⌘K</span>
+        </div>
+        <div class="view-switch">
+          <button class="vs active">
+            <svg class="icn" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Grade
+          </button>
+          <button class="vs">
+            <svg class="icn" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Lista
+          </button>
+        </div>
+      </div>
+
+      <div class="chip-row">
+        <span class="chip-label">Filtros</span>
+        <button class="chip active">Todos<span class="x">×</span></button>
+        <button class="chip">Últimos 30d</button>
+        <button class="chip">Com WhatsApp</button>
+        <button class="chip">Com e-mail</button>
+        <button class="chip">Com empresa</button>
+      </div>
+
+      <!-- Notice: aniversários -->
+      <div class="notice-card">
+        <div class="notice-ic">
+          <svg class="icn" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div class="notice-body">
+          <div class="notice-ttl">5 aniversários em 15 dias</div>
+          <div class="notice-sub">Ana (agente) cuida dos presentes e lembretes automáticos</div>
+        </div>
+        <div class="notice-actions">
+          <span class="pill"><span class="pill-av">A</span>Ana · amanhã</span>
+          <span class="pill"><span class="pill-av" style="background:var(--ok)">J</span>José · 3d</span>
+          <span class="pill"><span class="pill-av" style="background:var(--accent)">M</span>Mateus · 15d</span>
+        </div>
+      </div>
+
+      <!-- FAMÍLIA -->
+      <div>
+        <div class="sec-hdr">
+          <div class="sec-ttl">Família <span class="sec-cnt">4 de 12</span></div>
+          <button class="sec-link">Ver todos →</button>
+        </div>
+        <div class="contacts-grid">
+
+          <div class="c-card selected" onclick="selectCard(this)">
+            <div class="c-av av-slate on">A</div>
+            <div class="c-body">
+              <div class="c-name">Ana Carolina <span class="star">★</span></div>
+              <div class="c-role">Esposa · Curitiba</div>
+              <div class="c-tags">
+                <span class="ctag ct-neutral">Família</span>
+                <span class="ctag ct-amber">Aniversário amanhã</span>
+              </div>
+              <div class="c-last">
+                <svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                WhatsApp · há 2h
+              </div>
+            </div>
+            <div class="c-actions">
+              <button class="c-ab" title="WhatsApp"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+              <button class="c-ab" title="E-mail"><svg class="icn" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></button>
+            </div>
+          </div>
+
+          <div class="c-card" onclick="selectCard(this)">
+            <div class="c-av av-slate-2 on">M</div>
+            <div class="c-body">
+              <div class="c-name">Mateus Palhares</div>
+              <div class="c-role">Filho · 12 anos · Col. Marista</div>
+              <div class="c-tags"><span class="ctag ct-neutral">Família</span></div>
+              <div class="c-last">Atividade escolar sex</div>
+            </div>
+            <div class="c-actions">
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></button>
+            </div>
+          </div>
+
+          <div class="c-card" onclick="selectCard(this)">
+            <div class="c-av av-slate-3 on">S</div>
+            <div class="c-body">
+              <div class="c-name">Sofia Palhares</div>
+              <div class="c-role">Filha · 8 anos · Col. Positivo</div>
+              <div class="c-tags"><span class="ctag ct-neutral">Família</span></div>
+              <div class="c-last">Próx aniversário: 14/09</div>
+            </div>
+            <div class="c-actions">
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></button>
+            </div>
+          </div>
+
+          <div class="c-card" onclick="selectCard(this)">
+            <div class="c-av av-slate-4 off">J</div>
+            <div class="c-body">
+              <div class="c-name">José Braz</div>
+              <div class="c-role">Pai · Aposentado</div>
+              <div class="c-tags"><span class="ctag ct-neutral">Família</span></div>
+              <div class="c-last">Ligação há 4 dias</div>
+            </div>
+            <div class="c-actions">
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SÓCIOS -->
+      <div>
+        <div class="sec-hdr">
+          <div class="sec-ttl">Sócios <span class="sec-cnt">2 de 3</span></div>
+        </div>
+        <div class="contacts-grid">
+
+          <div class="c-card" onclick="selectCard(this)">
+            <div class="c-av av-indigo on">J</div>
+            <div class="c-body">
+              <div class="c-name">João Santos <span class="star">★</span></div>
+              <div class="c-role">Sócio PalharesTech · 30%</div>
+              <div class="c-tags"><span class="ctag ct-indigo">PalharesTech</span></div>
+              <div class="c-last">WhatsApp ontem</div>
+            </div>
+            <div class="c-actions">
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></button>
+            </div>
+          </div>
+
+          <div class="c-card" onclick="selectCard(this)">
+            <div class="c-av av-zinc off">P</div>
+            <div class="c-body">
+              <div class="c-name">Paulo Mendonça</div>
+              <div class="c-role">Sócio Vimar · 20%</div>
+              <div class="c-tags"><span class="ctag ct-neutral">Vimar</span></div>
+              <div class="c-last">Ligação há 1 semana</div>
+            </div>
+            <div class="c-actions">
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROFISSIONAIS -->
+      <div>
+        <div class="sec-hdr">
+          <div class="sec-ttl">Profissionais de confiança <span class="sec-cnt">4 de 18</span></div>
+          <button class="sec-link">Ver todos →</button>
+        </div>
+        <div class="contacts-grid">
+
+          <div class="c-card" onclick="selectCard(this)">
+            <div class="c-av av-emerald on">J</div>
+            <div class="c-body">
+              <div class="c-name">José Ferreira <span class="star">★</span></div>
+              <div class="c-role">Contador · CRC 12345-PR</div>
+              <div class="c-tags">
+                <span class="ctag ct-green">Contador</span>
+                <span class="ctag ct-amber">Aniversário 3d</span>
+              </div>
+              <div class="c-last">E-mail hoje · relatório fiscal</div>
+            </div>
+            <div class="c-actions">
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></button>
+            </div>
+          </div>
+
+          <div class="c-card" onclick="selectCard(this)">
+            <div class="c-av av-zinc-2 on">C</div>
+            <div class="c-body">
+              <div class="c-name">Dr. Carlos Lima</div>
+              <div class="c-role">Adv. Trabalhista · OAB/PR 54321</div>
+              <div class="c-tags">
+                <span class="ctag ct-neutral">Advogado</span>
+                <span class="ctag ct-red">Prazo ativo</span>
+              </div>
+              <div class="c-last">WhatsApp hoje · Proc. 0001234</div>
+            </div>
+            <div class="c-actions">
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></button>
+            </div>
+          </div>
+
+          <div class="c-card" onclick="selectCard(this)">
+            <div class="c-av av-slate on">P</div>
+            <div class="c-body">
+              <div class="c-name">Dr. Pedro Almeida</div>
+              <div class="c-role">Pediatra · Mateus e Sofia</div>
+              <div class="c-tags"><span class="ctag ct-red">Médico</span></div>
+              <div class="c-last">Consulta agendada: 15/05</div>
+            </div>
+            <div class="c-actions">
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></button>
+            </div>
+          </div>
+
+          <div class="c-card" onclick="selectCard(this)">
+            <div class="c-av av-slate-3 off">R</div>
+            <div class="c-body">
+              <div class="c-name">Ricardo Souza</div>
+              <div class="c-role">Corretor · CRECI 12345</div>
+              <div class="c-tags"><span class="ctag ct-neutral">Vimar</span></div>
+              <div class="c-last">Mensagem há 1 semana</div>
+            </div>
+            <div class="c-actions">
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEGÓCIOS -->
+      <div>
+        <div class="sec-hdr">
+          <div class="sec-ttl">Negócios <span class="sec-cnt">4 destaques</span></div>
+          <button class="sec-link">Ver todos (109) →</button>
+        </div>
+        <div class="contacts-grid">
+
+          <div class="c-card" onclick="selectCard(this)">
+            <div class="c-av av-indigo-2 on">A</div>
+            <div class="c-body">
+              <div class="c-name">João Silva · Acme</div>
+              <div class="c-role">Cliente · CEO</div>
+              <div class="c-tags">
+                <span class="ctag ct-indigo">Cliente</span>
+                <span class="ctag ct-red">Prazo hoje</span>
+              </div>
+              <div class="c-last">E-mail · proposta R$89k</div>
+            </div>
+            <div class="c-actions">
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></button>
+            </div>
+          </div>
+
+          <div class="c-card" onclick="selectCard(this)">
+            <div class="c-av av-zinc off">S</div>
+            <div class="c-body">
+              <div class="c-name">Siderúrgica SP</div>
+              <div class="c-role">Fornecedor · Aço e cimento</div>
+              <div class="c-tags">
+                <span class="ctag ct-neutral">Vimar</span>
+                <span class="ctag ct-red">Renegociar</span>
+              </div>
+              <div class="c-last">Gasto mês: R$96k (+12%)</div>
+            </div>
+            <div class="c-actions">
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></button>
+            </div>
+          </div>
+
+          <div class="c-card" onclick="selectCard(this)">
+            <div class="c-av av-slate-3 on">A</div>
+            <div class="c-body">
+              <div class="c-name">ArtCasa Esquadrias</div>
+              <div class="c-role">Fornecedor · Alumínio</div>
+              <div class="c-tags"><span class="ctag ct-neutral">Vimar</span></div>
+              <div class="c-last">Boleto R$32k · semana</div>
+            </div>
+            <div class="c-actions">
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></button>
+            </div>
+          </div>
+
+          <div class="c-card" onclick="selectCard(this)">
+            <div class="c-av av-slate-2 on">R</div>
+            <div class="c-body">
+              <div class="c-name">Roberto · Empreiteiro</div>
+              <div class="c-role">18 colaboradores · Bloco A</div>
+              <div class="c-tags">
+                <span class="ctag ct-neutral">Vimar</span>
+                <span class="ctag ct-green">Ativo</span>
+              </div>
+              <div class="c-last">Reunião hoje 14h</div>
+            </div>
+            <div class="c-actions">
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+              <button class="c-ab"><svg class="icn" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /center -->
+
+    <!-- ═══ RIGHT DETAIL ═══ -->
+    <div class="detail-col">
+      <div class="dc-hero">
+        <button class="dc-close">
+          <svg class="icn" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div class="dc-av-xl">A</div>
+        <div class="dc-name">Ana Carolina <span class="star" style="color:var(--warn)">★</span></div>
+        <div class="dc-role">Esposa · Curitiba, PR</div>
+        <div class="dc-quick">
+          <button class="dc-q prim">
+            <svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            WhatsApp
+          </button>
+          <button class="dc-q">
+            <svg class="icn" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </button>
+          <button class="dc-q">
+            <svg class="icn" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="dc-body">
+
+        <div>
+          <div class="dc-sec-t">Informações</div>
+          <div class="info-list">
+            <div class="info-row">
+              <span class="info-ic"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg></span>
+              <span class="info-lb">Aniversário</span>
+              <span class="info-val urgent">22/08 · amanhã</span>
+            </div>
+            <div class="info-row">
+              <span class="info-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+              <span class="info-lb">Celular</span>
+              <span class="info-val">(41) 99876-5432</span>
+              <button class="copy-b"><svg class="icn" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+            </div>
+            <div class="info-row">
+              <span class="info-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+              <span class="info-lb">E-mail</span>
+              <span class="info-val" style="font-size:11.5px">ana.palhares@email.com</span>
+              <button class="copy-b"><svg class="icn" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+            </div>
+            <div class="info-row">
+              <span class="info-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+              <span class="info-lb">Endereço</span>
+              <span class="info-val">Av. Batel, 1234</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="dc-sec-t">Tags</div>
+          <div class="tags-row">
+            <span class="ctag ct-neutral">Família</span>
+            <span class="ctag ct-amber">VIP</span>
+            <span class="ctag ct-indigo">Preferencial</span>
+            <span class="ctag add">＋ Tag</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="dc-sec-t">Últimas interações</div>
+          <div>
+            <div class="tl-item">
+              <div class="tl-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+              <div class="tl-body">
+                <div class="tl-ttl">"Tô chegando, amor"</div>
+                <div class="tl-sub">WhatsApp · via Felipe Hub</div>
+                <div class="tl-time">há 2h</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-ic"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg></div>
+              <div class="tl-body">
+                <div class="tl-ttl">Jantar Mistura Oficial</div>
+                <div class="tl-sub">Aniversário · amanhã 20h · reserva feita</div>
+                <div class="tl-time">ontem</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+              <div class="tl-body">
+                <div class="tl-ttl">Foto do recital da Sofia</div>
+                <div class="tl-sub">E-mail · 12 fotos anexadas</div>
+                <div class="tl-time">3 dias atrás</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+              <div class="tl-body">
+                <div class="tl-ttl">Ligação · 12 minutos</div>
+                <div class="tl-sub">Planejamento viagem julho</div>
+                <div class="tl-time">1 semana atrás</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="dc-sec-t">Vínculos no hub</div>
+          <div class="link-item">
+            <div class="link-ic"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg></div>
+            <div style="flex:1"><div class="link-n">Jantar Mistura Oficial</div><div class="link-m">Agenda · Amanhã 20h</div></div>
+            <span class="link-arr"><svg class="icn" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+          </div>
+          <div class="link-item">
+            <div class="link-ic"><svg class="icn" viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/></svg></div>
+            <div style="flex:1"><div class="link-n">Presente em planejamento</div><div class="link-m">Ana (agente) · 3 opções</div></div>
+            <span class="link-arr"><svg class="icn" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+          </div>
+          <div class="link-item">
+            <div class="link-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div style="flex:1"><div class="link-n">Procuração pública 2023</div><div class="link-m">Documentos · Jurídico</div></div>
+            <span class="link-arr"><svg class="icn" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+          </div>
+          <div class="link-item">
+            <div class="link-ic"><svg class="icn" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+            <div style="flex:1"><div class="link-n">Conta conjunta Itaú</div><div class="link-m">Finanças · Felipe PF</div></div>
+            <span class="link-arr"><svg class="icn" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+          </div>
+        </div>
+
+        <div>
+          <div class="dc-sec-t">Agente responsável</div>
+          <div class="agent-card">
+            <div class="agent-av">A</div>
+            <div style="flex:1">
+              <div class="agent-n">Ana (agente)</div>
+              <div class="agent-r">Cuida da agenda familiar e lembretes</div>
+            </div>
+            <span class="link-arr"><svg class="icn" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+          </div>
+        </div>
+
+        <div>
+          <div class="dc-sec-t">Notas privadas</div>
+          <div class="notes-box">
+            <div class="notes-lb">Felipe anotou</div>
+            Ana prefere flores do campo a rosas. Alergia a frutos do mar. Adora viagens de descoberta, não roteiros prontos. Sempre agradecer no Instagram em datas especiais.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+function selectCard(el){
+  document.querySelectorAll('.c-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function toggleSub(el){
+  const sub = el.nextElementSibling;
+  if(sub && sub.classList.contains('fp-sub')) sub.classList.toggle('open');
+}
+document.querySelectorAll('.vs').forEach(b => b.addEventListener('click', function(){
+  document.querySelectorAll('.vs').forEach(x => x.classList.remove('active'));
+  this.classList.add('active');
+}));
+document.querySelectorAll('.fp-item').forEach(i => i.addEventListener('click', function(e){
+  if(e.target.closest('.fp-sub')) return;
+  document.querySelectorAll('.fp-item').forEach(x => x.classList.remove('active'));
+  this.classList.add('active');
+}));
+document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', function(){
+  this.classList.toggle('active');
+}));
+</script>
+</body>
+</html>

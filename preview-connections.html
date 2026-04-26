@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Felipe Hub — Conexões</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+:root{
+  --bg:#f8fafc;--card:#fff;--ink:#0f172a;--ink-2:#475569;--ink-3:#94a3b8;--ink-4:#cbd5e1;
+  --hair:#e2e8f0;--hair-2:#f1f5f9;
+  --accent:#4f46e5;--accent-hover:#4338ca;--accent-soft:#eef2ff;
+  --ok:#10b981;--warn:#d97706;--err:#dc2626;
+  --shadow-sm:0 1px 3px rgba(15,23,42,.06);
+  --r-sm:8px;--r-md:10px;--r-lg:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;overflow:hidden;font-size:13.5px;letter-spacing:-.05px}
+button{font-family:inherit;letter-spacing:inherit}
+.icn{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.icn-sm{width:13px;height:13px}
+.mono{font-family:-apple-system-ui-monospace,"SF Mono",monospace;font-variant-numeric:tabular-nums}
+
+aside{width:236px;min-width:236px;background:#0f172a;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:18px 18px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-mark{width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+.sb-brand{font-size:14px;font-weight:700;color:#f1f5f9;letter-spacing:-.25px}
+.sb-tag{font-size:10px;color:#64748b;font-weight:500;margin-top:1px}
+nav{flex:1;padding:10px;overflow-y:auto}
+nav::-webkit-scrollbar{display:none}
+.nv-label{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.07em;padding:12px 12px 4px}
+.nv-item{display:flex;align-items:center;gap:11px;padding:8px 12px;border-radius:7px;color:#94a3b8;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:1px;transition:all .12s}
+.nv-item:hover{background:rgba(255,255,255,.04);color:#e2e8f0}
+.nv-item.active{background:rgba(79,70,229,.15);color:#e0e7ff}
+.nv-item svg{width:15px;height:15px;opacity:.9}
+.nv-count{margin-left:auto;font-size:10.5px;font-weight:600;color:#64748b;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.04)}
+.nv-count.ok{background:rgba(16,185,129,.2);color:#6ee7b7}
+.sb-bottom{padding:10px;border-top:1px solid rgba(255,255,255,.06)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer}
+.sb-user-av{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.sb-user-n{font-size:12.5px;font-weight:600;color:#e2e8f0}
+.sb-user-r{font-size:10.5px;color:#64748b;margin-top:1px}
+
+main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--hair);background:var(--card);flex-shrink:0}
+.tb-title{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.4px;line-height:1}
+.tb-sub{font-size:12px;color:var(--ink-3);margin-top:3px;font-weight:500}
+.tb-actions{display:flex;gap:6px}
+.btn-i{width:32px;height:32px;border-radius:7px;border:1px solid var(--hair);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-2)}
+.btn-i:hover{background:var(--bg);border-color:var(--ink-4)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid var(--hair);background:var(--card);color:var(--ink);transition:all .15s}
+.btn:hover{background:var(--bg);border-color:var(--ink-4)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+
+.content{flex:1;overflow-y:auto;padding:22px 24px;display:flex;flex-direction:column;gap:22px}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+.sec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);margin-bottom:10px}
+
+/* Channel status cards */
+.channels-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ch-card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-lg);padding:16px 18px;display:flex;flex-direction:column;gap:12px;border-top:2px solid var(--hair)}
+.ch-card.wa{border-top-color:var(--ok)}
+.ch-card.tg{border-top-color:var(--accent)}
+.ch-card.dc{border-top-color:#7c3aed}
+.ch-head{display:flex;align-items:center;gap:11px}
+.ch-icon{width:36px;height:36px;border-radius:9px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--ink-2)}
+.ch-icon svg{width:17px;height:17px}
+.ch-name{font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-.2px}
+.ch-sub{font-size:11px;color:var(--ink-3);margin-top:1px;font-weight:500}
+.ch-status{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:auto;border:1px solid transparent;letter-spacing:.03em}
+.ch-status.on{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.ch-status.off{background:#fffbeb;color:#b45309;border-color:#fde68a}
+.ch-status.idle{background:var(--hair-2);color:var(--ink-3);border-color:var(--hair)}
+
+.ch-phone{font-size:12px;font-weight:600;color:var(--ink);letter-spacing:-.1px}
+.ch-phone.muted{color:var(--ink-3)}
+
+.ch-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.ch-stat{background:var(--bg);border:1px solid var(--hair);border-radius:7px;padding:7px;text-align:center}
+.ch-stat-v{font-size:15px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.ch-stat-l{font-size:9.5px;color:var(--ink-3);font-weight:600;margin-top:1px;text-transform:uppercase;letter-spacing:.04em}
+
+.ch-actions-row{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:auto}
+.ch-btn{padding:7px;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;border:1px solid var(--hair);background:var(--card);color:var(--ink);transition:all .15s;text-align:center}
+.ch-btn:hover{background:var(--bg);border-color:var(--ink-4)}
+.ch-btn.prim{background:var(--accent);border-color:var(--accent);color:#fff}
+.ch-btn.prim:hover{background:var(--accent-hover)}
+
+/* WhatsApp detail */
+.wa-detail{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-lg);overflow:hidden}
+.wa-hdr{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--hair);background:var(--bg)}
+.wa-hdr-ic{width:40px;height:40px;border-radius:10px;background:var(--card);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:var(--ok)}
+.wa-hdr-ic svg{width:18px;height:18px}
+.wa-hdr-ttl{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:-.25px}
+.wa-hdr-sub{font-size:11px;color:var(--ok);font-weight:600;margin-top:2px;display:flex;align-items:center;gap:4px}
+.wa-hdr-dot{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+
+.wa-grid{display:grid;grid-template-columns:300px 1fr 320px;min-height:540px}
+
+/* QR Panel */
+.qr-panel{padding:20px;border-right:1px solid var(--hair);display:flex;flex-direction:column;gap:12px}
+.qr-title{font-size:11.5px;font-weight:700;color:var(--ink-2);text-transform:uppercase;letter-spacing:.05em}
+.qr-box{background:var(--bg);border:1px solid var(--hair);border-radius:var(--r-md);padding:16px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.qr-img{width:160px;height:160px;background:repeating-conic-gradient(var(--ink) 0% 25%,transparent 0% 50%) 50% / 8px 8px,repeating-linear-gradient(0deg,var(--ink) 0% 3%,transparent 3% 6%);border:2px solid var(--ink);border-radius:8px;position:relative;display:flex;align-items:center;justify-content:center}
+.qr-img::before{content:"";position:absolute;width:40px;height:40px;background:var(--ok);border-radius:8px;border:3px solid var(--card);display:flex;align-items:center;justify-content:center}
+.qr-status{font-size:11.5px;color:var(--ok);font-weight:700;display:flex;align-items:center;gap:5px}
+.qr-status svg{width:13px;height:13px}
+.qr-number{font-size:14px;font-weight:700;color:var(--ink);font-family:-apple-system-ui-monospace,"SF Mono",monospace}
+.qr-btn{width:100%;padding:7px;border:1px solid #fecaca;border-radius:6px;background:#fef2f2;color:var(--err);font-size:11.5px;font-weight:600;cursor:pointer}
+.qr-btn:hover{background:#fee2e2}
+
+.qr-info{font-size:10.5px;color:var(--ink-2);line-height:1.6;font-weight:500}
+.qr-info strong{color:var(--ink)}
+.qr-info code{background:var(--bg);border:1px solid var(--hair);padding:1px 5px;border-radius:3px;font-family:-apple-system-ui-monospace,"SF Mono",monospace;font-size:10px;color:var(--ink-2)}
+
+/* Phone mockup */
+.phone-col{padding:20px;display:flex;flex-direction:column;align-items:center;gap:12px;background:var(--bg);border-right:1px solid var(--hair)}
+.phone-ttl{font-size:10.5px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
+.phone{width:260px;background:#e8e8e8;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px rgba(15,23,42,.1);display:flex;flex-direction:column;max-height:500px;border:1px solid var(--hair)}
+.phone-hdr{background:var(--ink);color:#fff;padding:9px 13px;display:flex;align-items:center;gap:9px}
+.phone-av{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.phone-name{font-size:12.5px;font-weight:700}
+.phone-status{font-size:10px;opacity:.7}
+.phone-body{flex:1;padding:10px;display:flex;flex-direction:column;gap:5px;overflow-y:auto;background:#f4f4f4}
+.phone-body::-webkit-scrollbar{width:3px}
+
+.wa-date{text-align:center;margin:3px 0}
+.wa-date-pill{display:inline-block;background:#fff;border:1px solid var(--hair);color:var(--ink-3);font-size:9.5px;font-weight:600;padding:2px 8px;border-radius:5px}
+.wa-msg{max-width:82%;padding:5px 8px;font-size:11px;line-height:1.4;border-radius:6px;position:relative;word-break:break-word}
+.wa-msg.recv{background:#fff;color:var(--ink);align-self:flex-start;border:1px solid var(--hair)}
+.wa-msg.sent{background:var(--accent-soft);color:var(--ink);align-self:flex-end;border:1px solid #c7d2fe}
+.wa-msg ul{padding-left:0;list-style:none;margin:2px 0}
+.wa-msg li{margin-bottom:1px}
+.wa-msg .wa-time{font-size:9px;color:var(--ink-3);float:right;margin-left:5px;margin-top:2px}
+.agent-tag{display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;margin-bottom:2px;text-transform:uppercase;letter-spacing:.03em;border:1px solid transparent}
+.at-silva{background:#f3e8ff;color:#6d28d9;border-color:#e9d5ff}
+.at-ricardo{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.at-ana{background:#fdf2f8;color:#be185d;border-color:#fbcfe8}
+.at-hub{background:var(--accent-soft);color:var(--accent);border-color:#c7d2fe}
+.at-urgent{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+
+.phone-input{display:flex;align-items:center;gap:6px;padding:7px 10px;background:#e8e8e8;border-top:1px solid var(--hair)}
+.phone-inp{flex:1;background:#fff;border-radius:16px;padding:5px 10px;font-size:10px;color:var(--ink-3)}
+.phone-mic{width:24px;height:24px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff}
+.phone-mic svg{width:11px;height:11px}
+
+/* Config panel */
+.cfg-col{padding:16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+.cfg-col::-webkit-scrollbar{width:3px}
+.cfg-col::-webkit-scrollbar-thumb{background:var(--hair);border-radius:99px}
+
+.cfg-block{background:var(--bg);border:1px solid var(--hair);border-radius:var(--r-md);padding:12px 14px}
+.cfg-ttl{font-size:11px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-2)}
+
+.rule-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--hair-2);font-size:11.5px}
+.rule-row:last-child{border-bottom:none}
+.rule-kw{background:var(--card);padding:1px 7px;border-radius:3px;font-family:-apple-system-ui-monospace,"SF Mono",monospace;font-size:10px;color:var(--ink-2);font-weight:600;border:1px solid var(--hair)}
+.rule-arr{color:var(--ink-3);font-size:9px}
+.rule-ag{display:flex;align-items:center;gap:5px;font-weight:600;color:var(--ink);letter-spacing:-.1px}
+.rule-ag-av{width:18px;height:18px;border-radius:5px;background:var(--card);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+
+.schedule-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--hair-2);font-size:11.5px}
+.schedule-row:last-child{border-bottom:none}
+.sh-name{font-weight:600;color:var(--ink);flex:1}
+.sh-time{background:var(--card);border:1px solid var(--hair);padding:1px 7px;border-radius:3px;font-family:-apple-system-ui-monospace,"SF Mono",monospace;font-size:10.5px;color:var(--ink);font-weight:600}
+
+.toggle{position:relative;width:28px;height:16px;background:var(--ink-4);border-radius:999px;cursor:pointer;transition:background .15s;flex-shrink:0}
+.toggle::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;background:var(--card);border-radius:50%;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.toggle.on{background:var(--accent)}
+.toggle.on::after{left:14px}
+
+.alert-type{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:11.5px;border-bottom:1px solid var(--hair-2)}
+.alert-type:last-child{border-bottom:none}
+.alert-emoji{font-size:14px;width:22px;text-align:center}
+.alert-name{font-weight:600;color:var(--ink);flex:1;letter-spacing:-.1px}
+.alert-desc{font-size:10px;color:var(--ink-3);margin-top:1px;font-weight:500}
+
+.dnd-range{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:var(--ink)}
+.dnd-time{background:var(--card);border:1px solid var(--hair);border-radius:5px;padding:3px 8px;font-family:-apple-system-ui-monospace,"SF Mono",monospace;font-size:11px}
+
+/* Dual cards (TG + Discord) */
+.dual-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dual-card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-lg);padding:16px 18px}
+.dc-channels{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:10px}
+.dc-chan{display:flex;align-items:center;gap:5px;padding:6px 9px;background:var(--accent-soft);border:1px solid #c7d2fe;border-radius:5px;font-size:10.5px;color:var(--accent);font-weight:600;font-family:-apple-system-ui-monospace,"SF Mono",monospace}
+.dc-chan.alerts{background:#fef2f2;color:var(--err);border-color:#fecaca}
+.dc-chan.briefing{background:#fffbeb;color:#b45309;border-color:#fde68a}
+.dc-chan.internal{background:var(--hair-2);color:var(--ink-2);border-color:var(--hair)}
+
+.tg-feature{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--hair-2);font-size:12px;color:var(--ink-2);font-weight:500}
+.tg-feature:last-child{border-bottom:none}
+.tg-feature svg{width:14px;height:14px;color:var(--ink-3);flex-shrink:0}
+.tg-feature strong{color:var(--ink);font-weight:700}
+
+.info-note{background:var(--bg);border:1px solid var(--hair);border-radius:var(--r-md);padding:10px 12px;font-size:11px;color:var(--ink-2);line-height:1.6;font-weight:500}
+.info-note strong{color:var(--ink)}
+.info-note code{background:var(--card);border:1px solid var(--hair);padding:1px 5px;border-radius:3px;font-family:-apple-system-ui-monospace,"SF Mono",monospace;font-size:10.5px}
+
+/* Logs */
+.logs-card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-lg);overflow:hidden}
+.logs-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--hair)}
+.logs-ttl{font-size:12.5px;font-weight:700;color:var(--ink);letter-spacing:-.15px}
+.logs-filter{display:flex;gap:5px}
+.lf-btn{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid var(--hair);background:var(--card);color:var(--ink-2);cursor:pointer;letter-spacing:-.05px}
+.lf-btn.active{background:var(--accent-soft);border-color:#c7d2fe;color:var(--accent)}
+.log-item{display:flex;align-items:flex-start;gap:10px;padding:10px 18px;border-bottom:1px solid var(--hair-2);font-size:11.5px}
+.log-item:last-child{border-bottom:none}
+.log-item:hover{background:var(--bg)}
+.log-ch{width:22px;height:22px;border-radius:6px;background:var(--bg);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;color:var(--ink-2)}
+.log-main{flex:1;min-width:0}
+.log-row1{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.log-from{font-weight:700;color:var(--ink);font-size:11.5px}
+.log-dir{color:var(--ink-3);font-size:10.5px}
+.log-agent{font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.02em;border:1px solid transparent}
+.log-msg{color:var(--ink-2);margin-top:2px;line-height:1.5;font-weight:500}
+.log-time{font-size:10px;color:var(--ink-3);flex-shrink:0;text-align:right;width:52px;font-weight:500}
+
+.badge{display:inline-flex;align-items:center;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:3px;border:1px solid transparent;letter-spacing:.02em}
+.b-green{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.b-amber{background:#fffbeb;color:#b45309;border-color:#fde68a}
+.b-red{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.b-indigo{background:var(--accent-soft);color:var(--accent);border-color:#c7d2fe}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="sb-logo"><div class="sb-mark">FH</div><div><div class="sb-brand">Felipe Hub</div><div class="sb-tag">Secretário Pessoal</div></div></div>
+  <nav>
+    <div class="nv-label">Principal</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Quem Sou Eu</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Painel</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>Agentes<span class="nv-count">8</span></div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Bater Papo</div>
+    <div class="nv-label">Produtividade</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Finanças</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Contatos</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/></svg>Agenda</div>
+    <div class="nv-label">Organização</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/></svg>Bancos</div>
+    <div class="nv-item"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documentos</div>
+    <div class="nv-label">Sistema</div>
+    <div class="nv-item active"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg>Configurações<span class="nv-count ok">●</span></div>
+  </nav>
+  <div class="sb-bottom"><div class="sb-user"><div class="sb-user-av">F</div><div><div class="sb-user-n">Felipe Palhares</div><div class="sb-user-r">Administrador</div></div></div></div>
+</aside>
+
+<main>
+  <div class="top-bar">
+    <div><div class="tb-title">Conexões Externas</div><div class="tb-sub">Configurações · canais de comunicação</div></div>
+    <div class="tb-actions">
+      <button class="btn-i"><svg class="icn icn-sm" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg></button>
+      <button class="btn btn-primary"><svg class="icn icn-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo canal</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div>
+      <div class="sec-title">Canais disponíveis</div>
+      <div class="channels-row">
+
+        <div class="ch-card wa">
+          <div class="ch-head">
+            <div class="ch-icon"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+            <div><div class="ch-name">WhatsApp</div><div class="ch-sub">Canal principal · Evolution API</div></div>
+            <span class="ch-status on">Conectado</span>
+          </div>
+          <div class="ch-phone mono">+55 41 99876-5432</div>
+          <div class="ch-stats">
+            <div class="ch-stat"><div class="ch-stat-v">147</div><div class="ch-stat-l">Msgs hoje</div></div>
+            <div class="ch-stat"><div class="ch-stat-v">12</div><div class="ch-stat-l">Alertas</div></div>
+            <div class="ch-stat"><div class="ch-stat-v">8/8</div><div class="ch-stat-l">Agentes</div></div>
+          </div>
+          <div class="ch-actions-row">
+            <button class="ch-btn prim">Configurar</button>
+            <button class="ch-btn">Logs</button>
+          </div>
+        </div>
+
+        <div class="ch-card tg">
+          <div class="ch-head">
+            <div class="ch-icon"><svg class="icn" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></div>
+            <div><div class="ch-name">Telegram</div><div class="ch-sub">Bot · Arquivos grandes</div></div>
+            <span class="ch-status off">Configurar</span>
+          </div>
+          <div class="ch-phone muted mono">@FelipeHubBot (pendente)</div>
+          <div class="ch-stats">
+            <div class="ch-stat"><div class="ch-stat-v">—</div><div class="ch-stat-l">Msgs hoje</div></div>
+            <div class="ch-stat"><div class="ch-stat-v">—</div><div class="ch-stat-l">Arquivos</div></div>
+            <div class="ch-stat"><div class="ch-stat-v">0/8</div><div class="ch-stat-l">Agentes</div></div>
+          </div>
+          <div class="ch-actions-row">
+            <button class="ch-btn prim">Conectar</button>
+            <button class="ch-btn">Guia</button>
+          </div>
+        </div>
+
+        <div class="ch-card dc">
+          <div class="ch-head">
+            <div class="ch-icon"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10"/></svg></div>
+            <div><div class="ch-name">Discord</div><div class="ch-sub">Servidor · Histórico rico</div></div>
+            <span class="ch-status idle">Pendente</span>
+          </div>
+          <div class="ch-phone muted">Felipe Hub Server</div>
+          <div class="ch-stats">
+            <div class="ch-stat"><div class="ch-stat-v">—</div><div class="ch-stat-l">Canais</div></div>
+            <div class="ch-stat"><div class="ch-stat-v">—</div><div class="ch-stat-l">Msgs</div></div>
+            <div class="ch-stat"><div class="ch-stat-v">0/8</div><div class="ch-stat-l">Agentes</div></div>
+          </div>
+          <div class="ch-actions-row">
+            <button class="ch-btn prim">Conectar</button>
+            <button class="ch-btn">Guia</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WhatsApp detail -->
+    <div>
+      <div class="sec-title">WhatsApp · Canal principal</div>
+
+      <div class="wa-detail">
+        <div class="wa-hdr">
+          <div class="wa-hdr-ic"><svg class="icn" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <div>
+            <div class="wa-hdr-ttl">Felipe Hub · Linha única</div>
+            <div class="wa-hdr-sub"><span class="wa-hdr-dot"></span>Online · +55 41 99876-5432 · Evolution v2.1</div>
+          </div>
+        </div>
+
+        <div class="wa-grid">
+
+          <div class="qr-panel">
+            <div class="qr-title">Conexão ativa</div>
+            <div class="qr-box">
+              <div class="qr-img"></div>
+              <div class="qr-status"><svg class="icn icn-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Conectado</div>
+              <div class="qr-number">+55 41 99876-5432</div>
+              <button class="qr-btn">Desconectar sessão</button>
+            </div>
+            <div class="qr-info">
+              <strong>Stack</strong><br/>
+              • Evolution API em <code>vps.felipehub.com:8080</code><br/>
+              • Webhook <code>/api/webhooks/whatsapp</code><br/>
+              • <code>EVOLUTION_API_KEY</code> configurada<br/>
+              • Última sync: há 3s
+            </div>
+          </div>
+
+          <div class="phone-col">
+            <div class="phone-ttl">Como aparece no seu celular</div>
+            <div class="phone">
+              <div class="phone-hdr">
+                <div class="phone-av">FH</div>
+                <div><div class="phone-name">Felipe Hub</div><div class="phone-status">online</div></div>
+              </div>
+              <div class="phone-body">
+                <div class="wa-date"><span class="wa-date-pill">HOJE</span></div>
+                <div class="wa-msg sent">menu<span class="wa-time">07:15</span></div>
+
+                <div class="wa-msg recv">
+                  <span class="agent-tag at-hub">Hub</span><br/>
+                  <strong>Bom dia Felipe!</strong><br/>Sua equipe está pronta. Com quem quer falar?<br/><br/>
+                  1. Dr. Silva · Jurídico<br/>2. Ricardo · Financeiro<br/>3. Engenheiro · Obras<br/>4. Ana · Família<br/>5. Diretor · Empresas<br/>6. Marcos · Governo<br/>7. Clara · E-mails<br/>8. Dr. Carlos · Saúde<br/>9. Briefing completo<br/>0. Urgente<span class="wa-time">07:15</span>
+                </div>
+
+                <div class="wa-msg sent">1<span class="wa-time">07:16</span></div>
+
+                <div class="wa-msg recv">
+                  <span class="agent-tag at-silva">Dr. Silva</span><br/>
+                  Bom dia. Alerta crítico: Processo <strong>0001234-56.2024</strong> prazo em <strong>12 dias</strong> (05/05). Dr. Carlos Lima precisa do seu OK hoje. Confirma?<span class="wa-time">07:16</span>
+                </div>
+
+                <div class="wa-msg sent">S, pode avisar<span class="wa-time">07:17</span></div>
+
+                <div class="wa-msg recv">
+                  <span class="agent-tag at-silva">Dr. Silva</span><br/>
+                  Confirmado. Vou notificar. Registrei no Hub.<span class="wa-time">07:17</span>
+                </div>
+
+                <div class="wa-date"><span class="wa-date-pill">12:00 · alertas</span></div>
+
+                <div class="wa-msg recv">
+                  <span class="agent-tag at-ricardo">Ricardo</span><br/>
+                  Fatura Nubank vence <strong>amanhã</strong> · R$ 3.240. Pagar agora? (S/N)<span class="wa-time">12:00</span>
+                </div>
+
+                <div class="wa-msg sent">S<span class="wa-time">12:03</span></div>
+
+                <div class="wa-msg recv">
+                  <span class="agent-tag at-ana">Ana</span><br/>
+                  Amanhã aniversário da Ana. Mesa no Mistura 20h reservada. Confirma?<span class="wa-time">12:01</span>
+                </div>
+              </div>
+              <div class="phone-input">
+                <div class="phone-inp">Mensagem...</div>
+                <div class="phone-mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cfg-col">
+
+            <div class="cfg-block">
+              <div class="cfg-ttl">Roteamento por palavra-chave</div>
+              <div class="rule-row"><span class="rule-kw">processo, prazo</span><span class="rule-arr">→</span><span class="rule-ag"><span class="rule-ag-av">⚖️</span>Dr. Silva</span></div>
+              <div class="rule-row"><span class="rule-kw">fatura, dinheiro</span><span class="rule-arr">→</span><span class="rule-ag"><span class="rule-ag-av">💰</span>Ricardo</span></div>
+              <div class="rule-row"><span class="rule-kw">obra, bloco</span><span class="rule-arr">→</span><span class="rule-ag"><span class="rule-ag-av">🏗️</span>Engenheiro</span></div>
+              <div class="rule-row"><span class="rule-kw">agenda, família</span><span class="rule-arr">→</span><span class="rule-ag"><span class="rule-ag-av">🌸</span>Ana</span></div>
+              <div class="rule-row"><span class="rule-kw">email, resposta</span><span class="rule-arr">→</span><span class="rule-ag"><span class="rule-ag-av">✉️</span>Clara</span></div>
+              <div class="rule-row"><span class="rule-kw" style="background:var(--accent-soft);border-color:#c7d2fe;color:var(--accent)">livre</span><span class="rule-arr">→</span><span class="rule-ag">Router IA</span></div>
+            </div>
+
+            <div class="cfg-block">
+              <div class="cfg-ttl">Horários de alertas</div>
+              <div class="schedule-row"><div class="sh-name">Briefing diário</div><span class="sh-time">07:00</span><div class="toggle on"></div></div>
+              <div class="schedule-row"><div class="sh-name">Alertas manhã</div><span class="sh-time">12:00</span><div class="toggle on"></div></div>
+              <div class="schedule-row"><div class="sh-name">Resumo do dia</div><span class="sh-time">18:00</span><div class="toggle on"></div></div>
+              <div class="schedule-row"><div class="sh-name">Urgências</div><span class="sh-time">24/7</span><div class="toggle on"></div></div>
+            </div>
+
+            <div class="cfg-block">
+              <div class="cfg-ttl">Não perturbe</div>
+              <div class="dnd-range"><span>De</span><span class="dnd-time">22:00</span><span>até</span><span class="dnd-time">06:30</span></div>
+              <div style="font-size:10.5px;color:var(--ink-3);margin-top:8px;font-weight:500">Urgências sempre passam. <span class="badge b-green">Ativo</span></div>
+            </div>
+
+            <div class="cfg-block">
+              <div class="cfg-ttl">Tipos de alerta</div>
+              <div class="alert-type"><span class="alert-emoji">⚖️</span><div style="flex:1"><div class="alert-name">Prazos jurídicos</div><div class="alert-desc">Processos, contratos, certidões</div></div><div class="toggle on"></div></div>
+              <div class="alert-type"><span class="alert-emoji">💰</span><div style="flex:1"><div class="alert-name">Vencimentos</div><div class="alert-desc">Faturas, boletos, impostos</div></div><div class="toggle on"></div></div>
+              <div class="alert-type"><span class="alert-emoji">📅</span><div style="flex:1"><div class="alert-name">Compromissos</div><div class="alert-desc">Agenda e aniversários</div></div><div class="toggle on"></div></div>
+              <div class="alert-type"><span class="alert-emoji">🏗️</span><div style="flex:1"><div class="alert-name">Obras</div><div class="alert-desc">Cronograma, custo, equipe</div></div><div class="toggle on"></div></div>
+              <div class="alert-type"><span class="alert-emoji">🩺</span><div style="flex:1"><div class="alert-name">Saúde</div><div class="alert-desc">Consultas, exames</div></div><div class="toggle"></div></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec-title">Canais secundários</div>
+      <div class="dual-row">
+
+        <div class="dual-card">
+          <div class="ch-head">
+            <div class="ch-icon"><svg class="icn" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></div>
+            <div><div class="ch-name">Telegram</div><div class="ch-sub">Arquivos grandes e relatórios</div></div>
+            <span class="ch-status off">Configurar</span>
+          </div>
+
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--hair-2)">
+            <div class="cfg-ttl">Recursos</div>
+            <div class="tg-feature"><svg class="icn" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>Arquivos até <strong>2 GB</strong> (vs 16 MB do WhatsApp)</div>
+            <div class="tg-feature"><svg class="icn" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>Recebe relatórios em PDF e planilhas</div>
+            <div class="tg-feature"><svg class="icn" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Armazena contratos e plantas</div>
+            <div class="tg-feature"><svg class="icn" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Busca por mensagem e arquivo</div>
+          </div>
+
+          <div class="info-note" style="margin-top:10px"><strong>Como conectar:</strong> abra o Telegram, procure <code>@BotFather</code>, crie um bot, cole o token aqui.</div>
+
+          <button class="btn btn-primary" style="margin-top:10px;width:100%;justify-content:center">Configurar bot do Telegram</button>
+        </div>
+
+        <div class="dual-card">
+          <div class="ch-head">
+            <div class="ch-icon"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg></div>
+            <div><div class="ch-name">Discord</div><div class="ch-sub">Servidor com canal por agente</div></div>
+            <span class="ch-status idle">Pendente</span>
+          </div>
+
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--hair-2)">
+            <div class="cfg-ttl">Canais previstos</div>
+            <div class="dc-channels">
+              <div class="dc-chan">#dr-silva</div>
+              <div class="dc-chan">#ricardo</div>
+              <div class="dc-chan">#engenheiro</div>
+              <div class="dc-chan">#ana</div>
+              <div class="dc-chan">#diretor</div>
+              <div class="dc-chan">#clara</div>
+              <div class="dc-chan briefing">#briefing-diario</div>
+              <div class="dc-chan alerts">#urgencias</div>
+              <div class="dc-chan internal" style="grid-column:span 2">#agentes-internos</div>
+            </div>
+          </div>
+
+          <div class="info-note" style="margin-top:10px"><strong>Ideal para:</strong> histórico pesquisável longo, monitorar comunicação entre agentes, acessar de qualquer dispositivo.</div>
+
+          <button class="btn btn-primary" style="margin-top:10px;width:100%;justify-content:center">Criar servidor Discord</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec-title">Log unificado de mensagens</div>
+      <div class="logs-card">
+        <div class="logs-hdr">
+          <div class="logs-ttl">Últimas mensagens (todos os canais)</div>
+          <div class="logs-filter">
+            <button class="lf-btn active">Todos</button>
+            <button class="lf-btn">WhatsApp</button>
+            <button class="lf-btn">Telegram</button>
+            <button class="lf-btn">Discord</button>
+          </div>
+        </div>
+
+        <div class="log-item">
+          <div class="log-ch">WA</div>
+          <div class="log-main">
+            <div class="log-row1"><span class="log-from">Felipe</span><span class="log-dir">→</span><span class="log-agent" style="background:#f3e8ff;color:#6d28d9;border-color:#e9d5ff">Dr. Silva</span><span class="badge b-green">respondida</span></div>
+            <div class="log-msg">"S, pode avisar" · confirmação para contactar Dr. Carlos Lima</div>
+          </div>
+          <div class="log-time">07:17</div>
+        </div>
+
+        <div class="log-item">
+          <div class="log-ch">WA</div>
+          <div class="log-main">
+            <div class="log-row1"><span class="log-agent" style="background:#f3e8ff;color:#6d28d9;border-color:#e9d5ff">Dr. Silva</span><span class="log-dir">→</span><span class="log-from">Felipe</span><span class="badge b-red">urgente</span></div>
+            <div class="log-msg">Processo 0001234-56.2024 · prazo em 12 dias · OK hoje?</div>
+          </div>
+          <div class="log-time">07:16</div>
+        </div>
+
+        <div class="log-item">
+          <div class="log-ch">WA</div>
+          <div class="log-main">
+            <div class="log-row1"><span class="log-from">Felipe</span><span class="log-dir">→</span><span class="log-agent b-indigo">Hub menu</span></div>
+            <div class="log-msg">"menu" · solicitação de menu de agentes</div>
+          </div>
+          <div class="log-time">07:15</div>
+        </div>
+
+        <div class="log-item">
+          <div class="log-ch">WA</div>
+          <div class="log-main">
+            <div class="log-row1"><span class="log-agent" style="background:#ecfdf5;color:#047857;border-color:#a7f3d0">Ricardo</span><span class="log-dir">→</span><span class="log-from">Felipe</span><span class="badge b-amber">confirmação</span></div>
+            <div class="log-msg">Fatura Nubank R$ 3.240 vence amanhã · pagar? (S/N)</div>
+          </div>
+          <div class="log-time">12:00</div>
+        </div>
+
+        <div class="log-item">
+          <div class="log-ch">WA</div>
+          <div class="log-main">
+            <div class="log-row1"><span class="log-from">Felipe</span><span class="log-dir">→</span><span class="log-agent" style="background:#ecfdf5;color:#047857;border-color:#a7f3d0">Ricardo</span><span class="badge b-green">respondida</span></div>
+            <div class="log-msg">"S" · autorização pagamento Nubank</div>
+          </div>
+          <div class="log-time">12:03</div>
+        </div>
+
+        <div class="log-item">
+          <div class="log-ch">WA</div>
+          <div class="log-main">
+            <div class="log-row1"><span class="log-agent" style="background:#fdf2f8;color:#be185d;border-color:#fbcfe8">Ana</span><span class="log-dir">→</span><span class="log-from">Felipe</span><span class="badge b-indigo">lembrete</span></div>
+            <div class="log-msg">Aniversário Ana amanhã · Mistura Oficial 20h reservada · confirma?</div>
+          </div>
+          <div class="log-time">12:01</div>
+        </div>
+
+        <div class="log-item">
+          <div class="log-ch">WA</div>
+          <div class="log-main">
+            <div class="log-row1"><span class="log-from">Felipe</span><span class="log-dir">→</span><span class="log-agent" style="background:#fef2f2;color:#b91c1c;border-color:#fecaca">TODOS</span><span class="badge b-red">urgente</span></div>
+            <div class="log-msg">"urgente preciso dos prazos" · acionamento simultâneo 8 agentes</div>
+          </div>
+          <div class="log-time">14:22</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+document.querySelectorAll('.toggle').forEach(t => t.addEventListener('click', () => t.classList.toggle('on')));
+document.querySelectorAll('.lf-btn').forEach(b => b.addEventListener('click', function(){document.querySelectorAll('.lf-btn').forEach(x=>x.classList.remove('active'));this.classList.add('active')}));
+</script>
+</body>
+</html>
