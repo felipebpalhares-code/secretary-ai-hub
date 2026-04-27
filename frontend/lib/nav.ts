@@ -17,8 +17,8 @@ export const NAV: NavGroup[] = [
     items: [
       { href: "/quem-sou-eu", label: "Quem Sou Eu", icon: "user" },
       { href: "/", label: "Painel", icon: "grid" },
-      { href: "/agentes", label: "Agentes", icon: "bot", count: 8 },
-      { href: "/bater-papo", label: "Bater Papo", icon: "chat", count: 5, countVariant: "alert" },
+      { href: "/agentes", label: "Agentes", icon: "bot" },
+      { href: "/bater-papo", label: "Bater Papo", icon: "chat" },
     ],
   },
   {

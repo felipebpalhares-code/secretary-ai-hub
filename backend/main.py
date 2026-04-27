@@ -9,6 +9,8 @@ from services.database import init_db
 from services.scheduler import start_scheduler, stop_scheduler
 from routes.connections import router as connections_router
 from routes.banks import router as banks_router
+from routes.profile import router as profile_router
+from routes.utils import router as utils_router
 
 
 @asynccontextmanager
@@ -35,6 +37,8 @@ app.add_middleware(
 
 app.include_router(connections_router)
 app.include_router(banks_router)
+app.include_router(profile_router)
+app.include_router(utils_router)
 
 
 @app.get("/health")

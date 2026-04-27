@@ -10,19 +10,19 @@ import {
   ObjetivosTab,
 } from "@/components/profile/tabs"
 
-const TABS = [
-  { id: "identidade", label: "Identidade", icon: "user" as const },
-  { id: "empresarial", label: "Empresarial", icon: "building" as const },
-  { id: "familia", label: "Família", icon: "users" as const },
-  { id: "financeiro", label: "Financeiro", icon: "money" as const },
-  { id: "juridico", label: "Jurídico", icon: "shield" as const, notif: true },
-  { id: "acessos", label: "Acessos", icon: "lock" as const },
-  { id: "objetivos", label: "Objetivos", icon: "target" as const },
-]
+export function ProfileTabs({ legalDeadlineSoon = false }: { legalDeadlineSoon?: boolean }) {
+  const tabs = [
+    { id: "identidade", label: "Identidade", icon: "user" as const },
+    { id: "empresarial", label: "Empresarial", icon: "building" as const },
+    { id: "familia", label: "Família", icon: "users" as const },
+    { id: "financeiro", label: "Financeiro", icon: "money" as const },
+    { id: "juridico", label: "Jurídico", icon: "shield" as const, notif: legalDeadlineSoon },
+    { id: "acessos", label: "Acessos", icon: "lock" as const },
+    { id: "objetivos", label: "Objetivos", icon: "target" as const },
+  ]
 
-export function ProfileTabs() {
   return (
-    <Tabs tabs={TABS} defaultActive="identidade">
+    <Tabs tabs={tabs} defaultActive="identidade">
       {(active) => (
         <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-5">
           {active === "identidade" && <IdentidadeTab />}
