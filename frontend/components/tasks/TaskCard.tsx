@@ -1,4 +1,6 @@
 "use client"
+import { useSortable } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 import type { TaskColumn, TaskItem } from "@/lib/api"
 import { Icon } from "@/components/Icon"
 import { PRIORITY_LABEL, dueClass, dueStateOf, fmtDue } from "./_helpers"
@@ -7,27 +9,49 @@ export function TaskCard({
   task,
   column,
   onClick,
+  isDragOverlay = false,
 }: {
   task: TaskItem
   column: TaskColumn | undefined
-  onClick: () => void
+  onClick?: () => void
+  isDragOverlay?: boolean
 }) {
+  const sortable = useSortable({
+    id: task.id,
+    data: { type: "task", task },
+    disabled: isDragOverlay,
+  })
+
   const isDone = !!column?.is_done_column
   const due = fmtDue(task)
   const dueCls = dueClass(dueStateOf(task))
   const prio = task.priority ? PRIORITY_LABEL[task.priority] : null
 
+  const style = isDragOverlay
+    ? undefined
+    : {
+        transform: CSS.Transform.toString(sortable.transform),
+        transition: sortable.transition,
+        opacity: sortable.isDragging ? 0.4 : 1,
+      }
+
   return (
     <div
-      role="button"
-      tabIndex={0}
-      onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") onClick()
+      ref={isDragOverlay ? undefined : sortable.setNodeRef}
+      style={style}
+      {...(isDragOverlay ? {} : sortable.attributes)}
+      {...(isDragOverlay ? {} : sortable.listeners)}
+      onClick={(e) => {
+        if (sortable.isDragging) return
+        // Distingue click de drag: só dispara se não houve transformação significativa
+        e.stopPropagation()
+        onClick?.()
       }}
-      className={`bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:shadow-sm transition-all ${
-        isDone ? "opacity-60" : ""
-      }`}
+      className={`bg-white border rounded-lg p-4 hover:shadow-sm transition-all select-none ${
+        isDragOverlay
+          ? "border-indigo-300 ring-2 ring-indigo-200 shadow-lg cursor-grabbing"
+          : "border-gray-200 cursor-grab active:cursor-grabbing"
+      } ${isDone ? "opacity-60" : ""}`}
     >
       <div
         className={`text-[14px] font-medium text-gray-900 leading-snug ${
