@@ -1,11 +1,14 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Icon } from "@/components/Icon"
 import { cn } from "@/lib/cn"
 import { MiniCalendar } from "@/components/agenda/MiniCalendar"
 import { WeekView } from "@/components/agenda/WeekView"
 import { EventDetail } from "@/components/agenda/EventDetail"
 import { WEEK_EVENTS } from "@/lib/agenda-data"
+import { listTaskColumns, listTasks, type TaskColumn, type TaskItem } from "@/lib/api"
+import { TaskDetailModal } from "@/components/tasks/TaskDetailModal"
+import { dueClass, dueStateOf, fmtDue } from "@/components/tasks/_helpers"
 
 const CATEGORIES = [
   { id: "reunioes", label: "Reuniões", color: "bg-blue-600", count: 12 },
@@ -31,6 +34,34 @@ export function AgendaHub() {
   const [cats, setCats] = useState<Record<string, boolean>>(
     Object.fromEntries(CATEGORIES.slice(0, 7).map((c) => [c.id, true]))
   )
+
+  // Tarefas com prazo
+  const [taskColumns, setTaskColumns] = useState<TaskColumn[]>([])
+  const [tasksWithDue, setTasksWithDue] = useState<TaskItem[]>([])
+  const [openTask, setOpenTask] = useState<TaskItem | null>(null)
+
+  const reloadTasks = async () => {
+    try {
+      const [cols, all] = await Promise.all([listTaskColumns(), listTasks()])
+      setTaskColumns(cols)
+      const sevenDays = 7 * 24 * 60 * 60 * 1000
+      const cutoff = Date.now() + sevenDays
+      const dueColumns = new Set(cols.filter((c) => c.is_done_column).map((c) => c.id))
+      const filtered = all
+        .filter((t) => t.due_date && !dueColumns.has(t.column_id))
+        .filter((t) => new Date(t.due_date as string).getTime() < cutoff)
+        .sort((a, b) =>
+          new Date(a.due_date as string).getTime() - new Date(b.due_date as string).getTime(),
+        )
+      setTasksWithDue(filtered)
+    } catch {
+      // silencioso — agenda continua funcionando sem tasks
+    }
+  }
+
+  useEffect(() => {
+    void reloadTasks()
+  }, [])
 
   return (
     <div className="flex-1 flex overflow-hidden min-w-0">
@@ -123,6 +154,43 @@ export function AgendaHub() {
           </div>
         </div>
 
+        {tasksWithDue.length > 0 && (
+          <div className="bg-card border border-dashed border-hair rounded-md px-3 py-2.5 shrink-0">
+            <div className="flex items-center gap-2 mb-2">
+              <Icon name="check-square" size={13} className="text-ink-3" />
+              <span className="text-[10.5px] font-bold text-ink-3 uppercase tracking-[.07em]">
+                Tarefas com prazo (próximos 7 dias)
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {tasksWithDue.map((t) => {
+                const ds = dueStateOf(t)
+                const baseCls = dueClass(ds)
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => setOpenTask(t)}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 border border-dashed bg-bg rounded-md px-2 py-1 text-[11.5px] font-medium hover:bg-card transition-colors",
+                      ds === "overdue"
+                        ? "border-red-300"
+                        : ds === "today"
+                          ? "border-indigo-300"
+                          : "border-hair"
+                    )}
+                  >
+                    <Icon name="check-square" size={11} className={baseCls} />
+                    <span className="text-ink truncate max-w-[200px]">{t.title}</span>
+                    <span className={cn("text-[10.5px] font-semibold", baseCls)}>
+                      {fmtDue(t)}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         <WeekView selected={selectedEvent} onSelect={setSelectedEvent} />
       </div>
 
@@ -132,6 +200,14 @@ export function AgendaHub() {
           onClose={() => setSelectedEvent(null)}
         />
       )}
+
+      <TaskDetailModal
+        open={openTask !== null}
+        task={openTask}
+        columns={taskColumns}
+        onClose={() => setOpenTask(null)}
+        onChanged={reloadTasks}
+      />
     </div>
   )
 }
