@@ -1,13 +1,14 @@
 """
 Utilitários públicos pro frontend:
   - GET /api/utils/cnpj/{cnpj}  → consulta CNPJ na BrasilAPI (gratuita, sem chave)
-                                   formato simplificado + QSA (sócios) + cache em memória 24h
+                                   formato simplificado + QSA + dados extras
+                                   cache em memória 24h
   - GET /api/utils/cep/{cep}    → reservado pra futura implementação de endereços
 """
 from __future__ import annotations
 import re
 import time
-from typing import Any
+from typing import Any, Optional
 
 import httpx
 from fastapi import APIRouter, HTTPException
@@ -16,9 +17,20 @@ router = APIRouter(prefix="/api/utils", tags=["utils"])
 
 BRASILAPI_CNPJ = "https://brasilapi.com.br/api/cnpj/v1/{cnpj}"
 TIMEOUT_S = 5.0
-CACHE_TTL = 24 * 60 * 60  # 24h
+CACHE_TTL = 24 * 60 * 60
 
 _cnpj_cache: dict[str, tuple[float, dict[str, Any]]] = {}
+
+
+def _to_float(v: Any) -> Optional[float]:
+    if v is None or v == "":
+        return None
+    try:
+        if isinstance(v, str):
+            v = v.replace(",", ".")
+        return float(v)
+    except (TypeError, ValueError):
+        return None
 
 
 def _normalize_cnpj_status(situacao: Any) -> str:
@@ -30,25 +42,15 @@ def _normalize_cnpj_status(situacao: Any) -> str:
 
 
 def _normalize_qsa(qsa_raw: Any) -> list[dict[str, Any]]:
-    """Mapeia o QSA bruto da BrasilAPI pro formato simplificado que o frontend usa."""
     if not isinstance(qsa_raw, list):
         return []
     out: list[dict[str, Any]] = []
     for item in qsa_raw:
         if not isinstance(item, dict):
             continue
-        pct: float | None
-        raw_pct = item.get("percentual_capital_social")
-        try:
-            if raw_pct is None or raw_pct == "":
-                pct = None
-            else:
-                pct = float(raw_pct)
-                if pct == 0:
-                    pct = None  # 0 normalmente significa "não informado"
-        except (TypeError, ValueError):
+        pct = _to_float(item.get("percentual_capital_social"))
+        if pct == 0:
             pct = None
-
         out.append({
             "nome": item.get("nome_socio"),
             "qual": item.get("qualificacao_socio"),
@@ -56,6 +58,42 @@ def _normalize_qsa(qsa_raw: Any) -> list[dict[str, Any]]:
             "percentual": pct,
         })
     return out
+
+
+def _format_address(d: dict[str, Any]) -> Optional[str]:
+    parts = [
+        d.get("logradouro") or "",
+        d.get("numero") or "",
+        d.get("complemento") or "",
+        d.get("bairro") or "",
+    ]
+    full = ", ".join(p.strip() for p in parts if p and p.strip())
+    return full or None
+
+
+def _from_brasilapi(data: dict[str, Any]) -> dict[str, Any]:
+    ddd = data.get("ddd_telefone_1")
+    return {
+        "razao_social": data.get("razao_social") or data.get("nome_fantasia"),
+        "nome_fantasia": data.get("nome_fantasia"),
+        "ramo": data.get("cnae_fiscal_descricao"),
+        "status": _normalize_cnpj_status(data.get("situacao_cadastral")),
+        "capital_social": _to_float(data.get("capital_social")),
+        "porte": data.get("descricao_porte") or data.get("porte"),
+        "natureza_juridica": (
+            data.get("descricao_natureza_juridica") or data.get("natureza_juridica")
+        ),
+        "address_full": _format_address(data),
+        "municipio": data.get("municipio"),
+        "uf": data.get("uf"),
+        "cep": str(data.get("cep") or "") or None,
+        "telefone": str(ddd).strip() if ddd else None,
+        "email": data.get("email"),
+        "simples_nacional": bool(data.get("opcao_pelo_simples")),
+        "mei": bool(data.get("opcao_pelo_mei")),
+        "qsa": _normalize_qsa(data.get("qsa")),
+        "source": "brasilapi",
+    }
 
 
 @router.get("/cnpj/{cnpj}")
@@ -87,11 +125,6 @@ async def lookup_cnpj(cnpj: str) -> dict[str, Any]:
     except Exception:
         raise HTTPException(status_code=502, detail="BrasilAPI retornou resposta inválida")
 
-    payload = {
-        "razao_social": data.get("razao_social") or data.get("nome_fantasia"),
-        "ramo": data.get("cnae_fiscal_descricao"),
-        "status": _normalize_cnpj_status(data.get("situacao_cadastral")),
-        "qsa": _normalize_qsa(data.get("qsa")),
-    }
+    payload = _from_brasilapi(data)
     _cnpj_cache[digits] = (now, payload)
     return payload

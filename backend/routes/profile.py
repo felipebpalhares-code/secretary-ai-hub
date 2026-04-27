@@ -85,6 +85,18 @@ def _company_to_out(c: Company) -> CompanyOut:
         ownership_pct=c.ownership_pct,
         is_active=bool(c.is_active),
         systems=json.loads(c.systems_json or "[]"),
+        nome_fantasia=c.nome_fantasia,
+        capital_social=c.capital_social,
+        porte=c.porte,
+        natureza_juridica=c.natureza_juridica,
+        address_full=c.address_full,
+        municipio=c.municipio,
+        uf=c.uf,
+        cep=c.cep,
+        telefone=c.telefone,
+        email=c.email,
+        simples_nacional=bool(c.simples_nacional),
+        mei=bool(c.mei),
     )
 
 
@@ -249,12 +261,9 @@ def list_companies(db: Session = Depends(get_session)):
 
 @router.post("/companies", response_model=CompanyOut, status_code=201)
 def create_company(payload: CompanyIn, db: Session = Depends(get_session)):
-    c = Company(
-        name=payload.name, cnpj=payload.cnpj, industry=payload.industry,
-        role=payload.role, ownership_pct=payload.ownership_pct,
-        is_active=payload.is_active,
-        systems_json=json.dumps(payload.systems, ensure_ascii=False),
-    )
+    data = payload.model_dump()
+    systems = data.pop("systems", [])
+    c = Company(systems_json=json.dumps(systems, ensure_ascii=False), **data)
     db.add(c); db.commit(); db.refresh(c)
     return _company_to_out(c)
 

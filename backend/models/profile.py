@@ -55,15 +55,28 @@ class Address(Base):
 
 class Company(Base):
     __tablename__ = "companies"
-    id            = Column(Integer, primary_key=True)
-    name          = Column(String, nullable=False)
-    cnpj          = Column(EncryptedString)
-    industry      = Column(String)
-    role          = Column(String)
-    ownership_pct = Column(Float)
-    is_active     = Column(Boolean, default=True)
-    systems_json  = Column(Text, default="[]")  # lista de strings (SAP, Salesforce, …)
-    partners      = relationship("Partner", back_populates="company", cascade="all, delete-orphan")
+    id                = Column(Integer, primary_key=True)
+    name              = Column(String, nullable=False)
+    cnpj              = Column(EncryptedString)
+    industry          = Column(String)
+    role              = Column(String)
+    ownership_pct     = Column(Float)
+    is_active         = Column(Boolean, default=True)
+    systems_json      = Column(Text, default="[]")  # lista de strings (SAP, Salesforce, …)
+    # Dados da Receita Federal (BrasilAPI / OpenCNPJ)
+    nome_fantasia     = Column(String)
+    capital_social    = Column(Float)
+    porte             = Column(String)        # "ME", "EPP", "Demais"
+    natureza_juridica = Column(String)
+    address_full      = Column(String)        # logradouro + número + complemento + bairro
+    municipio         = Column(String)
+    uf                = Column(String)
+    cep               = Column(String)
+    telefone          = Column(String)
+    email             = Column(String)
+    simples_nacional  = Column(Boolean, default=False)
+    mei               = Column(Boolean, default=False)
+    partners          = relationship("Partner", back_populates="company", cascade="all, delete-orphan")
 
 
 class Partner(Base):

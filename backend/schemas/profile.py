@@ -43,6 +43,19 @@ class CompanyIn(BaseModel):
     ownership_pct: Optional[float] = None
     is_active: bool = True
     systems: List[str] = []
+    # Dados da Receita Federal
+    nome_fantasia: Optional[str] = None
+    capital_social: Optional[float] = None
+    porte: Optional[str] = None
+    natureza_juridica: Optional[str] = None
+    address_full: Optional[str] = None
+    municipio: Optional[str] = None
+    uf: Optional[str] = None
+    cep: Optional[str] = None
+    telefone: Optional[str] = None
+    email: Optional[str] = None
+    simples_nacional: bool = False
+    mei: bool = False
 
 
 class CompanyOut(CompanyIn):

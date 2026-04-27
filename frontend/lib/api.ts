@@ -256,6 +256,18 @@ export type Company = {
   ownership_pct: number | null
   is_active: boolean
   systems: string[]
+  nome_fantasia: string | null
+  capital_social: number | null
+  porte: string | null
+  natureza_juridica: string | null
+  address_full: string | null
+  municipio: string | null
+  uf: string | null
+  cep: string | null
+  telefone: string | null
+  email: string | null
+  simples_nacional: boolean
+  mei: boolean
 }
 
 export type CompanyInput = Omit<Company, "id">
@@ -554,9 +566,22 @@ export type CnpjQsaItem = {
 
 export type CnpjLookup = {
   razao_social: string | null
+  nome_fantasia: string | null
   ramo: string | null
   status: "active" | "inactive"
+  capital_social: number | null
+  porte: string | null
+  natureza_juridica: string | null
+  address_full: string | null
+  municipio: string | null
+  uf: string | null
+  cep: string | null
+  telefone: string | null
+  email: string | null
+  simples_nacional: boolean
+  mei: boolean
   qsa: CnpjQsaItem[]
+  source: "brasilapi" | "opencnpj" | string
 }
 
 export async function lookupCnpj(cnpj: string) {

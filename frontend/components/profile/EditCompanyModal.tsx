@@ -28,6 +28,18 @@ const empty: CompanyInput = {
   ownership_pct: null,
   is_active: true,
   systems: [],
+  nome_fantasia: null,
+  capital_social: null,
+  porte: null,
+  natureza_juridica: null,
+  address_full: null,
+  municipio: null,
+  uf: null,
+  cep: null,
+  telefone: null,
+  email: null,
+  simples_nacional: false,
+  mei: false,
 }
 
 type MatchInfo =
@@ -39,7 +51,7 @@ type MatchInfo =
 type LookupState =
   | { kind: "idle" }
   | { kind: "loading" }
-  | { kind: "ok"; match: MatchInfo }
+  | { kind: "ok"; match: MatchInfo; source: string }
   | { kind: "error"; message: string }
 
 function onlyDigits(v: string | null | undefined) {
@@ -129,8 +141,20 @@ export function EditCompanyModal({
             match.kind === "matched" && match.percentual != null
               ? match.percentual
               : f.ownership_pct,
+          nome_fantasia: data.nome_fantasia ?? f.nome_fantasia,
+          capital_social: data.capital_social ?? f.capital_social,
+          porte: data.porte ?? f.porte,
+          natureza_juridica: data.natureza_juridica ?? f.natureza_juridica,
+          address_full: data.address_full ?? f.address_full,
+          municipio: data.municipio ?? f.municipio,
+          uf: data.uf ?? f.uf,
+          cep: data.cep ?? f.cep,
+          telefone: data.telefone ?? f.telefone,
+          email: data.email ?? f.email,
+          simples_nacional: data.simples_nacional,
+          mei: data.mei,
         }))
-        setLookup({ kind: "ok", match })
+        setLookup({ kind: "ok", match, source: data.source })
       } catch {
         setLookup({
           kind: "error",
@@ -342,6 +366,8 @@ export function EditCompanyModal({
           </FormField>
         </div>
       </div>
+
+      <ReceitaSection form={form} sourceLabel={lookup.kind === "ok" ? lookup.source : null} />
     </Modal>
   )
 }
@@ -380,6 +406,111 @@ function PartnerMatchBanner({ state }: { state: LookupState }) {
     )
   }
   return null
+}
+
+function fmtBRL(v: number | null): string {
+  if (v == null || isNaN(v)) return "—"
+  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0 })
+}
+
+const SOURCE_LABEL: Record<string, string> = {
+  brasilapi: "BrasilAPI",
+  opencnpj: "OpenCNPJ",
+}
+
+function ReceitaSection({
+  form,
+  sourceLabel,
+}: {
+  form: CompanyInput
+  sourceLabel: string | null
+}) {
+  // Só mostra se tem ao menos um dado da Receita preenchido
+  const hasData =
+    form.nome_fantasia ||
+    form.capital_social != null ||
+    form.porte ||
+    form.natureza_juridica ||
+    form.address_full ||
+    form.municipio ||
+    form.telefone ||
+    form.email ||
+    form.simples_nacional ||
+    form.mei
+
+  if (!hasData) return null
+
+  const source = sourceLabel ? (SOURCE_LABEL[sourceLabel] ?? sourceLabel) : null
+
+  return (
+    <div className="mt-5 pt-5 border-t border-hair">
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-[11px] font-bold text-ink-3 uppercase tracking-[.07em]">
+          Dados da Receita Federal
+        </div>
+        {source && (
+          <span className="text-[10px] font-semibold text-ink-3 bg-bg border border-hair px-2 py-0.5 rounded">
+            via {source}
+          </span>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2 bg-bg border border-hair rounded-md p-4 text-[12px]">
+        {form.nome_fantasia && (
+          <Field label="Nome fantasia" value={form.nome_fantasia} />
+        )}
+        {form.capital_social != null && (
+          <Field label="Capital social" value={fmtBRL(form.capital_social)} mono />
+        )}
+        {form.porte && <Field label="Porte" value={form.porte} />}
+        {form.natureza_juridica && (
+          <Field label="Natureza jurídica" value={form.natureza_juridica} />
+        )}
+        {form.address_full && (
+          <Field label="Endereço" value={form.address_full} colSpan={2} />
+        )}
+        {(form.municipio || form.uf) && (
+          <Field label="Cidade / UF" value={`${form.municipio ?? ""}${form.uf ? " — " + form.uf : ""}`} />
+        )}
+        {form.cep && <Field label="CEP" value={form.cep} mono />}
+        {form.telefone && <Field label="Telefone" value={form.telefone} mono />}
+        {form.email && <Field label="E-mail" value={form.email} />}
+        {(form.simples_nacional || form.mei) && (
+          <div className="col-span-2 flex gap-1.5 mt-1">
+            {form.simples_nacional && (
+              <span className="text-[10.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded">
+                Simples Nacional
+              </span>
+            )}
+            {form.mei && (
+              <span className="text-[10.5px] font-bold bg-accent-soft text-accent border border-indigo-200 px-2 py-0.5 rounded">
+                MEI
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function Field({
+  label,
+  value,
+  mono,
+  colSpan,
+}: {
+  label: string
+  value: string
+  mono?: boolean
+  colSpan?: number
+}) {
+  return (
+    <div className={colSpan === 2 ? "col-span-2" : ""}>
+      <div className="text-[10.5px] font-bold text-ink-3 uppercase tracking-[.05em]">{label}</div>
+      <div className={`text-ink font-semibold mt-0.5 ${mono ? "mono" : ""}`}>{value}</div>
+    </div>
+  )
 }
 
 function SpinnerIcon() {
