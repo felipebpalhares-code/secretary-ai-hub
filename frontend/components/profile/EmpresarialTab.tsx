@@ -224,12 +224,22 @@ export function EmpresarialTab() {
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => hasUserCpf && setSearchByCpfOpen(true)}
+                onClick={() => {
+                  if (hasUserCpf) setSearchByCpfOpen(true)
+                }}
                 disabled={!hasUserCpf}
-                title={hasUserCpf ? "" : "Cadastre seu CPF na aba Identidade primeiro"}
-                className="inline-flex items-center gap-[5px] text-[11.5px] font-semibold text-accent border border-hair px-[11px] py-[5px] rounded-md hover:border-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-hair"
+                title={
+                  hasUserCpf
+                    ? "Buscar empresas vinculadas ao seu CPF"
+                    : "Cadastre seu CPF na aba Identidade primeiro"
+                }
+                className={
+                  hasUserCpf
+                    ? "inline-flex items-center gap-[5px] text-[11.5px] font-semibold text-accent border border-hair px-[11px] py-[5px] rounded-md hover:border-accent transition-colors"
+                    : "inline-flex items-center gap-[5px] text-[11.5px] font-semibold text-ink-3 bg-hair-2 border border-hair px-[11px] py-[5px] rounded-md cursor-not-allowed"
+                }
               >
-                <Icon name="search" size={13} />
+                <Icon name={hasUserCpf ? "search" : "lock"} size={13} />
                 Buscar pelo CPF
               </button>
               <AddBtn label="Nova empresa" onClick={() => setCompanyModal({ open: true, data: null })} />
