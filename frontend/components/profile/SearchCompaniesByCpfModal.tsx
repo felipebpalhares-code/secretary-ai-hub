@@ -1,8 +1,13 @@
 "use client"
 import { useEffect, useState } from "react"
+import type { ChangeEvent } from "react"
 import { Icon } from "@/components/Icon"
 import { Modal } from "@/components/ui/Modal"
-import { PrimaryButton, SecondaryButton } from "@/components/ui/FormField"
+import {
+  FormField,
+  PrimaryButton,
+  SecondaryButton,
+} from "@/components/ui/FormField"
 import {
   lookupCompaniesByCpf,
   lookupCnpj,
@@ -11,13 +16,42 @@ import {
   type CompanyByCpf,
   type CompanyInput,
 } from "@/lib/api"
+import { useIdentity } from "./identity-context"
 
-type State =
-  | { kind: "loading" }
-  | { kind: "list"; results: CompanyByCpf[] }
-  | { kind: "creating"; total: number; done: number; failed: number }
-  | { kind: "summary"; created: number; failed: number; skipped: number }
-  | { kind: "error"; message: string }
+/* ─── helpers ─── */
+
+function onlyDigits(s: string): string {
+  return s.replace(/\D/g, "")
+}
+
+function formatCpf(value: string): string {
+  const d = onlyDigits(value).slice(0, 11)
+  if (d.length <= 3) return d
+  if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`
+  if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`
+  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`
+}
+
+function formatCnpj(d: string): string {
+  if (d.length !== 14) return d
+  return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`
+}
+
+function isValidCpf(input: string): boolean {
+  const d = onlyDigits(input)
+  if (d.length !== 11) return false
+  if (/^(\d)\1{10}$/.test(d)) return false
+  let s1 = 0
+  for (let i = 0; i < 9; i++) s1 += parseInt(d[i], 10) * (10 - i)
+  let dv1 = 11 - (s1 % 11)
+  if (dv1 >= 10) dv1 = 0
+  if (dv1 !== parseInt(d[9], 10)) return false
+  let s2 = 0
+  for (let i = 0; i < 10; i++) s2 += parseInt(d[i], 10) * (11 - i)
+  let dv2 = 11 - (s2 % 11)
+  if (dv2 >= 10) dv2 = 0
+  return dv2 === parseInt(d[10], 10)
+}
 
 function fmtDateBR(iso: string | null) {
   if (!iso) return null
@@ -35,6 +69,25 @@ function prettifyQual(q: string | null): string | null {
     .join(" ")
 }
 
+function maskUserCpf(cpf: string | null): string | null {
+  if (!cpf) return null
+  const d = onlyDigits(cpf)
+  if (d.length !== 11) return null
+  return `***.***.***-${d.slice(-2)}`
+}
+
+/* ─── tipos de estado ─── */
+
+type Phase =
+  | { kind: "input" }
+  | { kind: "loading" }
+  | { kind: "list"; results: CompanyByCpf[] }
+  | { kind: "error"; message: string }
+  | { kind: "creating"; total: number; done: number; failed: number }
+  | { kind: "summary"; created: number; failed: number }
+
+/* ─── componente ─── */
+
 export function SearchCompaniesByCpfModal({
   open,
   onClose,
@@ -46,30 +99,72 @@ export function SearchCompaniesByCpfModal({
   existingCompanies: Company[]
   onSaved: () => void
 }) {
-  const [state, setState] = useState<State>({ kind: "loading" })
+  const { identity } = useIdentity()
+  const [cpfRaw, setCpfRaw] = useState("")
+  const [phase, setPhase] = useState<Phase>({ kind: "input" })
   const [selected, setSelected] = useState<Set<string>>(new Set())
+
+  const userCpfDigits = identity?.cpf ? onlyDigits(identity.cpf) : null
+  const userCpfMasked = maskUserCpf(identity?.cpf ?? null)
+  const cpfDigits = onlyDigits(cpfRaw)
+  const useUserCpfChecked = !!userCpfDigits && cpfDigits === userCpfDigits
 
   const existingCnpjs = new Set(
     existingCompanies
-      .map((c) => (c.cnpj ?? "").replace(/\D/g, ""))
+      .map((c) => onlyDigits(c.cnpj ?? ""))
       .filter((d) => d.length === 14),
   )
 
+  // Reseta ao fechar
   useEffect(() => {
-    if (!open) return
-    setState({ kind: "loading" })
-    setSelected(new Set())
-    lookupCompaniesByCpf()
-      .then((results) => setState({ kind: "list", results }))
-      .catch((e: unknown) =>
-        setState({
-          kind: "error",
-          message: e instanceof Error ? e.message : "Falha ao buscar empresas",
-        }),
-      )
+    if (open) {
+      setCpfRaw("")
+      setPhase({ kind: "input" })
+      setSelected(new Set())
+    }
   }, [open])
 
-  function toggle(cnpj: string) {
+  function onCpfChange(e: ChangeEvent<HTMLInputElement>) {
+    setCpfRaw(formatCpf(e.target.value))
+  }
+
+  function toggleUseUserCpf(checked: boolean) {
+    if (!userCpfDigits) return
+    setCpfRaw(checked ? formatCpf(userCpfDigits) : "")
+  }
+
+  async function handleSearch() {
+    const digits = onlyDigits(cpfRaw)
+    if (!isValidCpf(digits)) {
+      setPhase({ kind: "error", message: "CPF inválido. Verifique os dígitos." })
+      return
+    }
+    setPhase({ kind: "loading" })
+    try {
+      const results = await lookupCompaniesByCpf(digits)
+      setSelected(new Set())
+      setPhase({ kind: "list", results })
+    } catch (e: unknown) {
+      const raw = e instanceof Error ? e.message : "Falha ao consultar"
+      // O ApiError já mostra o detail — pegamos e limpamos
+      const lower = raw.toLowerCase()
+      let friendly: string
+      if (lower.includes("cpf inválido") || lower.includes("invalido")) {
+        friendly = "CPF inválido. Verifique os dígitos."
+      } else if (lower.includes("indisponível") || lower.includes("503")) {
+        friendly = "Serviço temporariamente indisponível."
+      } else {
+        friendly = "Não foi possível consultar a Receita. Tente novamente."
+      }
+      setPhase({ kind: "error", message: friendly })
+    }
+  }
+
+  function backToInput() {
+    setPhase({ kind: "input" })
+  }
+
+  function toggleSelect(cnpj: string) {
     setSelected((s) => {
       const next = new Set(s)
       if (next.has(cnpj)) next.delete(cnpj)
@@ -79,24 +174,22 @@ export function SearchCompaniesByCpfModal({
   }
 
   async function handleCreate() {
-    if (state.kind !== "list") return
-    const toCreate = state.results.filter((r) => selected.has(r.cnpj))
+    if (phase.kind !== "list") return
+    const toCreate = phase.results.filter((r) => selected.has(r.cnpj))
     if (toCreate.length === 0) return
 
     let done = 0
     let failed = 0
-    setState({ kind: "creating", total: toCreate.length, done: 0, failed: 0 })
+    setPhase({ kind: "creating", total: toCreate.length, done: 0, failed: 0 })
 
     for (const item of toCreate) {
       try {
-        // Enriquece com BrasilAPI (preenche ramo, capital social, endereço, etc.)
         let enriched: Awaited<ReturnType<typeof lookupCnpj>> | null = null
         try {
           enriched = await lookupCnpj(item.cnpj)
         } catch {
           enriched = null
         }
-
         const input: CompanyInput = {
           name: item.razao_social ?? enriched?.razao_social ?? `Empresa ${item.cnpj}`,
           cnpj: item.cnpj,
@@ -123,7 +216,7 @@ export function SearchCompaniesByCpfModal({
       } catch {
         failed++
       }
-      setState({
+      setPhase({
         kind: "creating",
         total: toCreate.length,
         done: done + failed,
@@ -132,61 +225,93 @@ export function SearchCompaniesByCpfModal({
     }
 
     onSaved()
-    setState({
-      kind: "summary",
-      created: done,
-      failed,
-      skipped: 0,
-    })
+    setPhase({ kind: "summary", created: done, failed })
   }
 
-  return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="Buscar empresas pelo CPF"
-      size="lg"
-      footer={renderFooter()}
-    >
-      {state.kind === "loading" && (
-        <div className="text-center py-10">
+  /* ─── renders ─── */
+
+  function renderBody() {
+    if (phase.kind === "input" || phase.kind === "error") {
+      return (
+        <>
+          <div className="text-[12.5px] text-ink-2 font-medium mb-4">
+            Digite um CPF para consultar empresas vinculadas na Receita Federal.
+          </div>
+
+          {phase.kind === "error" && (
+            <div className="bg-red-50 border border-red-200 text-red-800 text-[12.5px] font-semibold px-3 py-2 rounded mb-3">
+              {phase.message}
+            </div>
+          )}
+
+          <FormField
+            label="CPF"
+            hint="Usaremos a API CPF.CNPJ para a consulta. O CPF não é armazenado."
+          >
+            <input
+              type="text"
+              inputMode="numeric"
+              value={cpfRaw}
+              onChange={onCpfChange}
+              placeholder="000.000.000-00"
+              className="w-full bg-bg border border-hair rounded-md px-4 py-3 text-[16px] text-ink mono tracking-[.05em] placeholder:text-ink-3 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+              autoFocus
+            />
+          </FormField>
+
+          {userCpfMasked && (
+            <label className="flex items-center gap-2 cursor-pointer mt-2 select-none">
+              <input
+                type="checkbox"
+                checked={useUserCpfChecked}
+                onChange={(e) => toggleUseUserCpf(e.target.checked)}
+                className="accent-accent"
+              />
+              <span className="text-[11.5px] font-medium text-ink-2">
+                Usar meu CPF cadastrado{" "}
+                <span className="mono text-ink-3">({userCpfMasked})</span>
+              </span>
+            </label>
+          )}
+        </>
+      )
+    }
+
+    if (phase.kind === "loading") {
+      return (
+        <div className="text-center py-12">
           <div className="text-accent inline-flex items-center gap-2">
             <SpinnerIcon />
             <span className="text-[12.5px] font-semibold">
-              Consultando empresas vinculadas ao seu CPF…
+              Consultando empresas vinculadas ao CPF…
             </span>
           </div>
           <div className="text-[11px] text-ink-3 mt-2 font-medium">via CPF.CNPJ</div>
         </div>
-      )}
+      )
+    }
 
-      {state.kind === "error" && (
-        <div className="bg-red-50 border border-red-200 text-red-800 text-[12.5px] font-semibold px-4 py-3 rounded">
-          {state.message}
-        </div>
-      )}
-
-      {state.kind === "list" && state.results.length === 0 && (
+    if (phase.kind === "list" && phase.results.length === 0) {
+      return (
         <div className="text-center py-10">
           <div className="w-12 h-12 rounded-full bg-bg border border-hair flex items-center justify-center text-ink-3 mx-auto mb-3">
-            <Icon name="search" size={20} />
+            <Icon name="file" size={20} />
           </div>
           <div className="text-[13px] font-bold text-ink mb-1">
-            Nenhuma empresa vinculada a este CPF foi encontrada
-          </div>
-          <div className="text-[11.5px] text-ink-3 font-medium max-w-md mx-auto">
-            A Receita Federal não retornou empresas em que você é sócio ou administrador.
+            Nenhuma empresa encontrada vinculada a este CPF.
           </div>
         </div>
-      )}
+      )
+    }
 
-      {state.kind === "list" && state.results.length > 0 && (
+    if (phase.kind === "list") {
+      return (
         <>
           <div className="text-[12.5px] font-semibold text-ink mb-3">
-            Encontramos {state.results.length} empresa(s). Selecione quais cadastrar:
+            Encontramos {phase.results.length} empresa(s). Selecione quais cadastrar:
           </div>
           <div className="border border-hair rounded-md overflow-hidden bg-card">
-            {state.results.map((r) => {
+            {phase.results.map((r) => {
               const already = existingCnpjs.has(r.cnpj)
               const isSelected = selected.has(r.cnpj)
               return (
@@ -200,7 +325,7 @@ export function SearchCompaniesByCpfModal({
                     type="checkbox"
                     disabled={already}
                     checked={!already && isSelected}
-                    onChange={() => toggle(r.cnpj)}
+                    onChange={() => toggleSelect(r.cnpj)}
                     className="mt-1 accent-accent"
                   />
                   <div className="flex-1 min-w-0">
@@ -239,70 +364,108 @@ export function SearchCompaniesByCpfModal({
             })}
           </div>
         </>
-      )}
+      )
+    }
 
-      {state.kind === "creating" && (
-        <div className="text-center py-10">
+    if (phase.kind === "creating") {
+      return (
+        <div className="text-center py-12">
           <div className="text-accent inline-flex items-center gap-2 mb-3">
             <SpinnerIcon />
             <span className="text-[12.5px] font-semibold">
-              Cadastrando {state.done} de {state.total}…
+              Cadastrando {phase.done} de {phase.total}…
             </span>
           </div>
           <div className="h-[3px] bg-hair-2 rounded-full overflow-hidden max-w-sm mx-auto">
             <div
               className="h-full bg-accent transition-all"
-              style={{ width: `${(state.done / state.total) * 100}%` }}
+              style={{ width: `${(phase.done / phase.total) * 100}%` }}
             />
           </div>
-          {state.failed > 0 && (
+          {phase.failed > 0 && (
             <div className="text-[11px] text-amber-700 font-semibold mt-2">
-              {state.failed} falharam até agora
+              {phase.failed} falharam até agora
             </div>
           )}
         </div>
-      )}
+      )
+    }
 
-      {state.kind === "summary" && (
+    if (phase.kind === "summary") {
+      return (
         <div className="text-center py-10">
           <div className="w-12 h-12 rounded-full bg-emerald-50 border-2 border-emerald-200 flex items-center justify-center text-ok mx-auto mb-3">
             <Icon name="check" size={22} />
           </div>
           <div className="text-[13px] font-bold text-ink">
-            {state.created} empresa(s) cadastrada(s)
+            {phase.created} empresa(s) cadastrada(s)
           </div>
-          {state.failed > 0 && (
+          {phase.failed > 0 && (
             <div className="text-[11.5px] text-amber-700 font-semibold mt-1">
-              {state.failed} falharam — você pode tentar de novo manualmente.
+              {phase.failed} falharam — você pode tentar de novo manualmente.
             </div>
           )}
         </div>
-      )}
-    </Modal>
-  )
+      )
+    }
+
+    return null
+  }
 
   function renderFooter() {
-    if (state.kind === "list" && state.results.length > 0) {
-      const count = Array.from(selected).filter((c) => !existingCnpjs.has(c)).length
+    if (phase.kind === "input") {
+      const ready = cpfDigits.length === 11
       return (
         <>
           <SecondaryButton onClick={onClose}>Cancelar</SecondaryButton>
+          <PrimaryButton onClick={handleSearch} disabled={!ready}>
+            Buscar
+          </PrimaryButton>
+        </>
+      )
+    }
+    if (phase.kind === "loading") {
+      return <SecondaryButton onClick={onClose}>Cancelar</SecondaryButton>
+    }
+    if (phase.kind === "error") {
+      return (
+        <>
+          <SecondaryButton onClick={onClose}>Cancelar</SecondaryButton>
+          <PrimaryButton onClick={backToInput}>Tentar novamente</PrimaryButton>
+        </>
+      )
+    }
+    if (phase.kind === "list" && phase.results.length === 0) {
+      return <PrimaryButton onClick={backToInput}>Buscar outro CPF</PrimaryButton>
+    }
+    if (phase.kind === "list") {
+      const count = Array.from(selected).filter((c) => !existingCnpjs.has(c)).length
+      return (
+        <>
+          <SecondaryButton onClick={backToInput}>Voltar</SecondaryButton>
           <PrimaryButton onClick={handleCreate} disabled={count === 0}>
             Cadastrar {count > 0 ? `${count} selecionada(s)` : "selecionadas"}
           </PrimaryButton>
         </>
       )
     }
-    if (state.kind === "summary" || state.kind === "error" || (state.kind === "list" && state.results.length === 0)) {
+    if (phase.kind === "summary") {
       return <PrimaryButton onClick={onClose}>Fechar</PrimaryButton>
     }
     return null
   }
-}
 
-function formatCnpj(d: string): string {
-  if (d.length !== 14) return d
-  return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Buscar empresas pelo CPF"
+      size="lg"
+      footer={renderFooter()}
+    >
+      {renderBody()}
+    </Modal>
+  )
 }
 
 function SpinnerIcon() {

@@ -600,8 +600,9 @@ export type CompanyByCpf = {
   situacao: "active" | "inactive"
 }
 
-export async function lookupCompaniesByCpf() {
-  return request<CompanyByCpf[]>("/api/utils/companies-by-cpf")
+export async function lookupCompaniesByCpf(cpf: string) {
+  const digits = cpf.replace(/\D/g, "")
+  return request<CompanyByCpf[]>(`/api/utils/companies-by-cpf/${digits}`)
 }
 
 /* ───────── Banner stats ───────── */

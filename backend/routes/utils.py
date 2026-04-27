@@ -1,10 +1,11 @@
 """
 Utilitários públicos pro frontend:
-  - GET /api/utils/cnpj/{cnpj}        → consulta CNPJ via BrasilAPI (fallback OpenCNPJ).
-                                         Cache em memória 24h indexado pelo CNPJ.
-  - GET /api/utils/companies-by-cpf   → busca empresas vinculadas ao CPF da identidade
-                                         via CPF.CNPJ (pacote 15). Cache 24h.
-  - GET /api/utils/cep/{cep}          → reservado pra futura implementação de endereços.
+  - GET /api/utils/cnpj/{cnpj}              → consulta CNPJ via BrasilAPI (fallback OpenCNPJ).
+                                                Cache em memória 24h por CNPJ.
+  - GET /api/utils/companies-by-cpf/{cpf}   → busca empresas vinculadas a um CPF arbitrário
+                                                via CPF.CNPJ (pacote 15). Cache 24h.
+                                                CPFs consultados não são logados nem persistidos.
+  - GET /api/utils/cep/{cep}                → reservado pra futura implementação de endereços.
 """
 from __future__ import annotations
 import os
@@ -13,11 +14,7 @@ import time
 from typing import Any, Optional
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-
-from models.profile import PersonalIdentity
-from services.database import get_session
+from fastapi import APIRouter, HTTPException
 
 router = APIRouter(prefix="/api/utils", tags=["utils"])
 
@@ -237,21 +234,33 @@ def _normalize_situacao_text(s: Any) -> str:
     return "inactive"
 
 
-@router.get("/companies-by-cpf")
-async def companies_by_cpf(db: Session = Depends(get_session)) -> list[dict[str, Any]]:
+def _is_valid_cpf(digits: str) -> bool:
+    """Valida CPF pelos dois dígitos verificadores. Rejeita também sequências repetidas."""
+    if len(digits) != 11 or len(set(digits)) == 1:
+        return False
+    s1 = sum(int(digits[i]) * (10 - i) for i in range(9))
+    d1 = 11 - (s1 % 11)
+    if d1 >= 10:
+        d1 = 0
+    if d1 != int(digits[9]):
+        return False
+    s2 = sum(int(digits[i]) * (11 - i) for i in range(10))
+    d2 = 11 - (s2 % 11)
+    if d2 >= 10:
+        d2 = 0
+    return d2 == int(digits[10])
+
+
+@router.get("/companies-by-cpf/{cpf}")
+async def companies_by_cpf(cpf: str) -> list[dict[str, Any]]:
     """
-    Retorna a lista de empresas onde o usuário (CPF da identidade) é sócio,
+    Retorna a lista de empresas onde o CPF informado é sócio/administrador,
     consultada na CPF.CNPJ. Cache em memória 24h pelo CPF.
+    O CPF NÃO é persistido em log nem no banco — apenas usado na chamada e na chave do cache.
     """
-    identity = db.query(PersonalIdentity).first()
-    if not identity or not identity.cpf:
-        raise HTTPException(
-            status_code=400,
-            detail="Cadastre seu CPF na aba Identidade antes de buscar empresas.",
-        )
-    digits = re.sub(r"\D", "", identity.cpf)
-    if len(digits) != 11:
-        raise HTTPException(status_code=400, detail="CPF da identidade é inválido.")
+    digits = re.sub(r"\D", "", cpf)
+    if not _is_valid_cpf(digits):
+        raise HTTPException(status_code=400, detail="CPF inválido. Verifique os dígitos.")
 
     now = time.time()
     cached = _cpf_cache.get(digits)
@@ -263,10 +272,11 @@ async def companies_by_cpf(db: Session = Depends(get_session)) -> list[dict[str,
         async with httpx.AsyncClient(timeout=TIMEOUT_S) as client:
             res = await client.get(url)
     except (httpx.TimeoutException, httpx.HTTPError) as e:
-        print(f"[CPF.CNPJ] network error: {e}", flush=True)
+        # Não logar CPF — só o tipo de erro
+        print(f"[CPF.CNPJ] network error: {type(e).__name__}", flush=True)
         raise HTTPException(
             status_code=503,
-            detail="Serviço temporariamente indisponível. Tente novamente mais tarde.",
+            detail="Não foi possível consultar a Receita. Tente novamente.",
         )
 
     try:
@@ -279,18 +289,13 @@ async def companies_by_cpf(db: Session = Depends(get_session)) -> list[dict[str,
 
     if data.get("status") != 1:
         codigo = data.get("erroCodigo")
-        msg = data.get("erro") or "erro desconhecido"
-        # Log no servidor pra debug; mensagem genérica pro frontend
-        print(f"[CPF.CNPJ] erro código={codigo} msg={msg!r} (HTTP {res.status_code})", flush=True)
+        # Log SÓ código de erro — sem CPF, sem mensagem (que pode conter dado sensível)
+        print(f"[CPF.CNPJ] erro código={codigo} HTTP={res.status_code}", flush=True)
         if codigo in (100, 101):
-            raise HTTPException(
-                status_code=400,
-                detail="CPF inválido. Confira o cadastro na aba Identidade.",
-            )
-        # Saldo zerado, chave inválida, qualquer outro erro: mensagem genérica
+            raise HTTPException(status_code=400, detail="CPF inválido. Verifique os dígitos.")
         raise HTTPException(
             status_code=503,
-            detail="Serviço temporariamente indisponível. Tente novamente mais tarde.",
+            detail="Serviço temporariamente indisponível.",
         )
 
     empresas_raw = data.get("empresas") or []
