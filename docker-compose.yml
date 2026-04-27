@@ -34,6 +34,11 @@ services:
       DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN:-}
       DISCORD_GUILD_ID: ${DISCORD_GUILD_ID:-}
 
+      # CPF.CNPJ — busca empresas vinculadas a um CPF (pacote 15)
+      # default = token de teste público (retorna dados fictícios).
+      # Em produção: cadastrar em https://www.cpfcnpj.com.br/register/ e setar a chave aqui.
+      CPF_LOOKUP_API_KEY: ${CPF_LOOKUP_API_KEY:-5ae973d7a997af13f0aaf2bf60e65803}
+
       # CORS — frontend Next.js
       CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
 

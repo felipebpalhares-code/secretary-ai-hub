@@ -67,6 +67,8 @@ services:
       DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN:-}
       DISCORD_GUILD_ID: ${DISCORD_GUILD_ID:-}
 
+      CPF_LOOKUP_API_KEY: ${CPF_LOOKUP_API_KEY:-5ae973d7a997af13f0aaf2bf60e65803}
+
       CORS_ORIGINS: "https://${DOMAIN_HUB}"
       DATABASE_PATH: /data/felipe_hub.db
     volumes:

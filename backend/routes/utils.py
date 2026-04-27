@@ -1,27 +1,38 @@
 """
 Utilitários públicos pro frontend:
-  - GET /api/utils/cnpj/{cnpj}  → consulta CNPJ.
-                                   Tenta BrasilAPI primeiro; se falhar (timeout,
-                                   5xx, 404), faz fallback pra OpenCNPJ.
-                                   Cache em memória 24h indexado pelo CNPJ.
-  - GET /api/utils/cep/{cep}    → reservado pra futura implementação de endereços.
+  - GET /api/utils/cnpj/{cnpj}        → consulta CNPJ via BrasilAPI (fallback OpenCNPJ).
+                                         Cache em memória 24h indexado pelo CNPJ.
+  - GET /api/utils/companies-by-cpf   → busca empresas vinculadas ao CPF da identidade
+                                         via CPF.CNPJ (pacote 15). Cache 24h.
+  - GET /api/utils/cep/{cep}          → reservado pra futura implementação de endereços.
 """
 from __future__ import annotations
+import os
 import re
 import time
 from typing import Any, Optional
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from models.profile import PersonalIdentity
+from services.database import get_session
 
 router = APIRouter(prefix="/api/utils", tags=["utils"])
 
 BRASILAPI_CNPJ = "https://brasilapi.com.br/api/cnpj/v1/{cnpj}"
 OPENCNPJ_URL = "https://api.opencnpj.org/{cnpj}"
+CPFCNPJ_URL = "https://api.cpfcnpj.com.br/{token}/15/{cpf}"
+# Token de teste público da CPF.CNPJ (retorna dados fictícios pra integração).
+# Em produção, setar CPF_LOOKUP_API_KEY no .env com chave real.
+CPF_LOOKUP_API_KEY = os.getenv("CPF_LOOKUP_API_KEY", "5ae973d7a997af13f0aaf2bf60e65803")
+
 TIMEOUT_S = 5.0
 CACHE_TTL = 24 * 60 * 60
 
 _cnpj_cache: dict[str, tuple[float, dict[str, Any]]] = {}
+_cpf_cache: dict[str, tuple[float, list[dict[str, Any]]]] = {}
 
 
 # ───────── helpers comuns ─────────
@@ -204,6 +215,109 @@ async def _try_opencnpj(digits: str) -> Optional[dict[str, Any]]:
 
 
 # ───────── rota ─────────
+
+# ───────── CPF.CNPJ — busca empresas por CPF ─────────
+
+def _date_br_to_iso(s: Any) -> Optional[str]:
+    """Converte 'DD/MM/AAAA' pra 'AAAA-MM-DD' (formato ISO usado pelo frontend)."""
+    if not isinstance(s, str):
+        return None
+    parts = s.split("/")
+    if len(parts) != 3:
+        return None
+    d, m, y = parts
+    if not (d.isdigit() and m.isdigit() and len(y) == 4 and y.isdigit()):
+        return None
+    return f"{y}-{m.zfill(2)}-{d.zfill(2)}"
+
+
+def _normalize_situacao_text(s: Any) -> str:
+    if isinstance(s, str) and s.strip().lower() == "ativa":
+        return "active"
+    return "inactive"
+
+
+@router.get("/companies-by-cpf")
+async def companies_by_cpf(db: Session = Depends(get_session)) -> list[dict[str, Any]]:
+    """
+    Retorna a lista de empresas onde o usuário (CPF da identidade) é sócio,
+    consultada na CPF.CNPJ. Cache em memória 24h pelo CPF.
+    """
+    identity = db.query(PersonalIdentity).first()
+    if not identity or not identity.cpf:
+        raise HTTPException(
+            status_code=400,
+            detail="Cadastre seu CPF na aba Identidade antes de buscar empresas.",
+        )
+    digits = re.sub(r"\D", "", identity.cpf)
+    if len(digits) != 11:
+        raise HTTPException(status_code=400, detail="CPF da identidade é inválido.")
+
+    now = time.time()
+    cached = _cpf_cache.get(digits)
+    if cached and (now - cached[0]) < CACHE_TTL:
+        return cached[1]
+
+    url = CPFCNPJ_URL.format(token=CPF_LOOKUP_API_KEY, cpf=digits)
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT_S) as client:
+            res = await client.get(url)
+    except (httpx.TimeoutException, httpx.HTTPError) as e:
+        print(f"[CPF.CNPJ] network error: {e}", flush=True)
+        raise HTTPException(
+            status_code=503,
+            detail="Serviço temporariamente indisponível. Tente novamente mais tarde.",
+        )
+
+    try:
+        data = res.json()
+    except Exception:
+        raise HTTPException(status_code=502, detail="Resposta inválida da CPF.CNPJ.")
+
+    if not isinstance(data, dict):
+        raise HTTPException(status_code=502, detail="Formato inesperado da CPF.CNPJ.")
+
+    if data.get("status") != 1:
+        codigo = data.get("erroCodigo")
+        msg = data.get("erro") or "erro desconhecido"
+        # Log no servidor pra debug; mensagem genérica pro frontend
+        print(f"[CPF.CNPJ] erro código={codigo} msg={msg!r} (HTTP {res.status_code})", flush=True)
+        if codigo in (100, 101):
+            raise HTTPException(
+                status_code=400,
+                detail="CPF inválido. Confira o cadastro na aba Identidade.",
+            )
+        # Saldo zerado, chave inválida, qualquer outro erro: mensagem genérica
+        raise HTTPException(
+            status_code=503,
+            detail="Serviço temporariamente indisponível. Tente novamente mais tarde.",
+        )
+
+    empresas_raw = data.get("empresas") or []
+    if not isinstance(empresas_raw, list):
+        empresas_raw = []
+
+    payload: list[dict[str, Any]] = []
+    for e in empresas_raw:
+        if not isinstance(e, dict):
+            continue
+        cnpj_digits = re.sub(r"\D", "", str(e.get("cnpj") or ""))
+        if len(cnpj_digits) != 14:
+            continue
+        payload.append({
+            "cnpj": cnpj_digits,
+            "razao_social": e.get("razao"),
+            "nome_fantasia": e.get("fantasia"),
+            "qualificacao": e.get("qualificacao"),
+            "data_entrada": _date_br_to_iso(e.get("dataSociedade")),
+            "situacao": _normalize_situacao_text(e.get("situacao")),
+        })
+
+    _cpf_cache[digits] = (now, payload)
+    return payload
+
+
+# ───────── rota CNPJ ─────────
 
 @router.get("/cnpj/{cnpj}")
 async def lookup_cnpj(cnpj: str) -> dict[str, Any]:

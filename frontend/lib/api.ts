@@ -589,6 +589,21 @@ export async function lookupCnpj(cnpj: string) {
   return request<CnpjLookup>(`/api/utils/cnpj/${digits}`)
 }
 
+/* ───────── Utilitários: Empresas por CPF (CPF.CNPJ) ───────── */
+
+export type CompanyByCpf = {
+  cnpj: string
+  razao_social: string | null
+  nome_fantasia: string | null
+  qualificacao: string | null
+  data_entrada: string | null   // YYYY-MM-DD
+  situacao: "active" | "inactive"
+}
+
+export async function lookupCompaniesByCpf() {
+  return request<CompanyByCpf[]>("/api/utils/companies-by-cpf")
+}
+
 /* ───────── Banner stats ───────── */
 
 export type BannerStats = {

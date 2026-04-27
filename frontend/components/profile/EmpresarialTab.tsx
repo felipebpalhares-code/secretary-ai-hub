@@ -32,6 +32,8 @@ import {
 import { EditCompanyModal } from "./EditCompanyModal"
 import { EditPartnerModal } from "./EditPartnerModal"
 import { EditProfessionalModal } from "./EditProfessionalModal"
+import { SearchCompaniesByCpfModal } from "./SearchCompaniesByCpfModal"
+import { useIdentity } from "./identity-context"
 
 const ROLE_LABEL: Record<string, string> = {
   contador: "Contador",
@@ -146,6 +148,9 @@ function CompanyCard({
 }
 
 export function EmpresarialTab() {
+  const { identity } = useIdentity()
+  const hasUserCpf = !!identity?.cpf
+
   const [companies, setCompanies] = useState<Company[] | null>(null)
   const [partnersByCompany, setPartnersByCompany] = useState<Record<number, Partner[]>>({})
   const [professionals, setProfessionals] = useState<Professional[] | null>(null)
@@ -165,6 +170,7 @@ export function EmpresarialTab() {
     open: false,
     data: null,
   })
+  const [searchByCpfOpen, setSearchByCpfOpen] = useState(false)
 
   const loadAll = useCallback(async () => {
     setError(null)
@@ -214,7 +220,21 @@ export function EmpresarialTab() {
       <div>
         <SectionHdr
           title="Empresas"
-          action={<AddBtn label="Nova empresa" onClick={() => setCompanyModal({ open: true, data: null })} />}
+          action={
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => hasUserCpf && setSearchByCpfOpen(true)}
+                disabled={!hasUserCpf}
+                title={hasUserCpf ? "" : "Cadastre seu CPF na aba Identidade primeiro"}
+                className="inline-flex items-center gap-[5px] text-[11.5px] font-semibold text-accent border border-hair px-[11px] py-[5px] rounded-md hover:border-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-hair"
+              >
+                <Icon name="search" size={13} />
+                Buscar pelo CPF
+              </button>
+              <AddBtn label="Nova empresa" onClick={() => setCompanyModal({ open: true, data: null })} />
+            </div>
+          }
         />
 
         {companies.length === 0 ? (
@@ -297,6 +317,12 @@ export function EmpresarialTab() {
         open={profModal.open}
         onClose={() => setProfModal({ open: false, data: null })}
         initial={profModal.data}
+        onSaved={loadAll}
+      />
+      <SearchCompaniesByCpfModal
+        open={searchByCpfOpen}
+        onClose={() => setSearchByCpfOpen(false)}
+        existingCompanies={companies ?? []}
         onSaved={loadAll}
       />
     </>
