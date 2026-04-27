@@ -605,6 +605,90 @@ export async function lookupCompaniesByCpf(cpf: string) {
   return request<CompanyByCpf[]>(`/api/utils/companies-by-cpf/${digits}`)
 }
 
+/* ───────── Tarefas (Kanban) ───────── */
+
+export type TaskColumn = {
+  id: string
+  title: string
+  color: string | null
+  order: number
+  is_done_column: boolean
+}
+
+export type TaskItem = {
+  id: string
+  column_id: string
+  title: string
+  description: string | null
+  priority: "low" | "medium" | "high" | null
+  due_date: string | null  // ISO datetime
+  due_time: boolean
+  tags: string[]
+  order: number
+  created_at: string
+  updated_at: string
+  completed_at: string | null
+}
+
+export type TaskColumnInput = { title: string; color?: string | null; is_done_column?: boolean }
+export type TaskColumnPatch = Partial<TaskColumnInput>
+
+export type TaskInput = {
+  column_id: string
+  title: string
+  description?: string | null
+  priority?: "low" | "medium" | "high" | null
+  due_date?: string | null
+  due_time?: boolean
+  tags?: string[]
+}
+export type TaskPatch = Partial<Omit<TaskInput, "column_id">> & { column_id?: string }
+
+export async function listTaskColumns() {
+  return request<TaskColumn[]>("/api/task-columns")
+}
+export async function createTaskColumn(payload: TaskColumnInput) {
+  return request<TaskColumn>("/api/task-columns", { method: "POST", body: JSON.stringify(payload) })
+}
+export async function updateTaskColumn(id: string, payload: TaskColumnPatch) {
+  return request<TaskColumn>(`/api/task-columns/${id}`, { method: "PUT", body: JSON.stringify(payload) })
+}
+export async function deleteTaskColumn(id: string) {
+  return request<{ ok: boolean }>(`/api/task-columns/${id}`, { method: "DELETE" })
+}
+export async function reorderTaskColumns(ids: string[]) {
+  return request<{ ok: boolean }>("/api/task-columns/reorder", {
+    method: "POST", body: JSON.stringify({ ids }),
+  })
+}
+
+export async function listTasks(params?: { column_id?: string; due?: "today" | "overdue" | "none" }) {
+  const q = new URLSearchParams()
+  if (params?.column_id) q.set("column_id", params.column_id)
+  if (params?.due) q.set("due", params.due)
+  const qs = q.toString()
+  return request<TaskItem[]>(`/api/tasks${qs ? `?${qs}` : ""}`)
+}
+export async function createTask(payload: TaskInput) {
+  return request<TaskItem>("/api/tasks", { method: "POST", body: JSON.stringify(payload) })
+}
+export async function updateTask(id: string, payload: TaskPatch) {
+  return request<TaskItem>(`/api/tasks/${id}`, { method: "PUT", body: JSON.stringify(payload) })
+}
+export async function deleteTask(id: string) {
+  return request<{ ok: boolean }>(`/api/tasks/${id}`, { method: "DELETE" })
+}
+export async function moveTask(id: string, column_id: string, order: number) {
+  return request<TaskItem>(`/api/tasks/${id}/move`, {
+    method: "POST", body: JSON.stringify({ column_id, order }),
+  })
+}
+export async function reorderTasks(ids: string[]) {
+  return request<{ ok: boolean }>("/api/tasks/reorder", {
+    method: "POST", body: JSON.stringify({ ids }),
+  })
+}
+
 /* ───────── Utilitários: OCR genérico de documentos de pessoa ───────── */
 
 export type ScanDocumentKind = "cnh" | "rg" | "cpf" | "passaporte"
