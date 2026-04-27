@@ -9,9 +9,11 @@ import {
   PrimaryButton,
   SecondaryButton,
 } from "@/components/ui/FormField"
+import { ExtractedHint, ScanDocumentButton } from "@/components/ui/ScanDocumentButton"
 import {
   createFamilyMember,
   updateFamilyMember,
+  type ExtractedPersonData,
   type FamilyMember,
   type FamilyMemberInput,
   type FamilyRelation,
@@ -58,9 +60,23 @@ export function EditFamilyMemberModal({
   const [form, setForm] = useState<FamilyMemberInput>(emptyFor(defaultRelation))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [extractedCount, setExtractedCount] = useState(0)
+
+  function applyExtracted(data: ExtractedPersonData) {
+    let count = 0
+    setForm((f) => {
+      const next = { ...f }
+      if (data.full_name) { next.name = data.full_name; count++ }
+      if (data.cpf) { next.cpf = data.cpf; count++ }
+      if (data.birth_date) { next.birth_date = data.birth_date; count++ }
+      return next
+    })
+    setExtractedCount(count)
+  }
 
   useEffect(() => {
     if (open) {
+      setExtractedCount(0)
       if (initial) {
         setForm({
           relation: initial.relation as FamilyRelation,
@@ -126,6 +142,11 @@ export function EditFamilyMemberModal({
           {error}
         </div>
       )}
+
+      <div className="flex justify-end mb-3">
+        <ScanDocumentButton onExtracted={applyExtracted} />
+      </div>
+      <ExtractedHint count={extractedCount} />
 
       <div className="grid grid-cols-2 gap-3">
         <FormField label="Relação" required>

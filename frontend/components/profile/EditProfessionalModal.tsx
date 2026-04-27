@@ -9,9 +9,11 @@ import {
   PrimaryButton,
   SecondaryButton,
 } from "@/components/ui/FormField"
+import { ExtractedHint, ScanDocumentButton } from "@/components/ui/ScanDocumentButton"
 import {
   createProfessional,
   updateProfessional,
+  type ExtractedPersonData,
   type Professional,
   type ProfessionalInput,
 } from "@/lib/api"
@@ -55,9 +57,24 @@ export function EditProfessionalModal({
   const [form, setForm] = useState<ProfessionalInput>(empty)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [extractedCount, setExtractedCount] = useState(0)
+
+  function applyExtracted(data: ExtractedPersonData) {
+    let count = 0
+    setForm((f) => {
+      const next = { ...f }
+      if (data.full_name) { next.name = data.full_name; count++ }
+      // Profissional não tem campo CPF no form atual; se quiser anotar,
+      // colocamos no campo "Notas" sem sobrescrever conteúdo existente.
+      if (data.cpf && !next.notes) { next.notes = `CPF: ${data.cpf}`; count++ }
+      return next
+    })
+    setExtractedCount(count)
+  }
 
   useEffect(() => {
     if (open) {
+      setExtractedCount(0)
       setForm(initial ? { ...initial } : empty)
       setError(null)
     }
@@ -106,6 +123,10 @@ export function EditProfessionalModal({
           {error}
         </div>
       )}
+      <div className="flex justify-end mb-3">
+        <ScanDocumentButton onExtracted={applyExtracted} />
+      </div>
+      <ExtractedHint count={extractedCount} />
       <div className="grid grid-cols-2 gap-3">
         <FormField label="Categoria" required>
           <Select value={form.role}

@@ -8,9 +8,11 @@ import {
   PrimaryButton,
   SecondaryButton,
 } from "@/components/ui/FormField"
+import { ExtractedHint, ScanDocumentButton } from "@/components/ui/ScanDocumentButton"
 import {
   createPartner,
   updatePartner,
+  type ExtractedPersonData,
   type Partner,
   type PartnerInput,
 } from "@/lib/api"
@@ -39,9 +41,22 @@ export function EditPartnerModal({
   const [form, setForm] = useState<PartnerInput>(empty)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [extractedCount, setExtractedCount] = useState(0)
+
+  function applyExtracted(data: ExtractedPersonData) {
+    let count = 0
+    setForm((f) => {
+      const next = { ...f }
+      if (data.full_name) { next.name = data.full_name; count++ }
+      if (data.cpf) { next.cpf = data.cpf; count++ }
+      return next
+    })
+    setExtractedCount(count)
+  }
 
   useEffect(() => {
     if (open) {
+      setExtractedCount(0)
       setForm(
         initial
           ? {
@@ -100,6 +115,10 @@ export function EditPartnerModal({
           {error}
         </div>
       )}
+      <div className="flex justify-end mb-3">
+        <ScanDocumentButton onExtracted={applyExtracted} />
+      </div>
+      <ExtractedHint count={extractedCount} />
       <FormField label="Nome completo" required>
         <TextInput value={form.name}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setField("name", e.target.value)} />

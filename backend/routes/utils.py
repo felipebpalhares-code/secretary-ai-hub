@@ -1,11 +1,11 @@
 """
 Utilitários públicos pro frontend:
-  - GET /api/utils/cnpj/{cnpj}              → consulta CNPJ via BrasilAPI (fallback OpenCNPJ).
-                                                Cache em memória 24h por CNPJ.
-  - GET /api/utils/companies-by-cpf/{cpf}   → busca empresas vinculadas a um CPF arbitrário
-                                                via CPF.CNPJ (pacote 15). Cache 24h.
-                                                CPFs consultados não são logados nem persistidos.
-  - GET /api/utils/cep/{cep}                → reservado pra futura implementação de endereços.
+  - GET  /api/utils/cnpj/{cnpj}              → CNPJ via BrasilAPI (fallback OpenCNPJ).
+  - GET  /api/utils/companies-by-cpf/{cpf}   → empresas vinculadas a um CPF (CPF.CNPJ).
+  - POST /api/utils/extract-person-document  → OCR via Claude Vision pra documentos
+                                                 de terceiros (cônjuge, filho, sócio, etc.).
+                                                 NÃO persiste o arquivo — descarta após extração.
+  - GET  /api/utils/cep/{cep}                → reservado pra futura implementação de endereços.
 """
 from __future__ import annotations
 import os
@@ -14,7 +14,9 @@ import time
 from typing import Any, Optional
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+
+from services.profile_extract import extract_person
 
 router = APIRouter(prefix="/api/utils", tags=["utils"])
 
@@ -27,6 +29,14 @@ CPF_LOOKUP_API_KEY = os.getenv("CPF_LOOKUP_API_KEY", "5ae973d7a997af13f0aaf2bf60
 
 TIMEOUT_S = 5.0
 CACHE_TTL = 24 * 60 * 60
+
+# OCR de documentos (POST /extract-person-document)
+OCR_ACCEPTED_MIMES = {
+    "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif",
+    "application/pdf",
+}
+OCR_MAX_BYTES = 10 * 1024 * 1024
+OCR_KINDS = {"cnh", "rg", "cpf", "passaporte"}
 
 _cnpj_cache: dict[str, tuple[float, dict[str, Any]]] = {}
 _cpf_cache: dict[str, tuple[float, list[dict[str, Any]]]] = {}
@@ -347,3 +357,44 @@ async def lookup_cnpj(cnpj: str) -> dict[str, Any]:
 
     _cnpj_cache[digits] = (now, payload)
     return payload
+
+
+# ───────── OCR de documentos (cônjuge, filho, sócio, profissional…) ─────────
+
+@router.post("/extract-person-document")
+async def extract_person_document(
+    file: UploadFile = File(...),
+    kind: str = Form("rg"),
+) -> dict[str, Any]:
+    """
+    Recebe foto/PDF de CNH, RG, CPF ou passaporte de uma pessoa, manda pro Claude Vision
+    e retorna campos estruturados pro frontend pré-preencher o formulário.
+    O arquivo NÃO é persistido — descartado após a extração.
+    """
+    if kind not in OCR_KINDS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"kind inválido. Aceitos: {sorted(OCR_KINDS)}",
+        )
+
+    mime = (file.content_type or "").lower()
+    if mime not in OCR_ACCEPTED_MIMES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Tipo não suportado: {mime!r}. Aceitos: imagens (JPG/PNG/WebP/GIF) e PDF.",
+        )
+
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="Arquivo vazio")
+    if len(content) > OCR_MAX_BYTES:
+        raise HTTPException(status_code=413, detail="Arquivo maior que 10 MB")
+
+    try:
+        extracted = extract_person(content, mime)
+    except Exception as e:
+        # Log no servidor; arquivo já foi descartado da memória ao fim do request
+        print(f"[OCR person] error: {type(e).__name__}", flush=True)
+        raise HTTPException(status_code=502, detail=f"Falha na extração: {e}")
+
+    return {"extracted": extracted}

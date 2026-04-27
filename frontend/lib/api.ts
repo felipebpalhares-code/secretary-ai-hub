@@ -605,6 +605,42 @@ export async function lookupCompaniesByCpf(cpf: string) {
   return request<CompanyByCpf[]>(`/api/utils/companies-by-cpf/${digits}`)
 }
 
+/* ───────── Utilitários: OCR genérico de documentos de pessoa ───────── */
+
+export type ScanDocumentKind = "cnh" | "rg" | "cpf" | "passaporte"
+
+export type ExtractedPersonData = {
+  full_name?: string | null
+  cpf?: string | null
+  rg?: string | null
+  birth_date?: string | null
+  gender?: "M" | "F" | null
+  mother_name?: string | null
+  father_name?: string | null
+  nationality?: string | null
+  cnh_number?: string | null
+  cnh_category?: string | null
+  cnh_expiry?: string | null
+}
+
+export async function extractPersonDocument(
+  file: File,
+  kind: ScanDocumentKind = "rg",
+): Promise<{ extracted: ExtractedPersonData }> {
+  const form = new FormData()
+  form.append("file", file)
+  form.append("kind", kind)
+  const res = await fetch(`${BASE}/api/utils/extract-person-document`, {
+    method: "POST",
+    body: form,
+  })
+  if (!res.ok) {
+    const payload = await res.json().catch(() => ({}))
+    throw new ApiError(res.status, payload)
+  }
+  return res.json()
+}
+
 /* ───────── Banner stats ───────── */
 
 export type BannerStats = {
