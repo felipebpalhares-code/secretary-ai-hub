@@ -2,6 +2,19 @@ import type { Config } from "tailwindcss"
 
 export default {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
+  // Safelist defensivo: garante que classes de cores semânticas sempre saiam
+  // no CSS, mesmo quando usadas dinamicamente em props ou template strings.
+  safelist: [
+    "bg-brand", "bg-brand-hover", "bg-brand-subtle",
+    "bg-success", "bg-success-subtle",
+    "bg-warning", "bg-warning-subtle",
+    "bg-danger", "bg-danger-subtle",
+    "bg-info", "bg-info-subtle",
+    "text-brand", "text-success", "text-warning", "text-danger", "text-info",
+    "text-text-primary", "text-text-secondary", "text-text-tertiary", "text-text-disabled",
+    "border-default", "border-strong",
+    "bg-bg-app", "bg-bg-surface", "bg-bg-subtle", "bg-bg-muted",
+  ],
   theme: {
     extend: {
       colors: {

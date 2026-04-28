@@ -26,18 +26,18 @@ export function DesignSystemExamples() {
       <main className="max-w-5xl mx-auto px-8 py-loose flex flex-col gap-section">
         <Section title="Cores" subtitle="Paleta neutra com sotaque grafite. Cores semânticas raríssimas.">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Swatch name="bg-app" hex="#FAFAFA" cls="bg-bg-app border-default" />
-            <Swatch name="bg-surface" hex="#FFFFFF" cls="bg-bg-surface border-default" />
-            <Swatch name="bg-subtle" hex="#F4F4F5" cls="bg-bg-subtle border-default" />
-            <Swatch name="bg-muted" hex="#E4E4E7" cls="bg-bg-muted border-default" />
-            <Swatch name="brand" hex="#1E293B" cls="bg-brand text-white" />
-            <Swatch name="brand-subtle" hex="#F1F5F9" cls="bg-brand-subtle border-default" />
-            <Swatch name="success" hex="#059669" cls="bg-success text-white" />
-            <Swatch name="success-subtle" hex="#ECFDF5" cls="bg-success-subtle border-default" />
-            <Swatch name="warning" hex="#D97706" cls="bg-warning text-white" />
-            <Swatch name="warning-subtle" hex="#FFFBEB" cls="bg-warning-subtle border-default" />
-            <Swatch name="danger" hex="#DC2626" cls="bg-danger text-white" />
-            <Swatch name="danger-subtle" hex="#FEF2F2" cls="bg-danger-subtle border-default" />
+            <Swatch name="bg-app" hex="#FAFAFA" bg="bg-bg-app" />
+            <Swatch name="bg-surface" hex="#FFFFFF" bg="bg-bg-surface" />
+            <Swatch name="bg-subtle" hex="#F4F4F5" bg="bg-bg-subtle" />
+            <Swatch name="bg-muted" hex="#E4E4E7" bg="bg-bg-muted" />
+            <Swatch name="brand" hex="#1E293B" bg="bg-brand" dark />
+            <Swatch name="brand-subtle" hex="#F1F5F9" bg="bg-brand-subtle" />
+            <Swatch name="success" hex="#059669" bg="bg-success" dark />
+            <Swatch name="success-subtle" hex="#ECFDF5" bg="bg-success-subtle" />
+            <Swatch name="warning" hex="#D97706" bg="bg-warning" dark />
+            <Swatch name="warning-subtle" hex="#FFFBEB" bg="bg-warning-subtle" />
+            <Swatch name="danger" hex="#DC2626" bg="bg-danger" dark />
+            <Swatch name="danger-subtle" hex="#FEF2F2" bg="bg-danger-subtle" />
           </div>
         </Section>
 
@@ -326,11 +326,26 @@ function Field({
   )
 }
 
-function Swatch({ name, hex, cls }: { name: string; hex: string; cls: string }) {
+function Swatch({
+  name,
+  hex,
+  bg,
+  dark = false,
+}: {
+  name: string
+  hex: string
+  bg: string
+  dark?: boolean
+}) {
+  // Em fundos escuros forçamos text-white em cada filho (defesa em profundidade
+  // contra herança quebrada e cor base do <body>). Em fundos claros, usamos
+  // os tokens semânticos do Design System.
+  const textCls = dark ? "text-white" : "text-text-primary"
+  const subTextCls = dark ? "text-white/80" : "text-text-tertiary"
   return (
-    <div className={`rounded-md border p-4 ${cls}`}>
-      <div className="text-body-strong">{name}</div>
-      <div className="text-tiny mt-0.5 opacity-70 mono">{hex}</div>
+    <div className={`rounded-md border border-default p-4 ${bg}`}>
+      <div className={`text-body-strong ${textCls}`}>{name}</div>
+      <div className={`text-tiny mt-0.5 mono ${subTextCls}`}>{hex}</div>
     </div>
   )
 }
