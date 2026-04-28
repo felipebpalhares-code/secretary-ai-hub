@@ -22,18 +22,28 @@ export function IconButton({
   name,
   dot,
   onClick,
+  disabled,
+  title,
 }: {
   name: Parameters<typeof Icon>[0]["name"]
   dot?: boolean
   onClick?: () => void
+  disabled?: boolean
+  title?: string
 }) {
   return (
     <button
       onClick={onClick}
-      className="w-8 h-8 rounded-[7px] border border-hair bg-card text-ink-2 hover:bg-bg hover:border-ink-4 flex items-center justify-center relative transition-colors"
+      disabled={disabled}
+      title={title}
+      className={
+        disabled
+          ? "w-8 h-8 rounded-[7px] border border-hair bg-card text-ink-3 flex items-center justify-center relative opacity-50 cursor-not-allowed"
+          : "w-8 h-8 rounded-[7px] border border-hair bg-card text-ink-2 hover:bg-bg hover:border-ink-4 flex items-center justify-center relative transition-colors"
+      }
     >
       <Icon name={name} size={14} />
-      {dot && (
+      {dot && !disabled && (
         <span className="absolute top-[6px] right-[6px] w-[6px] h-[6px] rounded-full bg-err border-[1.5px] border-card" />
       )}
     </button>
@@ -45,18 +55,22 @@ type BtnProps = {
   variant?: "default" | "primary"
   icon?: Parameters<typeof Icon>[0]["name"]
   onClick?: () => void
+  disabled?: boolean
+  title?: string
 }
 
-export function Button({ children, variant = "default", icon, onClick }: BtnProps) {
+export function Button({ children, variant = "default", icon, onClick, disabled, title }: BtnProps) {
+  const baseDisabled =
+    "inline-flex items-center gap-[6px] px-[13px] py-[7px] rounded-[7px] text-[12.5px] font-semibold tracking-[-.1px] border opacity-50 cursor-not-allowed"
+  const cls = disabled
+    ? variant === "primary"
+      ? `${baseDisabled} bg-accent text-white border-accent`
+      : `${baseDisabled} bg-card text-ink-3 border-hair`
+    : variant === "primary"
+      ? "inline-flex items-center gap-[6px] px-[13px] py-[7px] rounded-[7px] text-[12.5px] font-semibold tracking-[-.1px] bg-accent text-white border border-accent hover:bg-accent-hover transition-colors"
+      : "inline-flex items-center gap-[6px] px-[13px] py-[7px] rounded-[7px] text-[12.5px] font-semibold tracking-[-.1px] border border-hair bg-card text-ink hover:bg-bg hover:border-ink-4 transition-colors"
   return (
-    <button
-      onClick={onClick}
-      className={
-        variant === "primary"
-          ? "inline-flex items-center gap-[6px] px-[13px] py-[7px] rounded-[7px] text-[12.5px] font-semibold tracking-[-.1px] bg-accent text-white border border-accent hover:bg-accent-hover transition-colors"
-          : "inline-flex items-center gap-[6px] px-[13px] py-[7px] rounded-[7px] text-[12.5px] font-semibold tracking-[-.1px] border border-hair bg-card text-ink hover:bg-bg hover:border-ink-4 transition-colors"
-      }
-    >
+    <button onClick={onClick} disabled={disabled} title={title} className={cls}>
       {icon && <Icon name={icon} size={13} />}
       {children}
     </button>
