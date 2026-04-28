@@ -14,8 +14,13 @@ export default function ConfiguracoesPage() {
         subtitle="Configurações · canais de comunicação"
         actions={
           <>
-            <IconButton name="bell" />
-            <Button variant="primary" icon="plus">
+            <IconButton name="bell" disabled title="Em breve" />
+            <Button
+              variant="primary"
+              icon="plus"
+              disabled
+              title="Em breve · adicionar canal personalizado"
+            >
               Novo canal
             </Button>
           </>

@@ -1,9 +1,12 @@
+"use client"
+import { useRouter } from "next/navigation"
 import { TopBar, IconButton, Button } from "@/components/TopBar"
 import { SectionTitle } from "@/components/ui/Card"
 import { StatCard } from "@/components/ui/StatCard"
 import { Icon } from "@/components/Icon"
 
 export default function PainelPage() {
+  const router = useRouter()
   return (
     <>
       <TopBar
@@ -11,9 +14,14 @@ export default function PainelPage() {
         subtitle="Visão geral da operação"
         actions={
           <>
-            <IconButton name="search" />
-            <IconButton name="bell" />
-            <Button variant="primary" icon="plus">
+            <IconButton name="search" disabled title="Em breve" />
+            <IconButton name="bell" disabled title="Em breve" />
+            <Button
+              variant="primary"
+              icon="plus"
+              onClick={() => router.push("/tarefas")}
+              title="Abrir Tarefas"
+            >
               Nova tarefa
             </Button>
           </>

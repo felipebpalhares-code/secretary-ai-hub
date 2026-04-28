@@ -6,13 +6,22 @@ export default function ContatosPage() {
     <>
       <TopBar
         title="Contatos"
-        subtitle="247 contatos na rede"
+        subtitle="Sua rede de contatos"
         actions={
           <>
-            <IconButton name="search" />
-            <Button icon="plus">Importar</Button>
-            <Button icon="settings">Sync Google</Button>
-            <Button variant="primary" icon="plus">
+            <IconButton name="search" disabled title="Em breve" />
+            <Button icon="plus" disabled title="Em breve">
+              Importar
+            </Button>
+            <Button icon="settings" disabled title="Integração Google ainda não disponível">
+              Sync Google
+            </Button>
+            <Button
+              variant="primary"
+              icon="plus"
+              disabled
+              title="Em breve · cadastro de contatos pendente"
+            >
               Novo contato
             </Button>
           </>

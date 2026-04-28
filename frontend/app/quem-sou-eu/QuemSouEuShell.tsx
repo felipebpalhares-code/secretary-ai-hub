@@ -51,7 +51,7 @@ function ShellInner() {
         subtitle="Perfil pessoal e empresarial"
         actions={
           <>
-            <IconButton name="search" />
+            <IconButton name="search" disabled title="Em breve" />
             <Button variant="primary" icon="edit" onClick={openEdit}>
               Editar perfil
             </Button>

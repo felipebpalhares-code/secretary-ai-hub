@@ -6,11 +6,18 @@ export default function FinancasPage() {
     <>
       <TopBar
         title="Finanças"
-        subtitle="Controles paralelos · Entidades + Cartas de crédito"
+        subtitle="Centros de custo, obras e patrimônio"
         actions={
           <>
-            <Button icon="settings">Sincronizar</Button>
-            <Button variant="primary" icon="plus">
+            <Button icon="settings" disabled title="Em breve">
+              Sincronizar
+            </Button>
+            <Button
+              variant="primary"
+              icon="plus"
+              disabled
+              title="Em breve · cadastro de lançamentos pendente"
+            >
               Novo lançamento
             </Button>
           </>

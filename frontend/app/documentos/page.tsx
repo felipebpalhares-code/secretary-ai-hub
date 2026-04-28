@@ -6,11 +6,16 @@ export default function DocumentosPage() {
     <>
       <TopBar
         title="Documentos"
-        subtitle="87 arquivos · OCR ativo"
+        subtitle="OCR ativo · classificação automática"
         actions={
           <>
-            <IconButton name="search" />
-            <Button variant="primary" icon="plus">
+            <IconButton name="search" disabled title="Em breve" />
+            <Button
+              variant="primary"
+              icon="plus"
+              disabled
+              title="Em breve · upload genérico pendente (CNH/RG/passaporte ficam em /quem-sou-eu)"
+            >
               Enviar documento
             </Button>
           </>

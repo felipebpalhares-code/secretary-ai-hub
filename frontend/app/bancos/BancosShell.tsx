@@ -1,16 +1,37 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { TopBar, IconButton, Button } from "@/components/TopBar"
 import { Icon } from "@/components/Icon"
 import { BancosHub } from "./BancosHub"
 import { ConnectButton, BackendBanner } from "@/components/banks/ConnectButton"
 import { useBackendStatus } from "@/lib/useBackendStatus"
-import { banksSync } from "@/lib/api"
+import { banksSync, banksConnections } from "@/lib/api"
 
 export function BancosShell() {
   const status = useBackendStatus()
   const [syncing, setSyncing] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
+  const [connectionCount, setConnectionCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (status !== "online") return
+    let mounted = true
+    banksConnections()
+      .then((conns) => mounted && setConnectionCount(conns.length))
+      .catch(() => mounted && setConnectionCount(0))
+    return () => {
+      mounted = false
+    }
+  }, [status, refreshKey])
+
+  const subtitle =
+    connectionCount === null
+      ? "Open Finance Brasil · Pluggy"
+      : connectionCount === 0
+        ? "Open Finance Brasil · Pluggy · nenhuma instituição conectada"
+        : connectionCount === 1
+          ? "Open Finance Brasil · Pluggy · 1 instituição conectada"
+          : `Open Finance Brasil · Pluggy · ${connectionCount} instituições conectadas`
 
   const handleSync = async () => {
     if (status !== "online") return
@@ -29,10 +50,10 @@ export function BancosShell() {
     <>
       <TopBar
         title="Bancos"
-        subtitle="Open Finance Brasil · Pluggy · 10 contas conectadas"
+        subtitle={subtitle}
         actions={
           <>
-            <IconButton name="search" />
+            <IconButton name="search" disabled title="Em breve" />
             <button
               onClick={handleSync}
               disabled={status !== "online" || syncing}

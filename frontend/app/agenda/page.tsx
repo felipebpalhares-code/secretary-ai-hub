@@ -6,12 +6,19 @@ export default function AgendaPage() {
     <>
       <TopBar
         title="Agenda"
-        subtitle="Sexta, 24 de abril · 4 eventos hoje"
+        subtitle="Sua semana"
         actions={
           <>
-            <IconButton name="search" />
-            <Button icon="plus">Importar</Button>
-            <Button variant="primary" icon="plus">
+            <IconButton name="search" disabled title="Em breve" />
+            <Button icon="plus" disabled title="Em breve">
+              Importar
+            </Button>
+            <Button
+              variant="primary"
+              icon="plus"
+              disabled
+              title="Em breve · cadastro de eventos pendente"
+            >
               Novo evento
             </Button>
           </>
