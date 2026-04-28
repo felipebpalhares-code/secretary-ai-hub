@@ -1,53 +1,41 @@
 "use client"
-import { useState } from "react"
 import { Icon } from "@/components/Icon"
-import { AgentCard } from "@/components/agents/AgentCard"
-import { TrainingPanel } from "@/components/agents/TrainingPanel"
-import { ChatModal } from "@/components/agents/ChatModal"
-import { AGENTS, type Agent } from "@/lib/agents-data"
+import { EmptyState } from "@/components/ui/EmptyState"
 
+/**
+ * Sem backend de agentes ainda — esta tela mostra empty state honesto.
+ * Quando a API de agentes for implementada (CrewAI/LangGraph + persistência
+ * de definições e treinamento), troca o vazio por fetch real.
+ */
 export function AgentsHub() {
-  const [trainAgent, setTrainAgent] = useState<Agent | null>(null)
-  const [chatAgent, setChatAgent] = useState<Agent | null>(null)
-
   return (
-    <>
-      <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
-        <div className="grid grid-cols-4 gap-3">
-          <Sum icon="bot" value={8} label="Agentes criados" />
-          <Sum icon="check" value={6} label="Online agora" />
-          <Sum icon="alert" value={3} label="Alertas hoje" />
-          <Sum icon="file" value={28} label="Docs treinados" />
-        </div>
-
-        <div>
-          <div className="text-[11px] font-bold text-ink-3 uppercase tracking-[.07em] mb-[10px]">
-            Equipe de agentes
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {AGENTS.map((a) => (
-              <AgentCard
-                key={a.id}
-                agent={a}
-                onChat={() => setChatAgent(a)}
-                onTrain={() => setTrainAgent(a)}
-              />
-            ))}
-          </div>
-        </div>
+    <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5 bg-bg-app">
+      {/* KPIs zerados — estrutura mantida pra quando virar dinâmico */}
+      <div className="grid grid-cols-4 gap-3">
+        <Kpi icon="bot" value={0} label="Agentes" />
+        <Kpi icon="check" value={0} label="Online" />
+        <Kpi icon="alert" value={0} label="Alertas" />
+        <Kpi icon="file" value={0} label="Docs" />
       </div>
 
-      <TrainingPanel
-        agent={trainAgent}
-        open={!!trainAgent}
-        onClose={() => setTrainAgent(null)}
-      />
-      <ChatModal agent={chatAgent} open={!!chatAgent} onClose={() => setChatAgent(null)} />
-    </>
+      <div className="bg-bg-surface border border-default rounded-xl">
+        <EmptyState
+          icon="bot"
+          title="Nenhum agente configurado ainda"
+          subtitle={
+            <>
+              Quando os agentes IA forem cadastrados (Dr. jurídico, CFO, gestor de
+              obras, e-mails…), eles aparecem aqui com nível de treinamento, status e
+              alertas. Ainda não está disponível pra cadastro.
+            </>
+          }
+        />
+      </div>
+    </div>
   )
 }
 
-function Sum({
+function Kpi({
   icon,
   value,
   label,
@@ -57,13 +45,15 @@ function Sum({
   label: string
 }) {
   return (
-    <div className="bg-card border border-hair rounded-lg p-[14px_16px] flex items-center gap-3">
-      <div className="w-[34px] h-[34px] rounded-md bg-bg border border-hair flex items-center justify-center text-ink-2 shrink-0">
+    <div className="bg-bg-surface border border-default rounded-lg p-4 flex items-center gap-3">
+      <div className="w-9 h-9 rounded-md bg-bg-subtle border border-default flex items-center justify-center text-text-secondary shrink-0">
         <Icon name={icon} size={16} />
       </div>
       <div>
-        <div className="text-[19px] font-bold text-ink leading-none tabular">{value}</div>
-        <div className="text-[11px] text-ink-3 font-semibold mt-[3px]">{label}</div>
+        <div className="text-title text-text-primary leading-none tabular-nums">{value}</div>
+        <div className="text-tiny text-text-tertiary font-medium mt-1 uppercase tracking-wider">
+          {label}
+        </div>
       </div>
     </div>
   )
