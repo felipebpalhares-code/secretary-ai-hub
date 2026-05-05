@@ -44,11 +44,23 @@ services:
 
       # Banco SQLite — persiste em volume
       DATABASE_PATH: /data/felipe_hub.db
+
+      # ChromaDB (RAG dos agentes) — rede interna Docker
+      CHROMA_HOST: ${CHROMA_HOST:-chroma}
+      CHROMA_PORT: ${CHROMA_PORT:-8000}
+
+      # Cache do modelo de embeddings (sentence-transformers/all-MiniLM-L6-v2)
+      # — persistido em volume pra não rebaixar a cada container start
+      SENTENCE_TRANSFORMERS_HOME: /data/st-cache
+      HF_HOME: /data/hf-cache
     volumes:
       # Hot reload durante desenvolvimento (opcional — comente em produção)
       - ./backend:/app
-      # Banco persistente
+      # Banco persistente + cache de modelos + uploads
       - hub-data:/data
+    depends_on:
+      chroma:
+        condition: service_started
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -56,6 +68,20 @@ services:
       timeout: 5s
       retries: 3
       start_period: 15s
+
+  # ChromaDB — vector store usado pelo RAG dos agentes IA.
+  # Backend conecta via http://chroma:8000 (rede Docker interna).
+  # Host expõe na 8001 só para inspeção manual.
+  chroma:
+    # Pin igual à versão do client Python em backend/requirements.txt
+    # (versões diferentes quebram em "KeyError: '_type'" na criação de collection).
+    image: chromadb/chroma:0.5.23
+    container_name: felipe-chroma
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./backend/chroma_data:/chroma/chroma
+    restart: unless-stopped
 
   # Evolution API (WhatsApp) — perfil opcional
   # Subir com: docker compose --profile wa up

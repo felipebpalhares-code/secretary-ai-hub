@@ -50,3 +50,10 @@ Thumbs.db
 logs/
 tmp/
 .cache/
+
+# Agentes IA — dados gerados em runtime
+backend/chroma_data/*
+!backend/chroma_data/.gitkeep
+backend/data/
+backend/uploads/
+backend/felipe_hub.db
