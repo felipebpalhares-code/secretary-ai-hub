@@ -99,6 +99,8 @@ export default {
       borderRadius: {
         xs: "6px",
         sm: "7px",
+        // radius-default do DS — botões, inputs (8px)
+        default: "8px",
         md: "10px",
         lg: "12px",
         xl: "16px",
