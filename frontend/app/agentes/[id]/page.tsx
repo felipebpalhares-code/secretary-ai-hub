@@ -6,6 +6,8 @@ import { type Agent, getAgent } from "@/lib/agents-api"
 import { AgentDetailHeader } from "@/components/agents/AgentDetailHeader"
 import { AgentTabs, tabFromParams } from "@/components/agents/AgentTabs"
 import { GeneralTab } from "@/components/agents/tabs/GeneralTab"
+import { InstructionsTab } from "@/components/agents/tabs/InstructionsTab"
+import { DocumentsTab } from "@/components/agents/tabs/DocumentsTab"
 
 export default function AgentDetailPage() {
   const params = useParams<{ id: string }>()
@@ -86,8 +88,8 @@ export default function AgentDetailPage() {
       {flash && <FlashBanner kind={flash} onDismiss={() => setFlash(null)} />}
 
       {tab === "geral"      && <GeneralTab      agent={agent} onChange={setAgent} />}
-      {tab === "instrucoes" && <ComingSoon name="Instruções" />}
-      {tab === "documentos" && <ComingSoon name="Documentos" />}
+      {tab === "instrucoes" && <InstructionsTab agent={agent} onChange={setAgent} />}
+      {tab === "documentos" && <DocumentsTab    agent={agent} />}
       {tab === "webhooks"   && <ComingSoon name="Webhooks" />}
       {tab === "testar"     && <ComingSoon name="Testar" />}
     </div>
