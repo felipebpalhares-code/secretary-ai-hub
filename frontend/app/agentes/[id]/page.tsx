@@ -9,6 +9,7 @@ import { GeneralTab } from "@/components/agents/tabs/GeneralTab"
 import { InstructionsTab } from "@/components/agents/tabs/InstructionsTab"
 import { DocumentsTab } from "@/components/agents/tabs/DocumentsTab"
 import { WebhooksTab } from "@/components/agents/tabs/WebhooksTab"
+import { TestTab } from "@/components/agents/tabs/TestTab"
 
 export default function AgentDetailPage() {
   const params = useParams<{ id: string }>()
@@ -92,7 +93,7 @@ export default function AgentDetailPage() {
       {tab === "instrucoes" && <InstructionsTab agent={agent} onChange={setAgent} />}
       {tab === "documentos" && <DocumentsTab    agent={agent} />}
       {tab === "webhooks"   && <WebhooksTab    agent={agent} />}
-      {tab === "testar"     && <ComingSoon name="Testar" />}
+      {tab === "testar"     && <TestTab        agent={agent} />}
     </div>
   )
 }
@@ -143,14 +144,3 @@ function FlashBanner({
   )
 }
 
-function ComingSoon({ name }: { name: string }) {
-  return (
-    <div className="flex-1 overflow-y-auto px-6 md:px-8 py-loose">
-      <div className="max-w-3xl mx-auto bg-bg-surface border border-default rounded-xl p-loose text-center">
-        <p className="text-body text-text-tertiary">
-          Aba <strong>{name}</strong> — em construção.
-        </p>
-      </div>
-    </div>
-  )
-}
