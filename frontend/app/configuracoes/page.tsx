@@ -1,8 +1,5 @@
 import { TopBar, IconButton, Button } from "@/components/TopBar"
-import { Icon } from "@/components/Icon"
 import { ChannelCard } from "@/components/settings/ChannelCard"
-import { PhoneMockup } from "@/components/settings/PhoneMockup"
-import { ConfigPanel } from "@/components/settings/ConfigPanel"
 import { UnifiedLogs } from "@/components/settings/UnifiedLogs"
 import { WhatsAppChannelCard, WhatsAppQrPanel } from "@/components/settings/WhatsAppPanel"
 
@@ -73,28 +70,10 @@ export default function ConfiguracoesPage() {
 
         <div>
           <div className="text-[11px] font-bold text-ink-3 uppercase tracking-[.07em] mb-[10px]">
-            WhatsApp · Canal principal
+            Conectar WhatsApp
           </div>
-          <div className="bg-card border border-hair rounded-lg overflow-hidden">
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-hair bg-bg">
-              <div className="w-10 h-10 rounded-md bg-card border border-hair flex items-center justify-center text-ink-2">
-                <Icon name="chat" size={18} />
-              </div>
-              <div>
-                <div className="text-[15px] font-bold text-ink tracking-[-.25px]">
-                  Felipe Hub · Linha única
-                </div>
-                <div className="text-[11px] text-ink-3 font-semibold mt-px">
-                  Status em tempo real abaixo
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-[300px_1fr_320px] min-h-[540px]">
-              <WhatsAppQrPanel />
-              <PhoneMockup />
-              <ConfigPanel />
-            </div>
+          <div className="bg-card border border-hair rounded-lg overflow-hidden max-w-md">
+            <WhatsAppQrPanel />
           </div>
         </div>
 

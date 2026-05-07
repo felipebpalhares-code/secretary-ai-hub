@@ -129,7 +129,7 @@ export function WhatsAppQrPanel() {
   }
 
   return (
-    <div className="p-5 border-r border-hair flex flex-col gap-3">
+    <div className="p-5 flex flex-col gap-3">
       <div className="text-[11.5px] font-bold text-ink-2 uppercase tracking-[.05em]">
         Conexão Evolution
       </div>
