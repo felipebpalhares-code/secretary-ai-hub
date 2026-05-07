@@ -63,7 +63,6 @@ export function ChatHub() {
 
       {/* Chat real (WebSocket) */}
       <ChatMain
-        onAta={() => undefined}
         onToggleFeed={() => setFeedOpen((f) => !f)}
         connectionState={state}
         liveMessages={liveMessages}
