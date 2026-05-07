@@ -6,6 +6,7 @@ type Props = {
   value: string | number
   label: string
   meta?: string
+  tooltip?: string
   trend?: { label: string; variant: "up" | "down" | "neutral" }
   progress?: { value: number; color?: "default" | "err" | "warn" | "ok" }
 }
@@ -23,9 +24,12 @@ const PROGRESS_CLS = {
   ok: "bg-ok",
 }
 
-export function StatCard({ icon, value, label, meta, trend, progress }: Props) {
+export function StatCard({ icon, value, label, meta, tooltip, trend, progress }: Props) {
   return (
-    <div className="bg-card border border-hair rounded-lg p-5 flex flex-col gap-3 hover:border-ink-4 hover:shadow-[0_1px_3px_rgba(15,23,42,.06)] transition-all">
+    <div
+      title={tooltip}
+      className="bg-card border border-hair rounded-lg p-5 flex flex-col gap-3 hover:border-ink-4 hover:shadow-[0_1px_3px_rgba(15,23,42,.06)] transition-all"
+    >
       <div className="flex items-start justify-between">
         <div className="w-9 h-9 rounded-lg bg-bg border border-hair flex items-center justify-center text-ink-2">
           <Icon name={icon} size={17} />
