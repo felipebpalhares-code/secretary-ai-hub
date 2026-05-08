@@ -39,6 +39,12 @@ services:
       # Em produção: cadastrar em https://www.cpfcnpj.com.br/register/ e setar a chave aqui.
       CPF_LOOKUP_API_KEY: ${CPF_LOOKUP_API_KEY:-5ae973d7a997af13f0aaf2bf60e65803}
 
+      # Google OAuth (Contatos / Gmail / Calendar)
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost:8000/api/auth/google/callback}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+
       # CORS — frontend Next.js
       CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
 
