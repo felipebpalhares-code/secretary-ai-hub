@@ -2,6 +2,7 @@ import { TopBar, IconButton, Button } from "@/components/TopBar"
 import { ChannelCard } from "@/components/settings/ChannelCard"
 import { UnifiedLogs } from "@/components/settings/UnifiedLogs"
 import { WhatsAppChannelCard, WhatsAppQrPanel } from "@/components/settings/WhatsAppPanel"
+import { GoogleConnectCard } from "@/components/integrations/GoogleConnectCard"
 
 export default function ConfiguracoesPage() {
   return (
@@ -66,6 +67,16 @@ export default function ConfiguracoesPage() {
               secondaryLabel="Guia"
             />
           </div>
+        </div>
+
+        <div>
+          <div className="text-[11px] font-bold text-ink-3 uppercase tracking-[.07em] mb-[2px]">
+            Integrações Google
+          </div>
+          <div className="text-[11px] text-ink-3 font-medium mb-[10px]">
+            Contatos · Gmail · Calendar
+          </div>
+          <GoogleConnectCard />
         </div>
 
         <div>
