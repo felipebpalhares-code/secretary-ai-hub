@@ -51,6 +51,9 @@ logs/
 tmp/
 .cache/
 
+# Credenciais OAuth (Google etc)
+backend/credentials/
+
 # Agentes IA — dados gerados em runtime
 backend/chroma_data/*
 !backend/chroma_data/.gitkeep
