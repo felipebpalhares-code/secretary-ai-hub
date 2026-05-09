@@ -1,4 +1,4 @@
-import { TopBar, IconButton, Button } from "@/components/TopBar"
+import { TopBar, Button } from "@/components/TopBar"
 import { ContatosHub } from "./ContatosHub"
 
 export default function ContatosPage() {
@@ -9,20 +9,15 @@ export default function ContatosPage() {
         subtitle="Sua rede de contatos"
         actions={
           <>
-            <IconButton name="search" disabled title="Em breve" />
-            <Button icon="plus" disabled title="Em breve">
+            <Button icon="plus" disabled title="Em breve · CSV">
               Importar
             </Button>
-            <Button icon="settings" disabled title="Integração Google ainda não disponível">
-              Sync Google
-            </Button>
             <Button
-              variant="primary"
-              icon="plus"
+              icon="settings"
               disabled
-              title="Em breve · cadastro de contatos pendente"
+              title="Em breve · sincronização com Google Contacts"
             >
-              Novo contato
+              Sync Google
             </Button>
           </>
         }
