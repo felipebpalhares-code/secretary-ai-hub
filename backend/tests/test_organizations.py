@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy import text
 
 from models.contact import Contact, Organization
+from services import organization_service
 
 
 def _wipe(db):
@@ -105,3 +106,46 @@ def test_delete_org_unlinks_contacts(client, db):
     refreshed = client.get(f"/api/contacts/{c1['id']}").json()
     assert refreshed["organization_id"] is None
     assert refreshed["organization"] is None
+
+
+# ── 8. POST /enrich com BrasilAPI mockada → preenche e seta enriched_at ─
+def test_enrich_populates_from_brasilapi(client, monkeypatch):
+    # Org criada só com nome livre + cnpj
+    org = client.post("/api/organizations", json={
+        "name": "Empresa Pré-Enrich",
+        "cnpj": "11222333000144",
+        "notes": "minha nota manual",
+    }).json()
+    assert org["enriched_at"] is None
+    assert org["trade_name"] is None
+
+    fake_payload = {
+        "razao_social": "PALHARESTECH SOFTWARE LTDA",
+        "nome_fantasia": "PalharesTech",
+        "ramo": "Desenvolvimento de programas de computador sob encomenda",
+        "source": "brasilapi",
+    }
+
+    async def fake_fetch(cnpj: str):
+        assert cnpj == "11222333000144"
+        return fake_payload
+
+    monkeypatch.setattr(organization_service, "_fetch_cnpj_data", fake_fetch)
+
+    r = client.post(f"/api/organizations/{org['id']}/enrich")
+    assert r.status_code == 200, r.text
+    body = r.json()
+
+    assert body["name"] == "PALHARESTECH SOFTWARE LTDA"
+    assert body["trade_name"] == "PalharesTech"
+    assert body["industry"].startswith("Desenvolvimento")
+    assert body["enriched_at"] is not None
+    # Notes manuais preservadas
+    assert body["notes"] == "minha nota manual"
+
+
+def test_enrich_without_cnpj_returns_400(client):
+    org = client.post("/api/organizations", json={"name": "Sem CNPJ"}).json()
+    r = client.post(f"/api/organizations/{org['id']}/enrich")
+    assert r.status_code == 400
+    assert "cnpj" in r.json()["detail"].lower()

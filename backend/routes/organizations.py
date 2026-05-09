@@ -42,3 +42,8 @@ def update_organization(org_id: int, payload: OrganizationUpdate, db: Session = 
 def delete_organization(org_id: int, db: Session = Depends(get_session)):
     svc.delete_organization(db, org_id)
     return {"ok": True}
+
+
+@router.post("/{org_id}/enrich", response_model=OrganizationRead)
+async def enrich_organization(org_id: int, db: Session = Depends(get_session)):
+    return await svc.enrich_from_cnpj(db, org_id)
