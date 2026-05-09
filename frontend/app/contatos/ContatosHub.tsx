@@ -13,11 +13,15 @@ import {
   listCategories,
   listContacts,
   getStats,
+  deleteCategory as apiDeleteCategory,
 } from "@/lib/contacts-api"
 import { ContactCard } from "@/components/contatos/ContactCard"
 import { ContactRow } from "@/components/contatos/ContactRow"
 import { ContactDetail } from "@/components/contatos/ContactDetail"
 import { ContactModal } from "@/components/contatos/ContactModal"
+import { CategoryDialog } from "@/components/contatos/CategoryDialog"
+import { CategoryMenu } from "@/components/contatos/CategoryMenu"
+import { ConfirmDialog } from "@/components/contatos/ConfirmDialog"
 
 type Chip = "todos" | "30d" | "wa" | "email" | "empresa"
 
@@ -32,6 +36,14 @@ const CHIPS: { id: Chip; label: string }[] = [
 type ModalState =
   | { open: false }
   | { open: true; mode: { kind: "create" } | { kind: "edit"; contact: Contact } }
+
+type CategoryDialogState =
+  | { open: false }
+  | { open: true; mode: { kind: "create" } | { kind: "edit"; category: Category } }
+
+type CategoryDeleteState =
+  | { open: false }
+  | { open: true; category: Category; busy: boolean }
 
 
 export function ContatosHub() {
@@ -49,6 +61,8 @@ export function ContatosHub() {
 
   const [selected, setSelected] = useState<Contact | null>(null)
   const [modal, setModal] = useState<ModalState>({ open: false })
+  const [catDialog, setCatDialog] = useState<CategoryDialogState>({ open: false })
+  const [catDelete, setCatDelete] = useState<CategoryDeleteState>({ open: false })
 
   // ── Debounce search ──
   useEffect(() => {
@@ -108,6 +122,32 @@ export function ContatosHub() {
     void getStats().then(setStats).catch(() => {})
   }
 
+  function handleCategorySaved(_cat: Category) {
+    void Promise.all([listCategories(), getStats()])
+      .then(([cats, st]) => {
+        setCategories(cats)
+        setStats(st)
+      })
+      .catch(() => {})
+  }
+
+  async function handleCategoryDelete() {
+    if (!catDelete.open) return
+    setCatDelete({ ...catDelete, busy: true })
+    try {
+      await apiDeleteCategory(catDelete.category.id)
+      // Se a categoria deletada era a ativa, volta pra "Todos"
+      if (categoryId === catDelete.category.id) setCategoryId(null)
+      await refreshAll()
+      const cats = await listCategories()
+      setCategories(cats)
+      setCatDelete({ open: false })
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erro ao excluir categoria")
+      setCatDelete({ open: false })
+    }
+  }
+
   const isWaChip = chip === "wa"
   const visibleContacts = useMemo(() => (isWaChip ? [] : contacts), [contacts, isWaChip])
 
@@ -119,6 +159,9 @@ export function ContatosHub() {
         stats={stats}
         activeCategoryId={categoryId}
         onPick={(id) => setCategoryId(id)}
+        onAddCategory={() => setCatDialog({ open: true, mode: { kind: "create" } })}
+        onEditCategory={(cat) => setCatDialog({ open: true, mode: { kind: "edit", category: cat } })}
+        onDeleteCategory={(cat) => setCatDelete({ open: true, category: cat, busy: false })}
       />
 
       {/* Coluna principal */}
@@ -287,6 +330,32 @@ export function ContatosHub() {
         onSaved={handleSaved}
         onDeleted={handleDeleted}
       />
+
+      {/* Modais de categoria */}
+      <CategoryDialog
+        open={catDialog.open}
+        mode={catDialog.open ? catDialog.mode : { kind: "create" }}
+        onClose={() => setCatDialog({ open: false })}
+        onSaved={handleCategorySaved}
+      />
+      <ConfirmDialog
+        open={catDelete.open}
+        title="Excluir categoria"
+        destructive
+        confirmLabel="Excluir"
+        busy={catDelete.open ? catDelete.busy : false}
+        onClose={() => setCatDelete({ open: false })}
+        onConfirm={handleCategoryDelete}
+        message={
+          catDelete.open ? (
+            <>
+              Excluir <strong>{catDelete.category.name}</strong>? Os contatos
+              desta categoria não serão apagados — ficarão sem categoria. Essa
+              ação não pode ser desfeita.
+            </>
+          ) : null
+        }
+      />
     </div>
   )
 }
@@ -297,11 +366,17 @@ function Sidebar({
   stats,
   activeCategoryId,
   onPick,
+  onAddCategory,
+  onEditCategory,
+  onDeleteCategory,
 }: {
   categories: Category[]
   stats: ContactStats | null
   activeCategoryId: number | null
   onPick: (id: number | null) => void
+  onAddCategory: () => void
+  onEditCategory: (cat: Category) => void
+  onDeleteCategory: (cat: Category) => void
 }) {
   const countByCategory = useMemo(() => {
     const map = new Map<number | null, number>()
@@ -317,7 +392,7 @@ function Sidebar({
       <div className="text-tiny uppercase tracking-wider text-text-tertiary font-medium px-2 mb-2">
         Visões
       </div>
-      <SidebarItem
+      <SidebarRow
         label="Todos"
         count={total}
         active={activeCategoryId === null}
@@ -326,19 +401,28 @@ function Sidebar({
 
       <div className="text-tiny uppercase tracking-wider text-text-tertiary font-medium px-2 mt-6 mb-2 flex justify-between items-center">
         <span>Categorias</span>
+        <button
+          onClick={onAddCategory}
+          className="w-[18px] h-[18px] rounded border border-default bg-bg-surface text-text-secondary hover:border-brand hover:text-brand flex items-center justify-center transition-colors"
+          aria-label="Nova categoria"
+          title="Nova categoria"
+        >
+          <Icon name="plus" size={11} />
+        </button>
       </div>
       {categories.map((c) => (
-        <SidebarItem
+        <CategoryRow
           key={c.id}
-          label={c.name}
+          category={c}
           count={countByCategory.get(c.id) ?? 0}
-          color={c.color}
           active={activeCategoryId === c.id}
-          onClick={() => onPick(c.id)}
+          onPick={() => onPick(c.id)}
+          onEdit={() => onEditCategory(c)}
+          onDelete={() => onDeleteCategory(c)}
         />
       ))}
       {noCategoryCount > 0 && (
-        <SidebarItem
+        <SidebarRow
           label="Sem categoria"
           count={noCategoryCount}
           active={false}
@@ -350,7 +434,7 @@ function Sidebar({
   )
 }
 
-function SidebarItem({
+function SidebarRow({
   label,
   count,
   color,
@@ -382,5 +466,48 @@ function SidebarItem({
       </span>
       <span className="text-tiny text-text-tertiary tabular-nums">{count}</span>
     </button>
+  )
+}
+
+/** Categoria na sidebar com menu "..." aparecendo no hover. */
+function CategoryRow({
+  category,
+  count,
+  active,
+  onPick,
+  onEdit,
+  onDelete,
+}: {
+  category: Category
+  count: number
+  active: boolean
+  onPick: () => void
+  onEdit: () => void
+  onDelete: () => void
+}) {
+  return (
+    <div
+      onClick={onPick}
+      className={cn(
+        "group w-full flex items-center justify-between px-3 py-2 rounded-default text-body cursor-pointer transition-colors",
+        active
+          ? "bg-brand-subtle text-brand font-semibold"
+          : "text-text-secondary hover:bg-bg-subtle"
+      )}
+    >
+      <span className="flex items-center gap-2 truncate">
+        {category.color && (
+          <span className="w-2 h-2 rounded-sm shrink-0" style={{ background: category.color }} />
+        )}
+        <span className="truncate">{category.name}</span>
+      </span>
+      <span className="flex items-center gap-1 shrink-0">
+        <span className="text-tiny text-text-tertiary tabular-nums group-hover:hidden">{count}</span>
+        <span className="hidden group-hover:flex items-center gap-1">
+          <span className="text-tiny text-text-tertiary tabular-nums">{count}</span>
+          <CategoryMenu category={category} onEdit={onEdit} onDelete={onDelete} />
+        </span>
+      </span>
+    </div>
   )
 }
