@@ -26,6 +26,7 @@ export const NAV: NavGroup[] = [
     items: [
       { href: "/financas", label: "Finanças", icon: "chart" },
       { href: "/contatos", label: "Contatos", icon: "users" },
+      { href: "/empresas", label: "Empresas", icon: "building" },
       { href: "/agenda", label: "Agenda", icon: "calendar" },
       { href: "/tarefas", label: "Tarefas", icon: "check-square" },
     ],
