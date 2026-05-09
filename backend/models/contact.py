@@ -42,9 +42,6 @@ class Contact(Base):
     name            = Column(String)
     email           = Column(String, index=True)
     phone           = Column(String)
-    # Sprint E: substituído por organization_id. Mantemos a coluna como shadow
-    # read-only durante o ciclo — limpeza física fica pra próxima sprint.
-    company_name    = Column(String)
     role            = Column(String)
     category_id     = Column(Integer, ForeignKey("contact_categories.id", ondelete="SET NULL"))
     organization_id = Column(Integer, ForeignKey("organizations.id", ondelete="SET NULL"), index=True)

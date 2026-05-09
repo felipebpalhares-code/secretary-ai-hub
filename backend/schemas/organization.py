@@ -82,3 +82,11 @@ class OrganizationRead(BaseModel):
     enriched_at: Optional[datetime]
     created_at: datetime
     updated_at: datetime
+    contact_count: int = 0
+
+
+class OrganizationStats(BaseModel):
+    total: int
+    with_cnpj: int
+    enriched: int
+    without_contacts: int

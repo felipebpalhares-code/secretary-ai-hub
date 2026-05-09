@@ -149,3 +149,99 @@ def test_enrich_without_cnpj_returns_400(client):
     r = client.post(f"/api/organizations/{org['id']}/enrich")
     assert r.status_code == 400
     assert "cnpj" in r.json()["detail"].lower()
+
+
+# ── Sprint F ───────────────────────────────────────────────────────
+
+# ── 10. List retorna contact_count agregado ──────────────────────
+def test_list_returns_contact_count(client):
+    org = client.post("/api/organizations", json={"name": "Vinculada"}).json()
+    other = client.post("/api/organizations", json={"name": "Sozinha"}).json()
+    # 2 contatos vinculados à primeira, 0 na segunda
+    client.post("/api/contacts", json={"name": "A", "organization_id": org["id"]})
+    c2 = client.post("/api/contacts", json={"name": "B", "organization_id": org["id"]}).json()
+    # contato deletado (soft) não conta
+    client.post("/api/contacts", json={"name": "C", "organization_id": org["id"]})
+    deleted = client.post("/api/contacts", json={"name": "D", "organization_id": org["id"]}).json()
+    client.delete(f"/api/contacts/{deleted['id']}")
+
+    r = client.get("/api/organizations").json()
+    by_id = {o["id"]: o for o in r}
+    assert by_id[org["id"]]["contact_count"] == 3
+    assert by_id[other["id"]]["contact_count"] == 0
+
+
+# ── 11. Stats retorna campos esperados ────────────────────────────
+def test_stats_returns_expected_fields(client, db, monkeypatch):
+    # 3 orgs: 1 com cnpj+enriched+contato, 1 com cnpj sem contato, 1 sem cnpj sem contato
+    a = client.post("/api/organizations", json={"name": "A", "cnpj": "11111111000111"}).json()
+    b = client.post("/api/organizations", json={"name": "B", "cnpj": "22222222000222"}).json()
+    client.post("/api/organizations", json={"name": "C"})
+    client.post("/api/contacts", json={"name": "x", "organization_id": a["id"]})
+
+    # Marca A como enriched via mock
+    async def fake_fetch(_cnpj):
+        return {"razao_social": "A LTDA", "nome_fantasia": None, "ramo": None, "source": "fake"}
+    monkeypatch.setattr(organization_service, "_fetch_cnpj_data", fake_fetch)
+    client.post(f"/api/organizations/{a['id']}/enrich")
+
+    r = client.get("/api/organizations/stats").json()
+    assert r == {"total": 3, "with_cnpj": 2, "enriched": 1, "without_contacts": 2}
+
+
+# ── 12. POST /api/contacts ignora company_name silenciosamente ─────
+def test_post_contact_ignores_company_name(client):
+    r = client.post("/api/contacts", json={
+        "name": "Felipe",
+        "company_name": "Empresa Antiga (deve ser ignorada)",
+    })
+    assert r.status_code == 201
+    body = r.json()
+    # Schema não tem mais company_name → não aparece no response
+    assert "company_name" not in body
+
+
+# ── 13. Migration drop company_name é idempotente ─────────────────
+def test_drop_company_name_idempotent():
+    # init_db já rodou _drop_company_name_if_safe no startup do TestClient.
+    # Rodar de novo NÃO deve quebrar.
+    from services.database import _drop_company_name_if_safe
+    _drop_company_name_if_safe()
+    _drop_company_name_if_safe()
+
+
+# ── 14. Migration NÃO dropa quando ainda há strings populadas ─────
+def test_drop_company_name_skipped_when_data_present(db, caplog):
+    """
+    Re-cria a coluna manualmente, popula um contato e verifica que a função
+    não a remove e emite warning. Depois apaga manualmente a coluna recriada
+    pra não poluir os próximos testes.
+    """
+    from sqlalchemy import inspect, text
+    from services.database import engine, _drop_company_name_if_safe
+
+    with engine.begin() as conn:
+        cols = {c["name"] for c in inspect(engine).get_columns("contacts")}
+        recreated = "company_name" not in cols
+        if recreated:
+            conn.execute(text("ALTER TABLE contacts ADD COLUMN company_name VARCHAR"))
+
+    # Cria contato com company_name preenchido (via raw SQL p/ contornar o schema)
+    with engine.begin() as conn:
+        conn.execute(text(
+            "INSERT INTO contacts (name, company_name, is_starred, created_at, updated_at) "
+            "VALUES ('Teste', 'Empresa-x', 0, datetime('now'), datetime('now'))"
+        ))
+
+    import logging
+    with caplog.at_level(logging.WARNING, logger="services.database"):
+        _drop_company_name_if_safe()
+
+    cols_after = {c["name"] for c in inspect(engine).get_columns("contacts")}
+    assert "company_name" in cols_after, "coluna foi dropada apesar de haver dados"
+    assert any("DROP company_name pulado" in m for m in caplog.messages)
+
+    # Cleanup pros testes seguintes: apaga o contato e a coluna
+    with engine.begin() as conn:
+        conn.execute(text("DELETE FROM contacts WHERE company_name = 'Empresa-x'"))
+    _drop_company_name_if_safe()

@@ -1,11 +1,11 @@
-"""Camada de serviço de Organization (Sprint E)."""
+"""Camada de serviço de Organization (Sprint E + F)."""
 from __future__ import annotations
 import re
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Tuple
 
 from fastapi import HTTPException
-from sqlalchemy import or_, func
+from sqlalchemy import or_, func, select
 from sqlalchemy.orm import Session
 
 from models.contact import Organization, Contact
@@ -18,9 +18,28 @@ def _is_digits_only(s: str) -> bool:
     return bool(s) and s.replace(" ", "").isdigit()
 
 
-def list_organizations(db: Session, q: Optional[str] = None, limit: int = 20) -> List[Organization]:
-    """Autocomplete por prefixo de name (case-insensitive) ou substring de cnpj se `q` for dígitos."""
-    query = db.query(Organization)
+def list_organizations(
+    db: Session,
+    q: Optional[str] = None,
+    limit: int = 20,
+) -> List[Tuple[Organization, int]]:
+    """
+    Autocomplete por prefixo de name (case-insensitive) ou substring de cnpj.
+    Retorna lista de tuplas (org, contact_count) — só conta contatos não-deletados.
+    """
+    contact_count = (
+        db.query(Contact.organization_id, func.count(Contact.id).label("cnt"))
+        .filter(Contact.deleted_at.is_(None))
+        .filter(Contact.organization_id.isnot(None))
+        .group_by(Contact.organization_id)
+        .subquery()
+    )
+
+    query = db.query(
+        Organization,
+        func.coalesce(contact_count.c.cnt, 0).label("contact_count"),
+    ).outerjoin(contact_count, Organization.id == contact_count.c.organization_id)
+
     if q:
         clean = q.strip()
         if clean:
@@ -29,11 +48,36 @@ def list_organizations(db: Session, q: Optional[str] = None, limit: int = 20) ->
                 query = query.filter(Organization.cnpj.like(f"{digits}%"))
             else:
                 query = query.filter(func.lower(Organization.name).like(f"{clean.lower()}%"))
-    return (
+
+    rows = (
         query.order_by(Organization.name.asc().nulls_last(), Organization.id.asc())
         .limit(max(1, min(limit, 100)))
         .all()
     )
+    return [(r[0], int(r[1])) for r in rows]
+
+
+def get_stats(db: Session) -> Dict[str, int]:
+    base = db.query(Organization)
+    total = base.count()
+    with_cnpj = base.filter(Organization.cnpj.isnot(None), Organization.cnpj != "").count()
+    enriched = base.filter(Organization.enriched_at.isnot(None)).count()
+
+    # Sub: orgs com pelo menos 1 contato não-deletado
+    linked_ids = (
+        db.query(Contact.organization_id)
+        .filter(Contact.deleted_at.is_(None))
+        .filter(Contact.organization_id.isnot(None))
+        .distinct()
+    )
+    without_contacts = base.filter(~Organization.id.in_(linked_ids)).count()
+
+    return {
+        "total": total,
+        "with_cnpj": with_cnpj,
+        "enriched": enriched,
+        "without_contacts": without_contacts,
+    }
 
 
 def get_organization(db: Session, org_id: int) -> Organization:

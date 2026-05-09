@@ -52,7 +52,6 @@ class ContactBase(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
-    company_name: Optional[str] = None  # shadow read-only durante a transição p/ Organization
     role: Optional[str] = None
     category_id: Optional[int] = None
     organization_id: Optional[int] = None
@@ -62,7 +61,7 @@ class ContactBase(BaseModel):
     is_starred: bool = False
     tags: List[str] = Field(default_factory=list)
 
-    @field_validator("name", "phone", "company_name", "role", "notes", "photo_url", mode="before")
+    @field_validator("name", "phone", "role", "notes", "photo_url", mode="before")
     @classmethod
     def _strip(cls, v):
         return _strip_or_none(v) if isinstance(v, str) else v
@@ -81,7 +80,6 @@ class ContactUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
-    company_name: Optional[str] = None
     role: Optional[str] = None
     category_id: Optional[int] = None
     organization_id: Optional[int] = None
@@ -91,7 +89,7 @@ class ContactUpdate(BaseModel):
     is_starred: Optional[bool] = None
     tags: Optional[List[str]] = None
 
-    @field_validator("name", "phone", "company_name", "role", "notes", "photo_url", mode="before")
+    @field_validator("name", "phone", "role", "notes", "photo_url", mode="before")
     @classmethod
     def _strip(cls, v):
         return _strip_or_none(v) if isinstance(v, str) else v
@@ -103,7 +101,6 @@ class ContactRead(BaseModel):
     name: Optional[str]
     email: Optional[str]
     phone: Optional[str]
-    company_name: Optional[str]
     role: Optional[str]
     category_id: Optional[int]
     organization_id: Optional[int]
