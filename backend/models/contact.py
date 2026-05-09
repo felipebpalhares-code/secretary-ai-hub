@@ -49,6 +49,10 @@ class Contact(Base):
     photo_url       = Column(String)
     birthday        = Column(Date)
     is_starred      = Column(Boolean, default=False, nullable=False)
+    # Sprint G: rastreia origem externa pra sync (Google People resourceName).
+    # external_id é unique parcial (NULL permitido) — dois contatos manuais sem id externo coexistem.
+    external_source = Column(String, index=True)        # "google" | None
+    external_id     = Column(String, unique=True, index=True)
     created_at      = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at      = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     deleted_at      = Column(DateTime, index=True)  # soft delete
@@ -86,6 +90,19 @@ class ContactTag(Base):
 
     contact_id = Column(Integer, ForeignKey("contacts.id", ondelete="CASCADE"), primary_key=True)
     tag_id     = Column(Integer, ForeignKey("contact_tags_dict.id", ondelete="CASCADE"), primary_key=True)
+
+
+class GoogleSyncState(Base):
+    """
+    Singleton (id=1) com o estado da última sincronização Google → hub.
+    `last_report_json` guarda o relatório completo da última execução
+    (counts, errors); a tabela só é escrita pelo sync, não pela UI.
+    """
+    __tablename__ = "google_sync_state"
+
+    id                = Column(Integer, primary_key=True)
+    last_sync_at      = Column(DateTime)
+    last_report_json  = Column(Text)
 
 
 class Organization(Base):

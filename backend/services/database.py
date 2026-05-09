@@ -32,6 +32,20 @@ _RUNTIME_COLUMN_MIGRATIONS: list[tuple[str, str, str]] = [
     # (tabela, coluna, DDL completo do ALTER TABLE)
     ("contacts", "organization_id",
      "ALTER TABLE contacts ADD COLUMN organization_id INTEGER REFERENCES organizations(id) ON DELETE SET NULL"),
+    # Sprint G — rastreabilidade da origem externa
+    ("contacts", "external_source",
+     "ALTER TABLE contacts ADD COLUMN external_source VARCHAR"),
+    ("contacts", "external_id",
+     "ALTER TABLE contacts ADD COLUMN external_id VARCHAR"),
+]
+
+# Índices que precisam ser criados em DBs antigos (create_all cria automaticamente
+# em DB novo, mas ADD COLUMN não cria índice). Tuple = (nome, DDL idempotente).
+_RUNTIME_INDEXES: list[tuple[str, str]] = [
+    ("ix_contacts_external_source",
+     "CREATE INDEX IF NOT EXISTS ix_contacts_external_source ON contacts (external_source)"),
+    ("ix_contacts_external_id",
+     "CREATE UNIQUE INDEX IF NOT EXISTS ix_contacts_external_id ON contacts (external_id)"),
 ]
 
 
@@ -47,6 +61,8 @@ def _apply_runtime_migrations() -> None:
                 continue
             conn.execute(text(ddl))
             log.info("Runtime migration aplicada: %s.%s", table, column)
+        for _name, ddl in _RUNTIME_INDEXES:
+            conn.execute(text(ddl))
 
 
 def _drop_company_name_if_safe() -> None:

@@ -109,6 +109,8 @@ class ContactRead(BaseModel):
     photo_url: Optional[str]
     birthday: Optional[date]
     is_starred: bool
+    external_source: Optional[str] = None
+    external_id: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     tags: List[TagRead] = Field(default_factory=list)
