@@ -30,6 +30,14 @@ export type Organization = {
   enriched_at: string | null
   created_at: string
   updated_at: string
+  contact_count: number
+}
+
+export type OrganizationStats = {
+  total: number
+  with_cnpj: number
+  enriched: number
+  without_contacts: number
 }
 
 export type OrganizationCreate = {

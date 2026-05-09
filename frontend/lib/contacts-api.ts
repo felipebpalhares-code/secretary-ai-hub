@@ -15,6 +15,7 @@ import type {
   Organization,
   OrganizationCreate,
   OrganizationUpdate,
+  OrganizationStats,
 } from "./contacts-types"
 
 function buildQuery(filters: ContactsListFilters | undefined): string {
@@ -125,6 +126,10 @@ export async function deleteOrganization(id: number): Promise<{ ok: boolean }> {
 
 export async function enrichOrganization(id: number): Promise<Organization> {
   return request<Organization>(`/api/organizations/${id}/enrich`, { method: "POST" })
+}
+
+export async function getOrganizationStats(): Promise<OrganizationStats> {
+  return request<OrganizationStats>("/api/organizations/stats")
 }
 
 // ───── Backup (admin) ─────
