@@ -5,6 +5,8 @@ from typing import Optional, List
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 
+from schemas.organization import OrganizationRead
+
 
 # ───────── Category ─────────
 
@@ -50,9 +52,10 @@ class ContactBase(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
-    company_name: Optional[str] = None
+    company_name: Optional[str] = None  # shadow read-only durante a transição p/ Organization
     role: Optional[str] = None
     category_id: Optional[int] = None
+    organization_id: Optional[int] = None
     notes: Optional[str] = None
     photo_url: Optional[str] = None
     birthday: Optional[date] = None
@@ -81,6 +84,7 @@ class ContactUpdate(BaseModel):
     company_name: Optional[str] = None
     role: Optional[str] = None
     category_id: Optional[int] = None
+    organization_id: Optional[int] = None
     notes: Optional[str] = None
     photo_url: Optional[str] = None
     birthday: Optional[date] = None
@@ -102,6 +106,8 @@ class ContactRead(BaseModel):
     company_name: Optional[str]
     role: Optional[str]
     category_id: Optional[int]
+    organization_id: Optional[int]
+    organization: Optional[OrganizationRead] = None
     notes: Optional[str]
     photo_url: Optional[str]
     birthday: Optional[date]

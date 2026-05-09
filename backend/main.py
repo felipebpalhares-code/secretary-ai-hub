@@ -16,6 +16,7 @@ from routes.tasks import router as tasks_router
 from routes.agents import router as agents_router
 from routes.google_auth import router as google_auth_router
 from routes.contacts import router as contacts_router
+from routes.organizations import router as organizations_router
 
 
 @asynccontextmanager
@@ -50,6 +51,7 @@ app.include_router(tasks_router)
 app.include_router(agents_router)
 app.include_router(google_auth_router)
 app.include_router(contacts_router)
+app.include_router(organizations_router)
 
 
 @app.get("/health")
