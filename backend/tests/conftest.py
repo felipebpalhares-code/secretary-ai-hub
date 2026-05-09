@@ -12,11 +12,15 @@ import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock
 
-# Envs precisam estar configurados ANTES dos imports da aplicação
+# Envs precisam estar configurados ANTES dos imports da aplicação.
+# CRÍTICO: usar atribuição direta (não setdefault). No container Docker, a env
+# DATABASE_PATH=/data/felipe_hub.db já vem setada — se usássemos setdefault,
+# os testes rodariam contra o DB de produção e o teardown
+# (Base.metadata.drop_all) apagaria todas as tabelas.
 _TMPDIR = tempfile.mkdtemp(prefix="felipe-hub-tests-")
-os.environ.setdefault("DATABASE_PATH",  str(Path(_TMPDIR) / "test.db"))
-os.environ.setdefault("UPLOADS_PATH",   str(Path(_TMPDIR) / "uploads"))
-os.environ.setdefault("WEBHOOK_LOG_PATH", str(Path(_TMPDIR) / "webhooks.log"))
+os.environ["DATABASE_PATH"]  = str(Path(_TMPDIR) / "test.db")
+os.environ["UPLOADS_PATH"]   = str(Path(_TMPDIR) / "uploads")
+os.environ["WEBHOOK_LOG_PATH"] = str(Path(_TMPDIR) / "webhooks.log")
 os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")
 
 if not os.environ.get("ENCRYPTION_KEY"):
