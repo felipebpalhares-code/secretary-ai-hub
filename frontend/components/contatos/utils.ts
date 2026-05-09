@@ -1,8 +1,8 @@
 import type { Contact, Category } from "@/lib/contacts-types"
 
-/** Nome da empresa do contato — prefere a Organization vinculada e cai no shadow. */
-export function contactCompany(c: Pick<Contact, "organization" | "company_name">): string | null {
-  return c.organization?.name ?? c.company_name ?? null
+/** Nome da empresa do contato a partir da Organization vinculada. */
+export function contactCompany(c: Pick<Contact, "organization">): string | null {
+  return c.organization?.name ?? null
 }
 
 /** Iniciais a partir do nome (até 2 letras). Fallback E-/T- pra contato só com email/telefone. */

@@ -253,14 +253,7 @@ export function ContactModal({
         </FormField>
       </div>
 
-      <FormField
-        label="Empresa"
-        hint={
-          mode.kind === "edit" && !form.organization && mode.contact.company_name
-            ? `Em texto livre: «${mode.contact.company_name}» — escolha uma da lista pra estruturar.`
-            : undefined
-        }
-      >
+      <FormField label="Empresa">
         <OrganizationCombobox
           value={form.organization}
           onChange={(org) => setForm({ ...form, organization: org })}

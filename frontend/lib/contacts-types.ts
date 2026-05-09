@@ -56,8 +56,6 @@ export type Contact = {
   name: string | null
   email: string | null
   phone: string | null
-  /** Shadow read-only durante a transição p/ Organization (Sprint E → F). */
-  company_name: string | null
   role: string | null
   category_id: number | null
   organization_id: number | null
@@ -75,7 +73,6 @@ export type ContactCreate = {
   name?: string | null
   email?: string | null
   phone?: string | null
-  company_name?: string | null
   role?: string | null
   category_id?: number | null
   organization_id?: number | null
