@@ -12,6 +12,9 @@ import type {
   CategoryCreate,
   CategoryUpdate,
   Tag,
+  Organization,
+  OrganizationCreate,
+  OrganizationUpdate,
 } from "./contacts-types"
 
 function buildQuery(filters: ContactsListFilters | undefined): string {
@@ -91,6 +94,37 @@ export async function deleteCategory(id: number): Promise<{ ok: boolean }> {
 export async function searchTags(prefix: string, limit = 10): Promise<Tag[]> {
   const q = new URLSearchParams({ q: prefix, limit: String(limit) })
   return request<Tag[]>(`/api/contacts/tags?${q.toString()}`)
+}
+
+// ───── Organizations (Sprint E) ─────
+
+export async function listOrganizations(q?: string, limit = 20): Promise<Organization[]> {
+  const params = new URLSearchParams()
+  if (q) params.set("q", q)
+  params.set("limit", String(limit))
+  return request<Organization[]>(`/api/organizations?${params.toString()}`)
+}
+
+export async function createOrganization(payload: OrganizationCreate): Promise<Organization> {
+  return request<Organization>("/api/organizations", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function updateOrganization(id: number, payload: OrganizationUpdate): Promise<Organization> {
+  return request<Organization>(`/api/organizations/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function deleteOrganization(id: number): Promise<{ ok: boolean }> {
+  return request<{ ok: boolean }>(`/api/organizations/${id}`, { method: "DELETE" })
+}
+
+export async function enrichOrganization(id: number): Promise<Organization> {
+  return request<Organization>(`/api/organizations/${id}/enrich`, { method: "POST" })
 }
 
 // ───── Backup (admin) ─────

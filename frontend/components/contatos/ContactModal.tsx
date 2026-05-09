@@ -3,8 +3,9 @@ import { useEffect, useState } from "react"
 import { Modal } from "@/components/ui/Modal"
 import { FormField, TextInput, Select, PrimaryButton, SecondaryButton } from "@/components/ui/FormField"
 import { TagInput } from "./TagInput"
+import { OrganizationCombobox } from "./OrganizationCombobox"
 import { Icon } from "@/components/Icon"
-import type { Contact, Category, ContactCreate } from "@/lib/contacts-types"
+import type { Contact, Category, ContactCreate, Organization } from "@/lib/contacts-types"
 import { createContact, updateContact, deleteContact } from "@/lib/contacts-api"
 
 type Mode =
@@ -15,7 +16,7 @@ type FormState = {
   name: string
   email: string
   phone: string
-  company_name: string
+  organization: Organization | null
   role: string
   category_id: number | null
   notes: string
@@ -29,7 +30,7 @@ const EMPTY: FormState = {
   name: "",
   email: "",
   phone: "",
-  company_name: "",
+  organization: null,
   role: "",
   category_id: null,
   notes: "",
@@ -69,7 +70,7 @@ export function ContactModal({
         name: c.name ?? "",
         email: c.email ?? "",
         phone: c.phone ?? "",
-        company_name: c.company_name ?? "",
+        organization: c.organization,
         role: c.role ?? "",
         category_id: c.category_id ?? null,
         notes: c.notes ?? "",
@@ -97,7 +98,7 @@ export function ContactModal({
         name: form.name.trim() || null,
         email: form.email.trim() || null,
         phone: form.phone.trim() || null,
-        company_name: form.company_name.trim() || null,
+        organization_id: form.organization?.id ?? null,
         role: form.role.trim() || null,
         category_id: form.category_id,
         notes: form.notes.trim() || null,
@@ -218,13 +219,6 @@ export function ContactModal({
             placeholder="11999998888"
           />
         </FormField>
-        <FormField label="Empresa">
-          <TextInput
-            value={form.company_name}
-            onChange={(e) => setForm({ ...form, company_name: e.target.value })}
-            placeholder="PalharesTech Ltda"
-          />
-        </FormField>
         <FormField label="Categoria">
           <Select
             value={form.category_id ?? ""}
@@ -258,6 +252,20 @@ export function ContactModal({
           />
         </FormField>
       </div>
+
+      <FormField
+        label="Empresa"
+        hint={
+          mode.kind === "edit" && !form.organization && mode.contact.company_name
+            ? `Em texto livre: «${mode.contact.company_name}» — escolha uma da lista pra estruturar.`
+            : undefined
+        }
+      >
+        <OrganizationCombobox
+          value={form.organization}
+          onChange={(org) => setForm({ ...form, organization: org })}
+        />
+      </FormField>
 
       <FormField label="Tags" hint="Enter ou vírgula adiciona. Sugestões aparecem conforme você digita.">
         <TagInput value={form.tags} onChange={(tags) => setForm({ ...form, tags })} />

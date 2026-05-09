@@ -19,14 +19,41 @@ export type Category = {
   sort_order: number
 }
 
+export type Organization = {
+  id: number
+  name: string
+  trade_name: string | null
+  cnpj: string | null
+  industry: string | null
+  website: string | null
+  notes: string | null
+  enriched_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type OrganizationCreate = {
+  name: string
+  trade_name?: string | null
+  cnpj?: string | null
+  industry?: string | null
+  website?: string | null
+  notes?: string | null
+}
+
+export type OrganizationUpdate = Partial<OrganizationCreate>
+
 export type Contact = {
   id: number
   name: string | null
   email: string | null
   phone: string | null
+  /** Shadow read-only durante a transição p/ Organization (Sprint E → F). */
   company_name: string | null
   role: string | null
   category_id: number | null
+  organization_id: number | null
+  organization: Organization | null
   notes: string | null
   photo_url: string | null
   birthday: string | null
@@ -43,6 +70,7 @@ export type ContactCreate = {
   company_name?: string | null
   role?: string | null
   category_id?: number | null
+  organization_id?: number | null
   notes?: string | null
   photo_url?: string | null
   birthday?: string | null

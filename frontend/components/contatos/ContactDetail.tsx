@@ -2,7 +2,7 @@
 import { Icon } from "@/components/Icon"
 import { cn } from "@/lib/cn"
 import type { Contact, Category } from "@/lib/contacts-types"
-import { avatarTone, displayLabel, initialsOf, categoryById, formatPhone } from "./utils"
+import { avatarTone, displayLabel, initialsOf, categoryById, formatPhone, contactCompany } from "./utils"
 
 export function ContactDetail({
   contact,
@@ -57,7 +57,7 @@ export function ContactDetail({
             {contact.is_starred && <span className="text-warn text-xs">★</span>}
           </div>
           <div className="text-xs text-ink-2 font-medium leading-[1.4] px-2">
-            {[contact.role, contact.company_name].filter(Boolean).join(" · ") || "—"}
+            {[contact.role, contactCompany(contact)].filter(Boolean).join(" · ") || "—"}
           </div>
           <div className="flex gap-[6px] mt-[10px] w-full">
             <button
@@ -89,8 +89,30 @@ export function ContactDetail({
                 <span className="break-all">{contact.email}</span>
               </InfoRow>
             )}
-            {contact.company_name && (
-              <InfoRow icon="building" label="Empresa">{contact.company_name}</InfoRow>
+            {(contact.organization || contact.company_name) && (
+              <InfoRow icon="building" label="Empresa">
+                {contact.organization ? (
+                  <span>
+                    {contact.organization.name}
+                    {contact.organization.cnpj && (
+                      <span className="text-ink-3 font-medium ml-1 mono text-[10.5px]">
+                        ·{" "}
+                        {contact.organization.cnpj.replace(
+                          /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+                          "$1.$2.$3/$4-$5"
+                        )}
+                      </span>
+                    )}
+                    {contact.organization.industry && (
+                      <span className="block text-ink-3 font-medium text-[10.5px] mt-0.5">
+                        {contact.organization.industry}
+                      </span>
+                    )}
+                  </span>
+                ) : (
+                  <span className="text-ink-3 italic">{contact.company_name} (texto livre)</span>
+                )}
+              </InfoRow>
             )}
             {contact.role && <InfoRow icon="user" label="Cargo">{contact.role}</InfoRow>}
             {contact.birthday && (

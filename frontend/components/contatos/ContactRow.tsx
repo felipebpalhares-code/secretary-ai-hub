@@ -2,7 +2,7 @@
 import { Icon } from "@/components/Icon"
 import { cn } from "@/lib/cn"
 import type { Contact, Category } from "@/lib/contacts-types"
-import { avatarTone, displayLabel, initialsOf, categoryById, formatPhone } from "./utils"
+import { avatarTone, displayLabel, initialsOf, categoryById, formatPhone, contactCompany } from "./utils"
 
 export function ContactRow({
   contact,
@@ -41,7 +41,7 @@ export function ContactRow({
       <div className="min-w-0">
         <div className="text-[12.5px] font-semibold text-ink truncate">{displayLabel(contact)}</div>
         <div className="text-[10.5px] text-ink-3 font-medium truncate">
-          {[contact.role, contact.company_name].filter(Boolean).join(" · ") || "—"}
+          {[contact.role, contactCompany(contact)].filter(Boolean).join(" · ") || "—"}
         </div>
       </div>
       <div className="text-[11.5px] text-ink-2 font-medium truncate mono">

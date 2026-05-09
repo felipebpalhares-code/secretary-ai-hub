@@ -2,7 +2,7 @@
 import { Icon } from "@/components/Icon"
 import { cn } from "@/lib/cn"
 import type { Contact, Category } from "@/lib/contacts-types"
-import { avatarTone, displayLabel, initialsOf, categoryById } from "./utils"
+import { avatarTone, displayLabel, initialsOf, categoryById, contactCompany } from "./utils"
 
 export function ContactCard({
   contact,
@@ -53,7 +53,7 @@ export function ContactCard({
           {contact.is_starred && <span className="text-warn text-[10px]">★</span>}
         </div>
         <div className="text-[11.5px] text-ink-2 mt-0.5 font-medium truncate">
-          {[contact.role, contact.company_name].filter(Boolean).join(" · ") || "—"}
+          {[contact.role, contactCompany(contact)].filter(Boolean).join(" · ") || "—"}
         </div>
         <div className="flex gap-1 mt-[5px] flex-wrap items-center">
           {cat && (
