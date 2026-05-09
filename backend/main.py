@@ -5,8 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import json
 
 from agents.orchestrator import process
-from services.database import init_db
+from services.database import init_db, SessionLocal
 from services.scheduler import start_scheduler, stop_scheduler
+from services.contact_service import seed_default_categories
 from routes.connections import router as connections_router
 from routes.banks import router as banks_router
 from routes.profile import router as profile_router
@@ -14,11 +15,14 @@ from routes.utils import router as utils_router
 from routes.tasks import router as tasks_router
 from routes.agents import router as agents_router
 from routes.google_auth import router as google_auth_router
+from routes.contacts import router as contacts_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    with SessionLocal() as db:
+        seed_default_categories(db)
     start_scheduler()
     yield
     stop_scheduler()
@@ -45,6 +49,7 @@ app.include_router(utils_router)
 app.include_router(tasks_router)
 app.include_router(agents_router)
 app.include_router(google_auth_router)
+app.include_router(contacts_router)
 
 
 @app.get("/health")

@@ -10,6 +10,7 @@ import models.banking         # noqa: F401
 import models.task            # noqa: F401
 import models.agent           # noqa: F401
 import models.oauth_credential  # noqa: F401
+import models.contact         # noqa: F401
 
 # Em Docker, DATABASE_PATH=/data/felipe_hub.db (volume persistido).
 # Local: cria felipe_hub.db na raiz do backend.
