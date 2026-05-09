@@ -78,3 +78,32 @@ export async function syncGoogleContacts(): Promise<ContactsSyncResponse> {
 export async function getContactsSyncStatus(): Promise<ContactsSyncStatus> {
   return request<ContactsSyncStatus>("/api/google/contacts/sync-status")
 }
+
+/* ───────── Sprint H — Aniversários no Calendar ───────── */
+
+export type BirthdaySyncReport = {
+  started_at: string
+  finished_at: string
+  calendar_id: string
+  created: number
+  updated: number
+  total_contacts: number
+}
+
+export type BirthdaySyncResponse = {
+  ok: boolean
+  report: BirthdaySyncReport
+}
+
+export type BirthdaySyncStatus = {
+  last_sync_at: string | null
+  last_report: BirthdaySyncReport | null
+}
+
+export async function syncBirthdays(): Promise<BirthdaySyncResponse> {
+  return request<BirthdaySyncResponse>("/api/google/calendar/sync-birthdays", { method: "POST" })
+}
+
+export async function getBirthdaySyncStatus(): Promise<BirthdaySyncStatus> {
+  return request<BirthdaySyncStatus>("/api/google/calendar/sync-birthdays/status")
+}

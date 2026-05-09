@@ -10,9 +10,12 @@ import {
   googleStartUrl,
   syncGoogleContacts,
   getContactsSyncStatus,
+  syncBirthdays,
+  getBirthdaySyncStatus,
   type GoogleStatus,
   type GoogleContact,
   type SyncReport,
+  type BirthdaySyncReport,
 } from "@/lib/google-api"
 
 type Toast = { kind: "ok" | "err"; msg: string } | null
@@ -52,6 +55,12 @@ type SyncState =
   | { phase: "done"; report: SyncReport }
   | { phase: "err"; msg: string }
 
+type BirthdayState =
+  | { phase: "idle" }
+  | { phase: "loading" }
+  | { phase: "done"; report: BirthdaySyncReport }
+  | { phase: "err"; msg: string }
+
 export function GoogleConnectCard() {
   const [status, setStatus] = useState<GoogleStatus | null>(null)
   const [busy, setBusy] = useState(false)
@@ -59,6 +68,8 @@ export function GoogleConnectCard() {
   const [toast, setToast] = useState<Toast>(null)
   const [sync, setSync] = useState<SyncState>({ phase: "idle" })
   const [lastSyncAt, setLastSyncAt] = useState<string | null>(null)
+  const [bday, setBday] = useState<BirthdayState>({ phase: "idle" })
+  const [lastBdayAt, setLastBdayAt] = useState<string | null>(null)
 
   // Lê status na carga inicial + sync-status quando conectado
   async function refresh() {
@@ -71,6 +82,12 @@ export function GoogleConnectCard() {
           setLastSyncAt(ss.last_sync_at)
         } catch {
           /* ignora — UI mostra "nunca" */
+        }
+        try {
+          const bs = await getBirthdaySyncStatus()
+          setLastBdayAt(bs.last_sync_at)
+        } catch {
+          /* ignora */
         }
       }
     } catch {
@@ -155,6 +172,26 @@ export function GoogleConnectCard() {
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Falha ao sincronizar"
       setSync({ phase: "err", msg })
+      setToast({ kind: "err", msg })
+      window.setTimeout(() => setToast(null), 7000)
+    }
+  }
+
+  async function handleBirthdaySync() {
+    setBday({ phase: "loading" })
+    try {
+      const res = await syncBirthdays()
+      setBday({ phase: "done", report: res.report })
+      setLastBdayAt(res.report.finished_at)
+      const r = res.report
+      setToast({
+        kind: "ok",
+        msg: `Aniversários: ${r.created} criados · ${r.updated} atualizados (${r.total_contacts} contatos com data)`,
+      })
+      window.setTimeout(() => setToast(null), 6000)
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Falha ao sincronizar aniversários"
+      setBday({ phase: "err", msg })
       setToast({ kind: "err", msg })
       window.setTimeout(() => setToast(null), 7000)
     }
@@ -288,6 +325,42 @@ export function GoogleConnectCard() {
             className="px-3 py-[7px] rounded-md bg-accent text-white border border-accent text-[11.5px] font-semibold hover:bg-accent-hover disabled:opacity-50 transition-colors whitespace-nowrap"
           >
             {sync.phase === "loading" ? "Sincronizando…" : "Sincronizar agora"}
+          </button>
+        </div>
+      )}
+
+      {/* Sprint H — aniversários no Calendar */}
+      {connected && (
+        <div className="bg-bg border border-hair rounded-md p-3 flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="text-[11.5px] font-bold text-ink-2 uppercase tracking-[.05em]">
+              Aniversários no Calendar
+            </div>
+            <div className="text-[11px] text-ink-3 font-medium mt-0.5">
+              {bday.phase === "loading" ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="inline-block w-2 h-2 rounded-full bg-accent animate-pulse" />
+                  Atualizando eventos…
+                </span>
+              ) : bday.phase === "done" ? (
+                <>
+                  Última sync {relativeFromIso(bday.report.finished_at)} ·
+                  {" "}{bday.report.created}c / {bday.report.updated}u
+                  {" · "}{bday.report.total_contacts} contatos com data
+                </>
+              ) : lastBdayAt ? (
+                <>Última sync {relativeFromIso(lastBdayAt)}</>
+              ) : (
+                <>Calendar dedicado · Nunca sincronizado</>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={handleBirthdaySync}
+            disabled={bday.phase === "loading"}
+            className="px-3 py-[7px] rounded-md bg-card text-ink border border-hair text-[11.5px] font-semibold hover:bg-bg hover:border-ink-4 disabled:opacity-50 transition-colors whitespace-nowrap"
+          >
+            {bday.phase === "loading" ? "Sincronizando…" : "Sincronizar aniversários"}
           </button>
         </div>
       )}
