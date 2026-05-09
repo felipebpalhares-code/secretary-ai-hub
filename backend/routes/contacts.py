@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from services.database import get_session
 from services import contact_service as svc
+from services.backup_service import run_backup
 from schemas.contact import (
     ContactCreate, ContactUpdate, ContactRead, ContactStats,
     CategoryCreate, CategoryUpdate, CategoryRead,
@@ -26,6 +27,15 @@ router = APIRouter(prefix="/api/contacts", tags=["contacts"])
 @router.get("/stats", response_model=ContactStats)
 def stats(db: Session = Depends(get_session)) -> ContactStats:
     return ContactStats(**svc.get_stats(db))
+
+
+# ───────── Backup ─────────
+
+@router.post("/backup/now")
+def backup_now():
+    """Dispara o backup imediatamente (útil pra teste e e2e manual)."""
+    path = run_backup()
+    return {"ok": True, "path": str(path)}
 
 
 # ───────── Categorias ─────────

@@ -10,6 +10,7 @@ from services.database import SessionLocal
 from services.briefing_builder import (
     build_morning_briefing, build_noon_alerts, build_evening_summary
 )
+from services.backup_service import run_backup, cleanup_old_backups
 from services.evolution_client import client as wa
 from services.telegram_client import client as tg
 from services.discord_client import client as dc
@@ -64,8 +65,13 @@ def start_scheduler() -> None:
     scheduler.add_job(job_morning, CronTrigger(hour=7,  minute=0),  id="morning", replace_existing=True)
     scheduler.add_job(job_noon,    CronTrigger(hour=12, minute=0),  id="noon",    replace_existing=True)
     scheduler.add_job(job_evening, CronTrigger(hour=18, minute=0),  id="evening", replace_existing=True)
+
+    # Backup diário do módulo Contatos + cleanup retroativo (30d)
+    scheduler.add_job(run_backup,            CronTrigger(hour=3, minute=0), id="contacts_backup",  replace_existing=True)
+    scheduler.add_job(cleanup_old_backups,   CronTrigger(hour=3, minute=5), id="contacts_cleanup", replace_existing=True)
+
     scheduler.start()
-    log.info("Scheduler started: morning (7h), noon (12h), evening (18h)")
+    log.info("Scheduler started: morning (7h), noon (12h), evening (18h), contacts backup (3h)")
 
 
 def stop_scheduler() -> None:

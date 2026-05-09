@@ -64,6 +64,9 @@ services:
       - ./backend:/app
       # Banco persistente + cache de modelos + uploads
       - hub-data:/data
+      # Backups de Contatos (sub-bind sobre /data) — visível no host pra
+      # inspeção/cópia rápida sem precisar entrar no volume nomeado.
+      - ./data/backups:/data/backups
     depends_on:
       chroma:
         condition: service_started

@@ -54,6 +54,9 @@ tmp/
 # Credenciais OAuth (Google etc)
 backend/credentials/
 
+# Backups e dados gerados em runtime (volume Docker bind ./data:/data)
+data/
+
 # Agentes IA — dados gerados em runtime
 backend/chroma_data/*
 !backend/chroma_data/.gitkeep
