@@ -49,3 +49,32 @@ export async function testConnection(): Promise<GoogleTestResponse> {
   }
   return { ok: true, contacts: payload.contacts ?? [] }
 }
+
+/* ───────── Sprint G — Sync de Contatos ───────── */
+
+export type SyncReport = {
+  started_at: string
+  finished_at: string
+  count_imported: number
+  count_updated: number
+  count_skipped: number
+  errors: string[]
+}
+
+export type ContactsSyncResponse = {
+  ok: boolean
+  report: SyncReport
+}
+
+export type ContactsSyncStatus = {
+  last_sync_at: string | null
+  last_report: SyncReport | null
+}
+
+export async function syncGoogleContacts(): Promise<ContactsSyncResponse> {
+  return request<ContactsSyncResponse>("/api/google/contacts/sync", { method: "POST" })
+}
+
+export async function getContactsSyncStatus(): Promise<ContactsSyncStatus> {
+  return request<ContactsSyncStatus>("/api/google/contacts/sync-status")
+}

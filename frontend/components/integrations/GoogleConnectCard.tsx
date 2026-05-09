@@ -8,8 +8,11 @@ import {
   disconnect,
   testConnection,
   googleStartUrl,
+  syncGoogleContacts,
+  getContactsSyncStatus,
   type GoogleStatus,
   type GoogleContact,
+  type SyncReport,
 } from "@/lib/google-api"
 
 type Toast = { kind: "ok" | "err"; msg: string } | null
@@ -30,17 +33,46 @@ function expiresLabel(expiresAt: string | null): string | null {
   return `Token expira em ${h}h · auto-refresh ativo`
 }
 
+function relativeFromIso(iso: string | null): string | null {
+  if (!iso) return null
+  const ms = Date.now() - new Date(iso).getTime()
+  if (Number.isNaN(ms) || ms < 0) return null
+  const min = Math.floor(ms / 60_000)
+  if (min < 1) return "agora há pouco"
+  if (min < 60) return `${min}min atrás`
+  const h = Math.floor(min / 60)
+  if (h < 24) return `${h}h atrás`
+  const d = Math.floor(h / 24)
+  return `${d}d atrás`
+}
+
+type SyncState =
+  | { phase: "idle" }
+  | { phase: "loading" }
+  | { phase: "done"; report: SyncReport }
+  | { phase: "err"; msg: string }
+
 export function GoogleConnectCard() {
   const [status, setStatus] = useState<GoogleStatus | null>(null)
   const [busy, setBusy] = useState(false)
   const [test, setTest] = useState<TestState>({ phase: "idle" })
   const [toast, setToast] = useState<Toast>(null)
+  const [sync, setSync] = useState<SyncState>({ phase: "idle" })
+  const [lastSyncAt, setLastSyncAt] = useState<string | null>(null)
 
-  // Lê status na carga inicial
+  // Lê status na carga inicial + sync-status quando conectado
   async function refresh() {
     try {
       const s = await getStatus()
       setStatus(s)
+      if (s.connected) {
+        try {
+          const ss = await getContactsSyncStatus()
+          setLastSyncAt(ss.last_sync_at)
+        } catch {
+          /* ignora — UI mostra "nunca" */
+        }
+      }
     } catch {
       setStatus({ connected: false, email: null, expires_at: null, scopes: [] })
     }
@@ -106,6 +138,25 @@ export function GoogleConnectCard() {
       setTest({ phase: "ok", contacts: res.contacts ?? [] })
     } else {
       setTest({ phase: "err", msg: res.error || "Falha ao buscar contatos" })
+    }
+  }
+
+  async function handleSync() {
+    setSync({ phase: "loading" })
+    try {
+      const res = await syncGoogleContacts()
+      setSync({ phase: "done", report: res.report })
+      setLastSyncAt(res.report.finished_at)
+      setToast({
+        kind: "ok",
+        msg: `${res.report.count_imported} novos · ${res.report.count_updated} atualizados · ${res.report.count_skipped} ignorados`,
+      })
+      window.setTimeout(() => setToast(null), 6000)
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Falha ao sincronizar"
+      setSync({ phase: "err", msg })
+      setToast({ kind: "err", msg })
+      window.setTimeout(() => setToast(null), 7000)
     }
   }
 
@@ -203,6 +254,41 @@ export function GoogleConnectCard() {
       {test.phase === "err" && (
         <div className="bg-red-50 border border-red-200 text-red-800 text-[11.5px] font-semibold px-3 py-2 rounded">
           {test.msg}
+        </div>
+      )}
+
+      {/* Sprint G — bloco de sincronização (só quando conectado) */}
+      {connected && (
+        <div className="bg-bg border border-hair rounded-md p-3 flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="text-[11.5px] font-bold text-ink-2 uppercase tracking-[.05em]">
+              Contatos sincronizados
+            </div>
+            <div className="text-[11px] text-ink-3 font-medium mt-0.5">
+              {sync.phase === "loading" ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="inline-block w-2 h-2 rounded-full bg-accent animate-pulse" />
+                  Importando…
+                </span>
+              ) : sync.phase === "done" ? (
+                <>
+                  Última sync {relativeFromIso(sync.report.finished_at)} ·
+                  {" "}{sync.report.count_imported}n / {sync.report.count_updated}u / {sync.report.count_skipped}s
+                </>
+              ) : lastSyncAt ? (
+                <>Última sync {relativeFromIso(lastSyncAt)}</>
+              ) : (
+                <>Nunca sincronizado</>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={handleSync}
+            disabled={sync.phase === "loading"}
+            className="px-3 py-[7px] rounded-md bg-accent text-white border border-accent text-[11.5px] font-semibold hover:bg-accent-hover disabled:opacity-50 transition-colors whitespace-nowrap"
+          >
+            {sync.phase === "loading" ? "Sincronizando…" : "Sincronizar agora"}
+          </button>
         </div>
       )}
 
