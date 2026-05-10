@@ -3,6 +3,7 @@ Sessão SQLAlchemy compartilhada (SQLite local).
 """
 import logging
 import os
+from pathlib import Path
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import sessionmaker
 from models.profile import Base
@@ -110,10 +111,53 @@ def _drop_company_name_if_safe() -> None:
     log.info("DROP COLUMN contacts.company_name aplicado")
 
 
+_ALEMBIC_BASELINE = "0001_baseline"
+_ALEMBIC_INI_PATH = str(Path(__file__).resolve().parents[1] / "alembic.ini")
+
+
+def _alembic_config():
+    """
+    Constrói o Config do Alembic apontando pra alembic.ini, com a URL sobrescrita
+    pelo DATABASE_URL atual (que respeita DATABASE_PATH em testes/produção).
+    """
+    from alembic.config import Config
+    cfg = Config(_ALEMBIC_INI_PATH)
+    cfg.set_main_option("sqlalchemy.url", DATABASE_URL)
+    return cfg
+
+
+def _ensure_alembic_baseline() -> None:
+    """
+    Para DBs que existiam antes de Alembic ser introduzido (Sprint H), marca
+    a baseline como aplicada se ainda não há tabela alembic_version. Isso evita
+    que upgrade head tente recriar tabelas já existentes.
+
+    DBs novos (sem nenhuma tabela) entram aqui também — alembic stamp baseline
+    funciona em ambos os casos, e na sequência upgrade head aplica as
+    migrations seguintes.
+    """
+    from alembic import command
+    insp = inspect(engine)
+    tables = set(insp.get_table_names())
+    if "alembic_version" in tables:
+        return
+    command.stamp(_alembic_config(), _ALEMBIC_BASELINE)
+
+
+def _run_alembic_upgrade() -> None:
+    from alembic import command
+    command.upgrade(_alembic_config(), "head")
+
+
 def init_db() -> None:
+    # Cria tabelas do metadata atual (idempotente). Cobre DB novo e mantém
+    # compatibilidade com a inicialização pré-Alembic.
     Base.metadata.create_all(bind=engine)
     _apply_runtime_migrations()
     _drop_company_name_if_safe()
+    # Daqui pra frente, mudanças de schema são gerenciadas por Alembic.
+    _ensure_alembic_baseline()
+    _run_alembic_upgrade()
 
 
 def get_session():
