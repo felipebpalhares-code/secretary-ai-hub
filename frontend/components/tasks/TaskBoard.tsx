@@ -31,6 +31,7 @@ import { TaskCard } from "./TaskCard"
 import { TaskColumnView } from "./TaskColumnView"
 import { TaskDetailModal } from "./TaskDetailModal"
 import { dueStateOf } from "./_helpers"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 type Filter = "all" | "today" | "overdue" | "none"
 
@@ -274,13 +275,15 @@ export function TaskBoard() {
           <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Tarefas</h1>
           <p className="text-sm text-gray-500 mt-0.5">Organize suas tarefas em quadros</p>
         </div>
-        <button
-          onClick={triggerNewTaskFirstColumn}
-          className="inline-flex items-center gap-1.5 bg-indigo-600 text-white text-[13px] font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
-        >
-          <Icon name="plus" size={14} />
-          Nova tarefa
-        </button>
+        <PermissionGate module="tarefas" action="criar">
+          <button
+            onClick={triggerNewTaskFirstColumn}
+            className="inline-flex items-center gap-1.5 bg-indigo-600 text-white text-[13px] font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+          >
+            <Icon name="plus" size={14} />
+            Nova tarefa
+          </button>
+        </PermissionGate>
       </div>
 
       <div className="px-6 pb-3 flex items-center gap-1.5 flex-wrap">
@@ -328,49 +331,51 @@ export function TaskBoard() {
             </SortableContext>
 
             <div className="w-[280px] md:w-[320px] shrink-0 snap-center">
-              {creatingColumn ? (
-                <div className="bg-white border border-indigo-300 ring-2 ring-indigo-100 rounded-xl p-3">
-                  <input
-                    autoFocus
-                    value={columnDraft}
-                    onChange={(e) => setColumnDraft(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") void handleCreateColumn()
-                      else if (e.key === "Escape") {
-                        setColumnDraft("")
-                        setCreatingColumn(false)
-                      }
-                    }}
-                    placeholder="Nome da coluna"
-                    className="w-full bg-transparent text-[13px] font-semibold text-gray-900 focus:outline-none"
-                  />
-                  <div className="flex justify-end gap-2 mt-2">
-                    <button
-                      onClick={() => {
-                        setColumnDraft("")
-                        setCreatingColumn(false)
+              <PermissionGate module="tarefas" action="criar">
+                {creatingColumn ? (
+                  <div className="bg-white border border-indigo-300 ring-2 ring-indigo-100 rounded-xl p-3">
+                    <input
+                      autoFocus
+                      value={columnDraft}
+                      onChange={(e) => setColumnDraft(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") void handleCreateColumn()
+                        else if (e.key === "Escape") {
+                          setColumnDraft("")
+                          setCreatingColumn(false)
+                        }
                       }}
-                      className="text-[11.5px] font-semibold text-gray-500 px-2 py-1"
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      onClick={() => void handleCreateColumn()}
-                      className="text-[11.5px] font-semibold bg-indigo-600 text-white px-3 py-1 rounded"
-                    >
-                      Criar
-                    </button>
+                      placeholder="Nome da coluna"
+                      className="w-full bg-transparent text-[13px] font-semibold text-gray-900 focus:outline-none"
+                    />
+                    <div className="flex justify-end gap-2 mt-2">
+                      <button
+                        onClick={() => {
+                          setColumnDraft("")
+                          setCreatingColumn(false)
+                        }}
+                        className="text-[11.5px] font-semibold text-gray-500 px-2 py-1"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        onClick={() => void handleCreateColumn()}
+                        className="text-[11.5px] font-semibold bg-indigo-600 text-white px-3 py-1 rounded"
+                      >
+                        Criar
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setCreatingColumn(true)}
-                  className="w-full bg-white/50 hover:bg-white border-2 border-dashed border-gray-200 hover:border-indigo-300 hover:text-indigo-600 text-gray-400 rounded-xl py-4 text-[13px] font-medium transition-colors flex items-center justify-center gap-1.5"
-                >
-                  <Icon name="plus" size={14} />
-                  Nova coluna
-                </button>
-              )}
+                ) : (
+                  <button
+                    onClick={() => setCreatingColumn(true)}
+                    className="w-full bg-white/50 hover:bg-white border-2 border-dashed border-gray-200 hover:border-indigo-300 hover:text-indigo-600 text-gray-400 rounded-xl py-4 text-[13px] font-medium transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <Icon name="plus" size={14} />
+                    Nova coluna
+                  </button>
+                )}
+              </PermissionGate>
             </div>
           </div>
         </div>

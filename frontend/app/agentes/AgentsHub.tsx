@@ -5,6 +5,7 @@ import { Bot, CheckCircle2, FileEdit, FileText, MessageSquare, ChevronRight, Plu
 import { listAgents, listDocuments, listConversations, type Agent } from "@/lib/agents-api"
 import { StatusPill } from "@/components/agents/StatusPill"
 import { AgentAvatar } from "@/components/agents/AgentAvatar"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 type AgentMetrics = {
   docs: number
@@ -191,13 +192,15 @@ function EmptyAgents({ onCreate }: { onCreate: () => void }) {
         Crie agentes especialistas (advogado, CFO, gestor de obras…) com persona,
         instruções e documentos pra treinar.
       </div>
-      <button
-        onClick={onCreate}
-        className="mt-6 inline-flex items-center gap-2 bg-brand text-white rounded-default px-4 py-2 text-body-strong font-medium shadow-xs hover:bg-brand-hover transition"
-      >
-        <Plus size={16} strokeWidth={1.5} />
-        Criar primeiro agente
-      </button>
+      <PermissionGate module="agentes" action="criar">
+        <button
+          onClick={onCreate}
+          className="mt-6 inline-flex items-center gap-2 bg-brand text-white rounded-default px-4 py-2 text-body-strong font-medium shadow-xs hover:bg-brand-hover transition"
+        >
+          <Plus size={16} strokeWidth={1.5} />
+          Criar primeiro agente
+        </button>
+      </PermissionGate>
     </div>
   )
 }

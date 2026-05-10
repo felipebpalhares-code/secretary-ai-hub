@@ -4,6 +4,7 @@ export type NavItem = {
   icon: string
   count?: number | string
   countVariant?: "default" | "alert" | "notice" | "ok"
+  adminOnly?: boolean
 }
 
 export type NavGroup = {
@@ -40,6 +41,9 @@ export const NAV: NavGroup[] = [
   },
   {
     label: "Sistema",
-    items: [{ href: "/configuracoes", label: "Configurações", icon: "settings" }],
+    items: [
+      { href: "/configuracoes", label: "Configurações", icon: "settings" },
+      { href: "/admin/users", label: "Usuários", icon: "users", adminOnly: true },
+    ],
   },
 ]

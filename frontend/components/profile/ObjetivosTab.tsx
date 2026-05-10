@@ -22,6 +22,7 @@ import {
 } from "./_shared"
 import { EditGoalModal } from "./EditGoalModal"
 import { EditPreferencesModal } from "./EditPreferencesModal"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 const CURRENT_YEAR = new Date().getFullYear()
 
@@ -51,12 +52,16 @@ function GoalRow({
         </div>
       </div>
       <Badge variant={variant}>{label}</Badge>
-      <button onClick={onEdit} className="text-ink-3 hover:text-accent p-1 rounded">
-        <Icon name="edit" size={13} />
-      </button>
-      <button onClick={onDelete} className="text-ink-3 hover:text-err p-1 rounded">
-        <Icon name="close" size={13} />
-      </button>
+      <PermissionGate module="quem-sou-eu" action="editar">
+        <button onClick={onEdit} className="text-ink-3 hover:text-accent p-1 rounded">
+          <Icon name="edit" size={13} />
+        </button>
+      </PermissionGate>
+      <PermissionGate module="quem-sou-eu" action="deletar">
+        <button onClick={onDelete} className="text-ink-3 hover:text-err p-1 rounded">
+          <Icon name="close" size={13} />
+        </button>
+      </PermissionGate>
     </div>
   )
 }
@@ -98,8 +103,10 @@ export function ObjetivosTab() {
         <SectionHdr
           title={`Metas pessoais ${CURRENT_YEAR}`}
           action={
-            <AddBtn label="Nova meta"
-              onClick={() => setGoalModal({ open: true, initial: null, defaultCategory: "pessoal" })} />
+            <PermissionGate module="quem-sou-eu" action="criar">
+              <AddBtn label="Nova meta"
+                onClick={() => setGoalModal({ open: true, initial: null, defaultCategory: "pessoal" })} />
+            </PermissionGate>
           }
         />
         {personal.length === 0 ? (
@@ -125,8 +132,10 @@ export function ObjetivosTab() {
         <SectionHdr
           title={`Metas empresariais ${CURRENT_YEAR}`}
           action={
-            <AddBtn label="Nova meta"
-              onClick={() => setGoalModal({ open: true, initial: null, defaultCategory: "empresarial" })} />
+            <PermissionGate module="quem-sou-eu" action="criar">
+              <AddBtn label="Nova meta"
+                onClick={() => setGoalModal({ open: true, initial: null, defaultCategory: "empresarial" })} />
+            </PermissionGate>
           }
         />
         {business.length === 0 ? (
@@ -149,7 +158,11 @@ export function ObjetivosTab() {
       </div>
 
       <div>
-        <SectionHdr title="Como prefere ser tratado" action={<EditBtn onClick={() => setPrefModal(true)} />} />
+        <SectionHdr title="Como prefere ser tratado" action={
+          <PermissionGate module="quem-sou-eu" action="editar">
+            <EditBtn onClick={() => setPrefModal(true)} />
+          </PermissionGate>
+        } />
         <div className="bg-card border border-hair rounded-lg p-4">
           <div className="bg-bg border border-hair rounded-md p-4 text-[12.5px] text-ink-2 leading-[1.65] font-medium">
             <div className="mb-2">
@@ -207,7 +220,11 @@ export function ObjetivosTab() {
             icon="target"
             title="Sem prioridades definidas"
             subtitle="Quando há conflitos, os agentes consultam essa ordem para sugerir trade-offs."
-            action={<EditBtn onClick={() => setPrefModal(true)} />}
+            action={
+              <PermissionGate module="quem-sou-eu" action="editar">
+                <EditBtn onClick={() => setPrefModal(true)} />
+              </PermissionGate>
+            }
           />
         ) : (
           <ol className="border border-hair rounded-md overflow-hidden bg-card">

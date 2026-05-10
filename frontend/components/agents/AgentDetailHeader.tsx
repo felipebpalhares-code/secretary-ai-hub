@@ -5,6 +5,7 @@ import { Pause, Play, Trash2 } from "lucide-react"
 import { type Agent, deleteAgent, updateAgent } from "@/lib/agents-api"
 import { AgentAvatar } from "./AgentAvatar"
 import { StatusPill } from "./StatusPill"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 export function AgentDetailHeader({
   agent,
@@ -55,25 +56,29 @@ export function AgentDetailHeader({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={togglePause}
-              disabled={busy || agent.status === "draft"}
-              title={agent.status === "draft" ? "Disponível após primeira ativação" : undefined}
-              className="inline-flex items-center gap-2 bg-bg-surface text-text-primary border border-default rounded-default px-3 py-2 text-small font-medium hover:bg-bg-subtle hover:border-strong transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isPaused ? <Play size={14} strokeWidth={1.5} /> : <Pause size={14} strokeWidth={1.5} />}
-              {isPaused ? "Ativar" : "Pausar"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setDeleteOpen(true)}
-              disabled={busy}
-              className="inline-flex items-center gap-2 bg-bg-surface text-danger border border-default rounded-default px-3 py-2 text-small font-medium hover:bg-danger-subtle hover:border-strong transition disabled:opacity-50"
-            >
-              <Trash2 size={14} strokeWidth={1.5} />
-              Excluir
-            </button>
+            <PermissionGate module="agentes" action="editar">
+              <button
+                type="button"
+                onClick={togglePause}
+                disabled={busy || agent.status === "draft"}
+                title={agent.status === "draft" ? "Disponível após primeira ativação" : undefined}
+                className="inline-flex items-center gap-2 bg-bg-surface text-text-primary border border-default rounded-default px-3 py-2 text-small font-medium hover:bg-bg-subtle hover:border-strong transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isPaused ? <Play size={14} strokeWidth={1.5} /> : <Pause size={14} strokeWidth={1.5} />}
+                {isPaused ? "Ativar" : "Pausar"}
+              </button>
+            </PermissionGate>
+            <PermissionGate module="agentes" action="deletar">
+              <button
+                type="button"
+                onClick={() => setDeleteOpen(true)}
+                disabled={busy}
+                className="inline-flex items-center gap-2 bg-bg-surface text-danger border border-default rounded-default px-3 py-2 text-small font-medium hover:bg-danger-subtle hover:border-strong transition disabled:opacity-50"
+              >
+                <Trash2 size={14} strokeWidth={1.5} />
+                Excluir
+              </button>
+            </PermissionGate>
           </div>
         </div>
       </header>

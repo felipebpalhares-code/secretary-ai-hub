@@ -18,6 +18,8 @@ from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
+from core.dependencies import require_role
+from models.user import User, UserRole
 from models.oauth_credential import OAuthCredential
 from services.database import get_session
 from services.google.oauth_service import (
@@ -29,6 +31,8 @@ from services.google.test_service import list_sample_contacts
 
 
 router = APIRouter(tags=["google-auth"])
+
+PERM_ADMIN = Depends(require_role(UserRole.ADMIN))
 
 STATE_COOKIE = "google_oauth_state"
 STATE_TTL_SECONDS = 600  # 10 min
@@ -48,7 +52,7 @@ def _redirect_to_frontend(params: dict) -> RedirectResponse:
 # ─────────────────────────────────────────────────────
 
 @router.get("/api/auth/google/start")
-async def google_start():
+async def google_start(_: User = PERM_ADMIN):
     state = secrets.token_urlsafe(32)
     auth_url = generate_auth_url(state)
     resp = RedirectResponse(auth_url, status_code=302)
@@ -71,6 +75,7 @@ async def google_callback(
     state: str | None = None,
     error: str | None = None,
     google_oauth_state: str | None = Cookie(default=None),
+    _: User = PERM_ADMIN,
     db: Session = Depends(get_session),
 ):
     if error == "access_denied":
@@ -102,7 +107,7 @@ async def google_callback(
 
 
 @router.get("/api/auth/google/status")
-async def google_status(db: Session = Depends(get_session)):
+async def google_status(_: User = PERM_ADMIN, db: Session = Depends(get_session)):
     cred = (
         db.query(OAuthCredential)
         .filter(OAuthCredential.provider == "google")
@@ -121,7 +126,7 @@ async def google_status(db: Session = Depends(get_session)):
 
 
 @router.post("/api/auth/google/disconnect")
-async def google_disconnect(db: Session = Depends(get_session)):
+async def google_disconnect(_: User = PERM_ADMIN, db: Session = Depends(get_session)):
     cred = (
         db.query(OAuthCredential)
         .filter(OAuthCredential.provider == "google")
@@ -138,7 +143,7 @@ async def google_disconnect(db: Session = Depends(get_session)):
 # ─────────────────────────────────────────────────────
 
 @router.get("/api/google/test")
-async def google_test(db: Session = Depends(get_session)):
+async def google_test(_: User = PERM_ADMIN, db: Session = Depends(get_session)):
     cred = (
         db.query(OAuthCredential)
         .filter(OAuthCredential.provider == "google")

@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react"
 import { Icon } from "../Icon"
 import { cn } from "@/lib/cn"
 import type { WsUpdate, ConnectionState } from "@/lib/useChatSocket"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 const STATE_BADGE: Record<ConnectionState, { label: string; cls: string; dot: string }> = {
   connecting: {
@@ -173,13 +174,15 @@ export function ChatMain({
           disabled={connectionState !== "open"}
           className="flex-1 bg-bg border border-hair rounded-md px-[13px] py-[9px] text-[12.5px] text-ink outline-none resize-none min-h-[40px] max-h-[120px] leading-[1.5] focus:border-accent focus:bg-card transition-all disabled:opacity-60 disabled:cursor-not-allowed"
         />
-        <button
-          onClick={submit}
-          disabled={connectionState !== "open" || !input.trim()}
-          className="w-10 h-10 rounded-md bg-accent text-white border-0 flex items-center justify-center hover:bg-accent-hover transition-colors shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <Icon name="send" size={16} />
-        </button>
+        <PermissionGate module="whatsapp" action="enviar">
+          <button
+            onClick={submit}
+            disabled={connectionState !== "open" || !input.trim()}
+            className="w-10 h-10 rounded-md bg-accent text-white border-0 flex items-center justify-center hover:bg-accent-hover transition-colors shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Icon name="send" size={16} />
+          </button>
+        </PermissionGate>
       </div>
     </div>
   )

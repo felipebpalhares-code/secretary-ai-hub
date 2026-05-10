@@ -23,6 +23,9 @@ os.environ["UPLOADS_PATH"]   = str(Path(_TMPDIR) / "uploads")
 os.environ["WEBHOOK_LOG_PATH"] = str(Path(_TMPDIR) / "webhooks.log")
 os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")
 
+# Sprint H — JWT secret obrigatório pra todos os testes (auth e demais).
+os.environ.setdefault("JWT_SECRET", "test-jwt-secret-do-not-use-in-prod")
+
 if not os.environ.get("ENCRYPTION_KEY"):
     from cryptography.fernet import Fernet
     os.environ["ENCRYPTION_KEY"] = Fernet.generate_key().decode()
@@ -54,9 +57,80 @@ def db():
         s.close()
 
 
+# ───────── Sprint H — autenticação nos testes ─────────
+#
+# A maioria dos testes operacionais precisa de um cliente já autenticado como
+# admin. `client` faz isso por padrão; `unauth_client` retorna um TestClient
+# sem cookie pra cobrir os caminhos 401.
+
+ADMIN_EMAIL    = "test-admin@example.com"
+ADMIN_PASSWORD = "TestAdminPasswordABC123!"
+
+
+def _ensure_admin():
+    from services.user_service import get_user_by_email, create_user
+    from models.user import UserRole
+    with SessionLocal() as db:
+        if get_user_by_email(db, ADMIN_EMAIL):
+            return
+        create_user(
+            db,
+            email=ADMIN_EMAIL,
+            name="Test Admin",
+            role=UserRole.ADMIN,
+            raw_password=ADMIN_PASSWORD,
+            must_change_password=False,
+        )
+
+
+@pytest.fixture
+def unauth_client():
+    """TestClient sem autenticação. Use pra testar 401."""
+    return TestClient(app)
+
+
 @pytest.fixture
 def client():
-    return TestClient(app)
+    """TestClient autenticado como admin (cookie httpOnly setado)."""
+    _ensure_admin()
+    c = TestClient(app)
+    r = c.post("/api/auth/login", json={"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD})
+    assert r.status_code == 200, f"Login falhou no fixture: {r.status_code} {r.text}"
+    return c
+
+
+@pytest.fixture
+def assistant_factory():
+    """
+    Cria um ASSISTANT com permissões configuráveis e retorna um TestClient
+    autenticado como ele. Cada chamada cria um user novo com email único
+    (UUID) — assim diferentes testes não compartilham permissões.
+
+    Uso:
+        c = assistant_factory({'contatos': {'ver': True, 'criar': True}})
+    """
+    import uuid
+    from services.user_service import create_user
+    from models.user import UserRole
+
+    def _make(permissions: dict | None = None, *, email: str | None = None, password: str = "AssistantTest123!"):
+        email = email or f"assistant-{uuid.uuid4().hex[:12]}@example.com"
+        with SessionLocal() as db:
+            create_user(
+                db,
+                email=email,
+                name="Assistant Teste",
+                role=UserRole.ASSISTANT,
+                permissions=permissions or {},
+                raw_password=password,
+                must_change_password=False,
+            )
+        c = TestClient(app)
+        r = c.post("/api/auth/login", json={"email": email, "password": password})
+        assert r.status_code == 200, f"Login do assistant falhou: {r.text}"
+        return c
+
+    yield _make
 
 
 @pytest.fixture

@@ -1,6 +1,7 @@
 import { Icon } from "../Icon"
 import { cn } from "@/lib/cn"
 import type { Event } from "@/lib/agenda-data"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 const TAG_CLS = {
   blue: "bg-blue-50 text-blue-700 border-blue-200",
@@ -82,12 +83,16 @@ export function EventDetail({ event, onClose }: { event?: Event; onClose: () => 
           <button className="flex-1 px-2 py-2 rounded-md bg-accent text-white border border-accent text-[11.5px] font-semibold hover:bg-accent-hover transition-colors">
             Entrar
           </button>
-          <button className="flex-1 px-2 py-2 rounded-md border border-hair bg-card text-ink text-[11.5px] font-semibold hover:bg-bg hover:border-ink-4 transition-colors">
-            Editar
-          </button>
-          <button className="flex-1 px-2 py-2 rounded-md border border-hair bg-card text-ink text-[11.5px] font-semibold hover:bg-bg hover:border-ink-4 transition-colors">
-            Excluir
-          </button>
+          <PermissionGate module="agenda" action="editar">
+            <button className="flex-1 px-2 py-2 rounded-md border border-hair bg-card text-ink text-[11.5px] font-semibold hover:bg-bg hover:border-ink-4 transition-colors">
+              Editar
+            </button>
+          </PermissionGate>
+          <PermissionGate module="agenda" action="deletar">
+            <button className="flex-1 px-2 py-2 rounded-md border border-hair bg-card text-ink text-[11.5px] font-semibold hover:bg-bg hover:border-ink-4 transition-colors">
+              Excluir
+            </button>
+          </PermissionGate>
         </div>
       </div>
 

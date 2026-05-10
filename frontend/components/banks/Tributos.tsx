@@ -12,6 +12,7 @@ import {
   type Tributo,
 } from "@/lib/tributos-data"
 import { ENTITIES, fmtBRL, type Entity } from "@/lib/banks-data"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 type SubTab = "proximos" | "calendario" | "pagos" | "certidoes"
 
@@ -459,9 +460,11 @@ function CertidoesList() {
               <button className="px-[10px] py-[5px] rounded-md bg-card border border-hair text-ink-2 text-[11px] font-semibold hover:bg-bg hover:border-ink-4 transition-colors">
                 Baixar
               </button>
-              <button className="px-[10px] py-[5px] rounded-md bg-accent-soft border border-indigo-200 text-accent text-[11px] font-semibold hover:bg-indigo-100 transition-colors">
-                Renovar
-              </button>
+              <PermissionGate module="bancos" action="editar">
+                <button className="px-[10px] py-[5px] rounded-md bg-accent-soft border border-indigo-200 text-accent text-[11px] font-semibold hover:bg-indigo-100 transition-colors">
+                  Renovar
+                </button>
+              </PermissionGate>
             </div>
           </div>
         )

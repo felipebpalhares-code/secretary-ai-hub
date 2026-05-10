@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { TopBar, Button } from "@/components/TopBar"
 import { listAgents } from "@/lib/agents-api"
 import { AgentsHub } from "./AgentsHub"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 export default function AgentesPage() {
   const router = useRouter()
@@ -30,9 +31,11 @@ export default function AgentesPage() {
         title="Agentes"
         subtitle={subtitle}
         actions={
-          <Button variant="primary" icon="plus" onClick={() => router.push("/agentes/novo")}>
-            Novo agente
-          </Button>
+          <PermissionGate module="agentes" action="criar">
+            <Button variant="primary" icon="plus" onClick={() => router.push("/agentes/novo")}>
+              Novo agente
+            </Button>
+          </PermissionGate>
         }
       />
       <AgentsHub />

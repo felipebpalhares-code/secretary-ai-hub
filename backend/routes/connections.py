@@ -8,6 +8,8 @@ Rotas HTTP para conexões externas:
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
+from core.dependencies import require_permission, require_role
+from models.user import User, UserRole
 from services.database import get_session
 from services.evolution_client import client as wa
 from services.telegram_client import client as tg
@@ -18,6 +20,13 @@ from models.message_log import MessageLog
 from agents.orchestrator import process as orchestrator_process
 
 router = APIRouter(prefix="/api/connections", tags=["connections"])
+
+# Sprint H — connections é admin-only por padrão. Webhooks externos (Evolution,
+# Telegram) e o canal /webhooks/* permanecem SEM auth de usuário pois quem
+# chama é sistema externo; segurança vem de allowlist/secret no Caddy/Evolution.
+PERM_ADMIN     = Depends(require_role(UserRole.ADMIN))
+PERM_WA_ENVIAR = Depends(require_permission("whatsapp", "enviar"))
+PERM_WA_VER    = Depends(require_permission("whatsapp", "ver"))
 
 
 # ─────────────────────────────────────────────────────
@@ -47,17 +56,17 @@ async def _ask_agent(agent_key: str, text: str) -> str:
 # ─────────────────────────────────────────────────────
 
 @router.get("/whatsapp/status")
-async def whatsapp_status():
+async def whatsapp_status(_: User = PERM_WA_VER):
     return {"channel": "whatsapp", "state": await wa.connection_state()}
 
 
 @router.get("/whatsapp/qrcode")
-async def whatsapp_qrcode():
+async def whatsapp_qrcode(_: User = PERM_ADMIN):
     return await wa.get_qrcode()
 
 
 @router.post("/whatsapp/disconnect")
-async def whatsapp_disconnect():
+async def whatsapp_disconnect(_: User = PERM_ADMIN):
     return await wa.disconnect()
 
 
@@ -127,7 +136,7 @@ async def whatsapp_webhook(request: Request, db: Session = Depends(get_session),
 
 
 @router.post("/whatsapp/send-alert")
-async def wa_send_alert(body: dict, db: Session = Depends(get_session)):
+async def wa_send_alert(body: dict, _: User = PERM_WA_ENVIAR, db: Session = Depends(get_session)):
     to, agent, message = body["to"], body.get("agent", "hub"), body["message"]
     formatted = f"*[{agent.upper()}]*\n{message}"
     await wa.send_text(to, formatted)
@@ -168,7 +177,7 @@ async def telegram_webhook(request: Request, db: Session = Depends(get_session))
 
 
 @router.post("/telegram/set-webhook")
-async def telegram_set_webhook(body: dict):
+async def telegram_set_webhook(body: dict, _: User = PERM_ADMIN):
     return await tg.set_webhook(body["url"])
 
 
@@ -177,7 +186,7 @@ async def telegram_set_webhook(body: dict):
 # ─────────────────────────────────────────────────────
 
 @router.post("/discord/post")
-async def discord_post(body: dict, db: Session = Depends(get_session)):
+async def discord_post(body: dict, _: User = PERM_ADMIN, db: Session = Depends(get_session)):
     """body = {agent, content}"""
     result = await dc.post_as_agent(body["agent"], body["content"])
     log_msg(db, "discord", "out", f"#{body['agent']}", body["content"], agent=body["agent"])
@@ -185,7 +194,7 @@ async def discord_post(body: dict, db: Session = Depends(get_session)):
 
 
 @router.post("/discord/internal")
-async def discord_internal(body: dict, db: Session = Depends(get_session)):
+async def discord_internal(body: dict, _: User = PERM_ADMIN, db: Session = Depends(get_session)):
     """Registra comunicação entre agentes no canal interno."""
     result = await dc.post_internal(body["from"], body["to"], body["message"])
     log_msg(db, "discord", "out", "#agentes-internos",
@@ -199,7 +208,7 @@ async def discord_internal(body: dict, db: Session = Depends(get_session)):
 # ─────────────────────────────────────────────────────
 
 @router.get("/logs")
-async def get_logs(channel: str | None = None, limit: int = 100, db: Session = Depends(get_session)):
+async def get_logs(channel: str | None = None, limit: int = 100, _: User = PERM_ADMIN, db: Session = Depends(get_session)):
     q = db.query(MessageLog).order_by(MessageLog.created_at.desc())
     if channel:
         q = q.filter(MessageLog.channel == channel)
@@ -215,7 +224,7 @@ async def get_logs(channel: str | None = None, limit: int = 100, db: Session = D
 
 
 @router.get("/logs/search")
-async def search_logs(q: str, limit: int = 50, db: Session = Depends(get_session)):
+async def search_logs(q: str, limit: int = 50, _: User = PERM_ADMIN, db: Session = Depends(get_session)):
     rows = (
         db.query(MessageLog)
         .filter(MessageLog.body.contains(q))

@@ -12,6 +12,7 @@ import {
   type PixTx,
 } from "@/lib/pix-data"
 import { fmtBRL, BANK_COLORS } from "@/lib/banks-data"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 const TONE_AV = {
   indigo: "bg-accent text-white",
@@ -134,9 +135,11 @@ export function Pix() {
                       {CATEGORY_LABEL[c]}
                     </FavChip>
                   ))}
-                  <FavChip active={false} onClick={() => {}}>
-                    + Adicionar
-                  </FavChip>
+                  <PermissionGate module="bancos" action="editar">
+                    <FavChip active={false} onClick={() => {}}>
+                      + Adicionar
+                    </FavChip>
+                  </PermissionGate>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -225,14 +228,18 @@ function QuickSend() {
       </div>
 
       <div className="grid grid-cols-2 gap-2 mt-1">
-        <button className="bg-card border border-hair text-ink py-[10px] rounded-md text-[12.5px] font-semibold hover:bg-bg hover:border-ink-4 transition-colors flex items-center justify-center gap-1">
-          <Icon name="calendar" size={13} />
-          Agendar
-        </button>
-        <button className="bg-accent text-white border border-accent py-[10px] rounded-md text-[12.5px] font-semibold hover:bg-accent-hover transition-colors flex items-center justify-center gap-1">
-          Enviar PIX
-          <Icon name="send" size={13} />
-        </button>
+        <PermissionGate module="bancos" action="editar">
+          <button className="bg-card border border-hair text-ink py-[10px] rounded-md text-[12.5px] font-semibold hover:bg-bg hover:border-ink-4 transition-colors flex items-center justify-center gap-1">
+            <Icon name="calendar" size={13} />
+            Agendar
+          </button>
+        </PermissionGate>
+        <PermissionGate module="bancos" action="editar">
+          <button className="bg-accent text-white border border-accent py-[10px] rounded-md text-[12.5px] font-semibold hover:bg-accent-hover transition-colors flex items-center justify-center gap-1">
+            Enviar PIX
+            <Icon name="send" size={13} />
+          </button>
+        </PermissionGate>
       </div>
 
       <div className="text-[10.5px] text-ink-3 font-medium leading-[1.5] mt-1 pt-3 border-t border-hair-2">
@@ -395,10 +402,12 @@ function MyKeys() {
             Limite de 5 chaves PF e 10 chaves PJ por banco
           </div>
         </div>
-        <button className="px-[13px] py-[7px] rounded-md bg-accent text-white border border-accent text-[12.5px] font-semibold hover:bg-accent-hover transition-colors flex items-center gap-1">
-          <Icon name="plus" size={13} />
-          Cadastrar chave
-        </button>
+        <PermissionGate module="bancos" action="editar">
+          <button className="px-[13px] py-[7px] rounded-md bg-accent text-white border border-accent text-[12.5px] font-semibold hover:bg-accent-hover transition-colors flex items-center gap-1">
+            <Icon name="plus" size={13} />
+            Cadastrar chave
+          </button>
+        </PermissionGate>
       </div>
       <div className="grid grid-cols-2 gap-3">
         {PIX_KEYS.map((k, i) => (
@@ -423,9 +432,11 @@ function MyKeys() {
               <button className="w-7 h-7 rounded-md border border-hair bg-card text-ink-2 hover:border-accent hover:text-accent flex items-center justify-center transition-colors">
                 <Icon name="grid" size={11} />
               </button>
-              <button className="w-7 h-7 rounded-md border border-hair bg-card text-ink-2 hover:border-err hover:text-err flex items-center justify-center transition-colors">
-                <Icon name="close" size={11} />
-              </button>
+              <PermissionGate module="bancos" action="editar">
+                <button className="w-7 h-7 rounded-md border border-hair bg-card text-ink-2 hover:border-err hover:text-err flex items-center justify-center transition-colors">
+                  <Icon name="close" size={11} />
+                </button>
+              </PermissionGate>
             </div>
           </div>
         ))}

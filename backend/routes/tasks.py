@@ -10,6 +10,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from core.dependencies import require_permission
+from models.user import User
 from models.task import Task, TaskColumn
 from schemas.task import (
     ColumnIn, ColumnOut, ColumnPatch,
@@ -19,6 +21,12 @@ from schemas.task import (
 from services.database import get_session
 
 router = APIRouter(prefix="/api", tags=["tasks"])
+
+# Sprint H — permissões do módulo "tarefas"
+PERM_VER     = Depends(require_permission("tarefas", "ver"))
+PERM_CRIAR   = Depends(require_permission("tarefas", "criar"))
+PERM_EDITAR  = Depends(require_permission("tarefas", "editar"))
+PERM_DELETAR = Depends(require_permission("tarefas", "deletar"))
 
 
 # ───────── helpers ─────────
@@ -75,7 +83,7 @@ def _next_column_order(db: Session) -> int:
 # ═════════════ COLUMNS ═════════════
 
 @router.get("/task-columns", response_model=list[ColumnOut])
-def list_columns(db: Session = Depends(get_session)):
+def list_columns(_: User = PERM_VER, db: Session = Depends(get_session)):
     cols = db.query(TaskColumn).order_by(TaskColumn.order, TaskColumn.created_at).all()
     if not cols:
         cols = _seed_default_columns(db)
@@ -83,7 +91,7 @@ def list_columns(db: Session = Depends(get_session)):
 
 
 @router.post("/task-columns", response_model=ColumnOut, status_code=201)
-def create_column(payload: ColumnIn, db: Session = Depends(get_session)):
+def create_column(payload: ColumnIn, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     col = TaskColumn(
         title=payload.title.strip() or "Sem título",
         color=payload.color,
@@ -95,7 +103,7 @@ def create_column(payload: ColumnIn, db: Session = Depends(get_session)):
 
 
 @router.put("/task-columns/{cid}", response_model=ColumnOut)
-def update_column(cid: str, payload: ColumnPatch, db: Session = Depends(get_session)):
+def update_column(cid: str, payload: ColumnPatch, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     col = db.get(TaskColumn, cid)
     if not col:
         raise HTTPException(404, "Coluna não encontrada")
@@ -107,7 +115,7 @@ def update_column(cid: str, payload: ColumnPatch, db: Session = Depends(get_sess
 
 
 @router.delete("/task-columns/{cid}")
-def delete_column(cid: str, db: Session = Depends(get_session)):
+def delete_column(cid: str, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     col = db.get(TaskColumn, cid)
     if not col:
         raise HTTPException(404, "Coluna não encontrada")
@@ -135,7 +143,7 @@ def delete_column(cid: str, db: Session = Depends(get_session)):
 
 
 @router.post("/task-columns/reorder")
-def reorder_columns(payload: ReorderIn, db: Session = Depends(get_session)):
+def reorder_columns(payload: ReorderIn, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     cols = {c.id: c for c in db.query(TaskColumn).all()}
     for idx, cid in enumerate(payload.ids):
         col = cols.get(cid)
@@ -151,6 +159,7 @@ def reorder_columns(payload: ReorderIn, db: Session = Depends(get_session)):
 def list_tasks(
     column_id: Optional[str] = Query(default=None),
     due: Optional[str] = Query(default=None, description="today | overdue | none"),
+    _: User = PERM_VER,
     db: Session = Depends(get_session),
 ):
     q = db.query(Task)
@@ -169,7 +178,7 @@ def list_tasks(
 
 
 @router.post("/tasks", response_model=TaskOut, status_code=201)
-def create_task(payload: TaskIn, db: Session = Depends(get_session)):
+def create_task(payload: TaskIn, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     col = db.get(TaskColumn, payload.column_id)
     if not col:
         raise HTTPException(400, "column_id não existe")
@@ -190,7 +199,7 @@ def create_task(payload: TaskIn, db: Session = Depends(get_session)):
 
 
 @router.put("/tasks/{tid}", response_model=TaskOut)
-def update_task(tid: str, payload: TaskPatch, db: Session = Depends(get_session)):
+def update_task(tid: str, payload: TaskPatch, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     t = db.get(Task, tid)
     if not t:
         raise HTTPException(404, "Tarefa não encontrada")
@@ -209,7 +218,7 @@ def update_task(tid: str, payload: TaskPatch, db: Session = Depends(get_session)
 
 
 @router.delete("/tasks/{tid}")
-def delete_task(tid: str, db: Session = Depends(get_session)):
+def delete_task(tid: str, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     t = db.get(Task, tid)
     if not t:
         raise HTTPException(404, "Tarefa não encontrada")
@@ -218,7 +227,7 @@ def delete_task(tid: str, db: Session = Depends(get_session)):
 
 
 @router.post("/tasks/{tid}/move", response_model=TaskOut)
-def move_task(tid: str, payload: TaskMove, db: Session = Depends(get_session)):
+def move_task(tid: str, payload: TaskMove, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     t = db.get(Task, tid)
     if not t:
         raise HTTPException(404, "Tarefa não encontrada")
@@ -250,7 +259,7 @@ def move_task(tid: str, payload: TaskMove, db: Session = Depends(get_session)):
 
 
 @router.post("/tasks/reorder")
-def reorder_tasks(payload: ReorderIn, db: Session = Depends(get_session)):
+def reorder_tasks(payload: ReorderIn, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     rows = {t.id: t for t in db.query(Task).filter(Task.id.in_(payload.ids)).all()}
     for idx, tid in enumerate(payload.ids):
         t = rows.get(tid)

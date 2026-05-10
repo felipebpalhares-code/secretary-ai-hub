@@ -3,6 +3,7 @@ import { Icon } from "@/components/Icon"
 import { cn } from "@/lib/cn"
 import type { Contact, Category } from "@/lib/contacts-types"
 import { avatarTone, displayLabel, initialsOf, categoryById, formatPhone, contactCompany } from "./utils"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 export function ContactDetail({
   contact,
@@ -60,20 +61,24 @@ export function ContactDetail({
             {[contact.role, contactCompany(contact)].filter(Boolean).join(" · ") || "—"}
           </div>
           <div className="flex gap-[6px] mt-[10px] w-full">
-            <button
-              onClick={onEdit}
-              className="flex-1 px-2 py-2 rounded-md bg-accent text-white font-semibold text-[11.5px] hover:bg-accent-hover transition-colors flex items-center justify-center gap-[5px]"
-            >
-              <Icon name="edit" size={13} />
-              Editar
-            </button>
-            <button
-              onClick={onDelete}
-              className="px-3 py-2 rounded-md border border-red-200 bg-red-50 text-err font-semibold text-[11.5px] hover:bg-red-100 transition-colors flex items-center justify-center gap-[5px]"
-            >
-              <Icon name="trash" size={13} />
-              Apagar
-            </button>
+            <PermissionGate module="contatos" action="editar">
+              <button
+                onClick={onEdit}
+                className="flex-1 px-2 py-2 rounded-md bg-accent text-white font-semibold text-[11.5px] hover:bg-accent-hover transition-colors flex items-center justify-center gap-[5px]"
+              >
+                <Icon name="edit" size={13} />
+                Editar
+              </button>
+            </PermissionGate>
+            <PermissionGate module="contatos" action="deletar">
+              <button
+                onClick={onDelete}
+                className="px-3 py-2 rounded-md border border-red-200 bg-red-50 text-err font-semibold text-[11.5px] hover:bg-red-100 transition-colors flex items-center justify-center gap-[5px]"
+              >
+                <Icon name="trash" size={13} />
+                Apagar
+              </button>
+            </PermissionGate>
           </div>
         </div>
 

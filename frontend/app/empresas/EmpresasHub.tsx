@@ -7,6 +7,7 @@ import type { Organization, OrganizationStats } from "@/lib/contacts-types"
 import { listOrganizations, getOrganizationStats } from "@/lib/contacts-api"
 import { OrgRow } from "@/components/empresas/OrgRow"
 import { OrgModal } from "@/components/empresas/OrgModal"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 type Filter = "all" | "with_cnpj" | "without_cnpj" | "enriched" | "without_contacts"
 
@@ -101,13 +102,15 @@ export function EmpresasHub() {
               </button>
             )}
           </div>
-          <button
-            onClick={() => setModal({ open: true, mode: { kind: "create" } })}
-            className="inline-flex items-center gap-1.5 bg-brand text-white text-small font-semibold px-3 py-2 rounded-default hover:bg-brand-hover transition-colors"
-          >
-            <Icon name="plus" size={13} />
-            Nova empresa
-          </button>
+          <PermissionGate module="empresas" action="criar">
+            <button
+              onClick={() => setModal({ open: true, mode: { kind: "create" } })}
+              className="inline-flex items-center gap-1.5 bg-brand text-white text-small font-semibold px-3 py-2 rounded-default hover:bg-brand-hover transition-colors"
+            >
+              <Icon name="plus" size={13} />
+              Nova empresa
+            </button>
+          </PermissionGate>
         </div>
 
         <div className="flex gap-1.5 flex-wrap items-center">

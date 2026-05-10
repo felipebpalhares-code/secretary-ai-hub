@@ -3,6 +3,8 @@ Rotas REST do módulo Contatos.
 
 Convenção: rotas com path concreto vêm ANTES das paramétricas pra evitar
 match acidental (ex: /contacts/categories antes de /contacts/{id}).
+
+Sprint H — todos os endpoints exigem permissão `contatos:<acao>`.
 """
 from __future__ import annotations
 from typing import Optional, List
@@ -10,6 +12,8 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
+from core.dependencies import require_permission
+from models.user import User
 from services.database import get_session
 from services import contact_service as svc
 from services.backup_service import run_backup
@@ -21,18 +25,23 @@ from schemas.contact import (
 
 router = APIRouter(prefix="/api/contacts", tags=["contacts"])
 
+PERM_VER     = Depends(require_permission("contatos", "ver"))
+PERM_CRIAR   = Depends(require_permission("contatos", "criar"))
+PERM_EDITAR  = Depends(require_permission("contatos", "editar"))
+PERM_DELETAR = Depends(require_permission("contatos", "deletar"))
+
 
 # ───────── Stats ─────────
 
 @router.get("/stats", response_model=ContactStats)
-def stats(db: Session = Depends(get_session)) -> ContactStats:
+def stats(_: User = PERM_VER, db: Session = Depends(get_session)) -> ContactStats:
     return ContactStats(**svc.get_stats(db))
 
 
 # ───────── Backup ─────────
 
 @router.post("/backup/now")
-def backup_now():
+def backup_now(_: User = PERM_VER):
     """Dispara o backup imediatamente (útil pra teste e e2e manual)."""
     path = run_backup()
     return {"ok": True, "path": str(path)}
@@ -41,22 +50,22 @@ def backup_now():
 # ───────── Categorias ─────────
 
 @router.get("/categories", response_model=List[CategoryRead])
-def list_categories(db: Session = Depends(get_session)):
+def list_categories(_: User = PERM_VER, db: Session = Depends(get_session)):
     return svc.list_categories(db)
 
 
 @router.post("/categories", response_model=CategoryRead, status_code=201)
-def create_category(payload: CategoryCreate, db: Session = Depends(get_session)):
+def create_category(payload: CategoryCreate, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     return svc.create_category(db, payload.name, payload.color)
 
 
 @router.patch("/categories/{cat_id}", response_model=CategoryRead)
-def update_category(cat_id: int, payload: CategoryUpdate, db: Session = Depends(get_session)):
+def update_category(cat_id: int, payload: CategoryUpdate, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     return svc.update_category(db, cat_id, payload.model_dump(exclude_unset=True))
 
 
 @router.delete("/categories/{cat_id}")
-def delete_category(cat_id: int, db: Session = Depends(get_session)):
+def delete_category(cat_id: int, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     svc.delete_category(db, cat_id)
     return {"ok": True}
 
@@ -64,7 +73,7 @@ def delete_category(cat_id: int, db: Session = Depends(get_session)):
 # ───────── Tags ─────────
 
 @router.get("/tags", response_model=List[TagRead])
-def search_tags(q: str = "", limit: int = Query(10, ge=1, le=50), db: Session = Depends(get_session)):
+def search_tags(q: str = "", limit: int = Query(10, ge=1, le=50), _: User = PERM_VER, db: Session = Depends(get_session)):
     return svc.search_tags(db, q, limit)
 
 
@@ -79,6 +88,7 @@ def list_contacts(
     last_30_days: bool = False,
     search: Optional[str] = None,
     tag_ids: Optional[List[int]] = Query(default=None),
+    _: User = PERM_VER,
     db: Session = Depends(get_session),
 ):
     return svc.list_contacts(db, {
@@ -93,21 +103,21 @@ def list_contacts(
 
 
 @router.get("/{contact_id}", response_model=ContactRead)
-def get_contact(contact_id: int, db: Session = Depends(get_session)):
+def get_contact(contact_id: int, _: User = PERM_VER, db: Session = Depends(get_session)):
     return svc.get_contact(db, contact_id)
 
 
 @router.post("", response_model=ContactRead, status_code=201)
-def create_contact(payload: ContactCreate, db: Session = Depends(get_session)):
+def create_contact(payload: ContactCreate, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     return svc.create_contact(db, payload.model_dump())
 
 
 @router.patch("/{contact_id}", response_model=ContactRead)
-def update_contact(contact_id: int, payload: ContactUpdate, db: Session = Depends(get_session)):
+def update_contact(contact_id: int, payload: ContactUpdate, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     return svc.update_contact(db, contact_id, payload.model_dump(exclude_unset=True))
 
 
 @router.delete("/{contact_id}")
-def delete_contact(contact_id: int, db: Session = Depends(get_session)):
+def delete_contact(contact_id: int, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     svc.soft_delete_contact(db, contact_id)
     return {"ok": True}

@@ -9,6 +9,7 @@ import {
   type TaskItem,
 } from "@/lib/api"
 import { PRIORITY_LABEL, renderMarkdown } from "./_helpers"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 const PRIORITIES: { value: "low" | "medium" | "high"; label: string }[] = [
   { value: "low", label: "Baixa" },
@@ -133,20 +134,24 @@ export function TaskDetailModal({
         <div className="flex items-center justify-between w-full">
           <div className="text-[11px] text-gray-400">Criada {timeAgo(task.created_at)}</div>
           <div className="flex gap-2">
-            <button
-              onClick={handleDelete}
-              disabled={saving}
-              className="text-[12px] font-semibold text-red-600 hover:bg-red-50 px-3 py-1.5 rounded transition-colors"
-            >
-              Apagar
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="text-[12px] font-semibold bg-indigo-600 text-white px-4 py-1.5 rounded hover:bg-indigo-700 disabled:opacity-50"
-            >
-              {saving ? "Salvando…" : "Salvar"}
-            </button>
+            <PermissionGate module="tarefas" action="deletar">
+              <button
+                onClick={handleDelete}
+                disabled={saving}
+                className="text-[12px] font-semibold text-red-600 hover:bg-red-50 px-3 py-1.5 rounded transition-colors"
+              >
+                Apagar
+              </button>
+            </PermissionGate>
+            <PermissionGate module="tarefas" action="editar">
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="text-[12px] font-semibold bg-indigo-600 text-white px-4 py-1.5 rounded hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {saving ? "Salvando…" : "Salvar"}
+              </button>
+            </PermissionGate>
           </div>
         </div>
       }

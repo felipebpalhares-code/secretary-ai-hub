@@ -1,12 +1,31 @@
 "use client"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { NAV } from "@/lib/nav"
 import { Icon } from "./Icon"
 import { cn } from "@/lib/cn"
+import { useAuthStore } from "@/stores/authStore"
+import { authApi } from "@/lib/auth-api"
 
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const user = useAuthStore((s) => s.user)
+  const clearUser = useAuthStore((s) => s.clearUser)
+
+  const initial = (user?.name?.trim()?.[0] ?? "?").toUpperCase()
+  const roleLabel =
+    user?.role === "ADMIN" ? "Administrador" : user?.role === "ASSISTANT" ? "Assistente" : "—"
+
+  async function logout() {
+    try {
+      await authApi.logout()
+    } catch {
+      // ignora — backend pode estar offline; cookie expira sozinho
+    }
+    clearUser()
+    router.replace("/login")
+  }
 
   return (
     <aside className="w-[236px] min-w-[236px] shrink-0 bg-[#0f172a] flex flex-col overflow-hidden">
@@ -23,12 +42,17 @@ export function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 p-[10px] overflow-y-auto scrollbar-none">
-        {NAV.map((group) => (
+        {NAV.map((group) => {
+          const items = group.items.filter(
+            (it) => !it.adminOnly || user?.role === "ADMIN",
+          )
+          if (items.length === 0) return null
+          return (
           <div key={group.label}>
             <div className="text-[10px] font-bold text-slate-600 uppercase tracking-[.07em] px-3 pt-3 pb-1">
               {group.label}
             </div>
-            {group.items.map((item) => {
+            {items.map((item) => {
               const active = pathname === item.href
               return (
                 <Link
@@ -63,20 +87,35 @@ export function Sidebar() {
               )
             })}
           </div>
-        ))}
+          )
+        })}
       </nav>
 
       {/* User */}
       <div className="p-[10px] border-t border-white/[.06]">
-        <div className="flex items-center gap-[10px] px-[10px] py-2 rounded-lg hover:bg-white/[.04] transition-colors cursor-pointer">
+        <Link
+          href="/account/change-password"
+          className="flex items-center gap-[10px] px-[10px] py-2 rounded-lg hover:bg-white/[.04] transition-colors"
+          title="Trocar senha"
+        >
           <div className="w-[30px] h-[30px] rounded-full bg-accent flex items-center justify-center text-xs font-bold text-white">
-            F
+            {initial}
           </div>
-          <div>
-            <div className="text-[12.5px] font-semibold text-slate-200">Felipe Palhares</div>
-            <div className="text-[10.5px] text-slate-500 mt-px">Administrador</div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[12.5px] font-semibold text-slate-200 truncate">
+              {user?.name ?? "—"}
+            </div>
+            <div className="text-[10.5px] text-slate-500 mt-px">{roleLabel}</div>
           </div>
-        </div>
+        </Link>
+        <button
+          onClick={logout}
+          className="mt-1 w-full flex items-center gap-[10px] px-[10px] py-2 rounded-lg text-slate-400 hover:bg-white/[.04] hover:text-slate-200 transition-colors text-[12px] font-medium"
+          title="Sair"
+        >
+          <Icon name="close" size={14} />
+          <span>Sair</span>
+        </button>
       </div>
     </aside>
   )

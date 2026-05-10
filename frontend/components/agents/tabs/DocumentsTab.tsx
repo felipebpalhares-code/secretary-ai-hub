@@ -9,6 +9,7 @@ import {
   listDocuments,
   uploadDocument,
 } from "@/lib/agents-api"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 const ACCEPT = ".pdf,.docx,.txt,.md"
 const POLL_MS = 3000
@@ -82,38 +83,40 @@ export function DocumentsTab({ agent }: { agent: Agent }) {
     <div className="flex-1 overflow-y-auto px-6 md:px-8 py-6">
       <div className="max-w-3xl mx-auto flex flex-col gap-comfortable">
         {/* Drop zone */}
-        <div
-          onDragEnter={() => setDragOver(true)}
-          onDragLeave={() => setDragOver(false)}
-          onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
-          onDrop={(e) => { e.preventDefault(); setDragOver(false); pickFiles(e.dataTransfer.files) }}
-          onClick={() => inputRef.current?.click()}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); inputRef.current?.click() }
-          }}
-          className={`flex flex-col items-center justify-center text-center rounded-xl border-2 border-dashed transition cursor-pointer p-12 ${
-            dragOver
-              ? "border-brand bg-brand-subtle"
-              : "border-default bg-bg-surface hover:border-strong hover:bg-bg-subtle"
-          }`}
-        >
-          <Upload size={48} strokeWidth={1.5} className="text-text-tertiary" />
-          <div className="text-body-strong text-text-primary mt-3">
-            {uploading ? "Enviando…" : "Arraste arquivos ou clique pra selecionar"}
+        <PermissionGate module="agentes" action="editar">
+          <div
+            onDragEnter={() => setDragOver(true)}
+            onDragLeave={() => setDragOver(false)}
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+            onDrop={(e) => { e.preventDefault(); setDragOver(false); pickFiles(e.dataTransfer.files) }}
+            onClick={() => inputRef.current?.click()}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") { e.preventDefault(); inputRef.current?.click() }
+            }}
+            className={`flex flex-col items-center justify-center text-center rounded-xl border-2 border-dashed transition cursor-pointer p-12 ${
+              dragOver
+                ? "border-brand bg-brand-subtle"
+                : "border-default bg-bg-surface hover:border-strong hover:bg-bg-subtle"
+            }`}
+          >
+            <Upload size={48} strokeWidth={1.5} className="text-text-tertiary" />
+            <div className="text-body-strong text-text-primary mt-3">
+              {uploading ? "Enviando…" : "Arraste arquivos ou clique pra selecionar"}
+            </div>
+            <div className="text-small text-text-tertiary mt-1">PDF, DOCX, TXT · múltiplos</div>
+            <input
+              ref={inputRef}
+              type="file"
+              multiple
+              accept={ACCEPT}
+              disabled={uploading}
+              className="hidden"
+              onChange={(e) => { pickFiles(e.target.files); e.target.value = "" }}
+            />
           </div>
-          <div className="text-small text-text-tertiary mt-1">PDF, DOCX, TXT · múltiplos</div>
-          <input
-            ref={inputRef}
-            type="file"
-            multiple
-            accept={ACCEPT}
-            disabled={uploading}
-            className="hidden"
-            onChange={(e) => { pickFiles(e.target.files); e.target.value = "" }}
-          />
-        </div>
+        </PermissionGate>
 
         {error && (
           <div className="bg-danger-subtle border border-default rounded-md p-3 text-small text-danger">
@@ -166,14 +169,16 @@ function DocRow({ doc, onDelete }: { doc: DocumentMeta; onDelete: () => void }) 
           <span>{formatDate(doc.created_at)}</span>
         </div>
       </div>
-      <button
-        type="button"
-        onClick={onDelete}
-        aria-label={`Remover ${doc.filename}`}
-        className="text-text-tertiary hover:text-danger p-1.5 rounded-default hover:bg-danger-subtle transition"
-      >
-        <Trash2 size={14} strokeWidth={1.5} />
-      </button>
+      <PermissionGate module="agentes" action="editar">
+        <button
+          type="button"
+          onClick={onDelete}
+          aria-label={`Remover ${doc.filename}`}
+          className="text-text-tertiary hover:text-danger p-1.5 rounded-default hover:bg-danger-subtle transition"
+        >
+          <Trash2 size={14} strokeWidth={1.5} />
+        </button>
+      </PermissionGate>
     </div>
   )
 }

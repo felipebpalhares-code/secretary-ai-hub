@@ -17,6 +17,7 @@ import {
   confirmDelete,
 } from "./_shared"
 import { EditVaultEntryModal } from "./EditVaultEntryModal"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 const SECTIONS: { id: VaultCategory; title: string; icon: Parameters<typeof Icon>[0]["name"] }[] = [
   { id: "gov", title: "Portais governamentais", icon: "shield" },
@@ -92,12 +93,16 @@ function VaultRow({
       >
         {copied ? "Copiado!" : "Copiar"}
       </button>
-      <button onClick={onEdit} className="text-ink-3 hover:text-accent p-1 rounded">
-        <Icon name="edit" size={13} />
-      </button>
-      <button onClick={onDelete} className="text-ink-3 hover:text-err p-1 rounded">
-        <Icon name="close" size={13} />
-      </button>
+      <PermissionGate module="quem-sou-eu" action="editar">
+        <button onClick={onEdit} className="text-ink-3 hover:text-accent p-1 rounded">
+          <Icon name="edit" size={13} />
+        </button>
+      </PermissionGate>
+      <PermissionGate module="quem-sou-eu" action="deletar">
+        <button onClick={onDelete} className="text-ink-3 hover:text-err p-1 rounded">
+          <Icon name="close" size={13} />
+        </button>
+      </PermissionGate>
     </div>
   )
 }
@@ -147,10 +152,12 @@ export function AcessosTab() {
             <SectionHdr
               title={sec.title}
               action={
-                <AddBtn
-                  label="Adicionar"
-                  onClick={() => setModal({ open: true, initial: null, defaultCategory: sec.id })}
-                />
+                <PermissionGate module="quem-sou-eu" action="criar">
+                  <AddBtn
+                    label="Adicionar"
+                    onClick={() => setModal({ open: true, initial: null, defaultCategory: sec.id })}
+                  />
+                </PermissionGate>
               }
             />
             {items.length === 0 ? (

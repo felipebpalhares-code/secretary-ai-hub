@@ -6,17 +6,25 @@ from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from core.dependencies import require_permission
+from models.user import User
 from services.database import get_session
 from services.pluggy_client import client as pluggy
 from models.banking import PluggyConnection, PluggyAccount, PluggyTransaction
 
 router = APIRouter(prefix="/api/banks", tags=["banks"])
 
+# Sprint H — bancos
+PERM_VER     = Depends(require_permission("bancos", "ver"))
+PERM_CRIAR   = Depends(require_permission("bancos", "criar"))
+PERM_EDITAR  = Depends(require_permission("bancos", "editar"))
+PERM_DELETAR = Depends(require_permission("bancos", "deletar"))
+
 
 # ── Connect Token (frontend abre o widget) ─────────────
 
 @router.post("/connect-token")
-async def connect_token(body: dict | None = None):
+async def connect_token(body: dict | None = None, _: User = PERM_CRIAR):
     """
     Retorna token de curta duração para o Pluggy Connect Widget.
     Body opcional: { "itemId": "uuid" } para reconectar item existente.
@@ -32,7 +40,7 @@ async def connect_token(body: dict | None = None):
 # ── Connections ────────────────────────────────────────
 
 @router.get("/connections")
-async def list_connections(db: Session = Depends(get_session)):
+async def list_connections(_: User = PERM_VER, db: Session = Depends(get_session)):
     """Lista conexões bancárias do banco local (cache)."""
     rows = db.query(PluggyConnection).all()
     return [
@@ -50,7 +58,7 @@ async def list_connections(db: Session = Depends(get_session)):
 
 
 @router.post("/connections/sync")
-async def sync_connections(db: Session = Depends(get_session)):
+async def sync_connections(_: User = PERM_VER, db: Session = Depends(get_session)):
     """Puxa snapshot Pluggy → atualiza/insere connections + accounts."""
     items = await pluggy.list_items()
 
@@ -94,7 +102,7 @@ async def sync_connections(db: Session = Depends(get_session)):
 
 
 @router.delete("/connections/{item_id}")
-async def disconnect(item_id: str, db: Session = Depends(get_session)):
+async def disconnect(item_id: str, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     await pluggy.delete_item(item_id)
     db.query(PluggyConnection).filter(PluggyConnection.pluggy_item_id == item_id).delete()
     db.query(PluggyAccount).filter(PluggyAccount.pluggy_item_id == item_id).delete()
@@ -105,7 +113,7 @@ async def disconnect(item_id: str, db: Session = Depends(get_session)):
 # ── Accounts ───────────────────────────────────────────
 
 @router.get("/accounts")
-async def list_accounts(entity: str | None = None, db: Session = Depends(get_session)):
+async def list_accounts(entity: str | None = None, _: User = PERM_VER, db: Session = Depends(get_session)):
     q = db.query(PluggyAccount)
     if entity:
         q = q.filter(PluggyAccount.entity == entity)
@@ -130,7 +138,7 @@ async def list_accounts(entity: str | None = None, db: Session = Depends(get_ses
 
 
 @router.get("/accounts/summary")
-async def accounts_summary(db: Session = Depends(get_session)):
+async def accounts_summary(_: User = PERM_VER, db: Session = Depends(get_session)):
     """Total consolidado + por entidade."""
     rows = db.query(PluggyAccount).all()
     by_entity: dict[str, float] = {}
@@ -152,6 +160,7 @@ async def list_transactions(
     account_id: str | None = None,
     entity: str | None = None,
     days: int = 30,
+    _: User = PERM_VER,
     db: Session = Depends(get_session),
 ):
     """Extrato unificado · filtros opcionais."""
@@ -189,7 +198,7 @@ async def list_transactions(
 
 
 @router.post("/transactions/sync")
-async def sync_transactions(body: dict, db: Session = Depends(get_session)):
+async def sync_transactions(body: dict, _: User = PERM_VER, db: Session = Depends(get_session)):
     """Puxa transações do Pluggy de um account específico."""
     account_id = body.get("accountId")
     days = body.get("days", 30)
@@ -236,7 +245,7 @@ async def sync_transactions(body: dict, db: Session = Depends(get_session)):
 
 
 @router.patch("/transactions/{tx_id}/categorize")
-async def categorize_transaction(tx_id: int, body: dict, db: Session = Depends(get_session)):
+async def categorize_transaction(tx_id: int, body: dict, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     """Felipe ou um agente classifica manualmente a transação."""
     tx = db.query(PluggyTransaction).filter(PluggyTransaction.id == tx_id).first()
     if not tx:

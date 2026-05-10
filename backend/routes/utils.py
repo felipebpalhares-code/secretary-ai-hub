@@ -14,11 +14,22 @@ import time
 from typing import Any, Optional
 
 import httpx
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
+from core.dependencies import get_current_user, require_permission
+from models.user import User
 from services.profile_extract import extract_person
 
-router = APIRouter(prefix="/api/utils", tags=["utils"])
+# Sprint H — utilitários ficam disponíveis pra qualquer usuário autenticado
+# (não há ação destrutiva). O OCR de documentos é tratado como `quem-sou-eu:editar`
+# porque é usado pra preencher formulários do perfil.
+router = APIRouter(
+    prefix="/api/utils",
+    tags=["utils"],
+    dependencies=[Depends(get_current_user)],
+)
+
+PERM_PROFILE_EDITAR = Depends(require_permission("quem-sou-eu", "editar"))
 
 BRASILAPI_CNPJ = "https://brasilapi.com.br/api/cnpj/v1/{cnpj}"
 OPENCNPJ_URL = "https://api.opencnpj.org/{cnpj}"
@@ -365,6 +376,7 @@ async def lookup_cnpj(cnpj: str) -> dict[str, Any]:
 async def extract_person_document(
     file: UploadFile = File(...),
     kind: str = Form("rg"),
+    _: User = PERM_PROFILE_EDITAR,
 ) -> dict[str, Any]:
     """
     Recebe foto/PDF de CNH, RG, CPF ou passaporte de uma pessoa, manda pro Claude Vision

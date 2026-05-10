@@ -32,10 +32,24 @@ from schemas.profile import (
     GoalIn, GoalOut,
     BannerStats,
 )
+from core.dependencies import require_permission
+from models.user import User
 from services.database import get_session
 from services.profile_extract import extract_identity
 
-router = APIRouter(prefix="/api/profile", tags=["profile"])
+# Sprint H — todo o módulo /api/profile fica atrás de quem-sou-eu:ver via
+# router-level dependency. Endpoints POST/PUT/DELETE adicionam Depends extra
+# de criar/editar/deletar — assim ASSISTANT precisa ter ver=true E action
+# específica, e o resto do código não precisa alterar a assinatura.
+router = APIRouter(
+    prefix="/api/profile",
+    tags=["profile"],
+    dependencies=[Depends(require_permission("quem-sou-eu", "ver"))],
+)
+
+PERM_CRIAR   = Depends(require_permission("quem-sou-eu", "criar"))
+PERM_EDITAR  = Depends(require_permission("quem-sou-eu", "editar"))
+PERM_DELETAR = Depends(require_permission("quem-sou-eu", "deletar"))
 
 UPLOAD_ROOT = Path(os.getenv("UPLOAD_ROOT", "/data/uploads"))
 IDENTITY_UPLOAD_DIR = UPLOAD_ROOT / "identity"
@@ -128,7 +142,7 @@ def get_identity(db: Session = Depends(get_session)):
 
 
 @router.put("/identity", response_model=IdentitySchema)
-def update_identity(payload: IdentitySchema, db: Session = Depends(get_session)):
+def update_identity(payload: IdentitySchema, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     identity = _get_or_create_identity(db)
     for k, v in payload.model_dump(exclude_unset=True).items():
         setattr(identity, k, v)
@@ -143,7 +157,7 @@ def get_preferences(db: Session = Depends(get_session)):
 
 
 @router.put("/preferences", response_model=PreferencesSchema)
-def update_preferences(payload: PreferencesSchema, db: Session = Depends(get_session)):
+def update_preferences(payload: PreferencesSchema, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     prefs = _get_or_create_preferences(db)
     data = payload.model_dump(exclude_unset=True)
     if "life_priorities" in data:
@@ -162,6 +176,7 @@ def update_preferences(payload: PreferencesSchema, db: Session = Depends(get_ses
 async def extract_identity_endpoint(
     file: UploadFile = File(...),
     kind: str = Form("other"),
+    _: User = PERM_EDITAR,
     db: Session = Depends(get_session),
 ):
     mime = (file.content_type or "").lower()
@@ -237,7 +252,7 @@ def get_identity_document(doc_id: int, db: Session = Depends(get_session)):
 
 
 @router.delete("/identity/documents/{doc_id}")
-def delete_identity_document(doc_id: int, db: Session = Depends(get_session)):
+def delete_identity_document(doc_id: int, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     doc: Optional[IdentityDocument] = db.get(IdentityDocument, doc_id)
     if not doc:
         raise HTTPException(404, "Documento não encontrado")
@@ -260,7 +275,7 @@ def list_companies(db: Session = Depends(get_session)):
 
 
 @router.post("/companies", response_model=CompanyOut, status_code=201)
-def create_company(payload: CompanyIn, db: Session = Depends(get_session)):
+def create_company(payload: CompanyIn, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     data = payload.model_dump()
     systems = data.pop("systems", [])
     c = Company(systems_json=json.dumps(systems, ensure_ascii=False), **data)
@@ -269,7 +284,7 @@ def create_company(payload: CompanyIn, db: Session = Depends(get_session)):
 
 
 @router.put("/companies/{cid}", response_model=CompanyOut)
-def update_company(cid: int, payload: CompanyIn, db: Session = Depends(get_session)):
+def update_company(cid: int, payload: CompanyIn, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     c = db.get(Company, cid)
     if not c:
         raise HTTPException(404, "Empresa não encontrada")
@@ -283,7 +298,7 @@ def update_company(cid: int, payload: CompanyIn, db: Session = Depends(get_sessi
 
 
 @router.delete("/companies/{cid}")
-def delete_company(cid: int, db: Session = Depends(get_session)):
+def delete_company(cid: int, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     c = db.get(Company, cid)
     if not c:
         raise HTTPException(404, "Empresa não encontrada")
@@ -301,7 +316,7 @@ def list_partners(cid: int, db: Session = Depends(get_session)):
 
 
 @router.post("/companies/{cid}/partners", response_model=PartnerOut, status_code=201)
-def create_partner(cid: int, payload: PartnerIn, db: Session = Depends(get_session)):
+def create_partner(cid: int, payload: PartnerIn, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     if not db.get(Company, cid):
         raise HTTPException(404, "Empresa não encontrada")
     p = Partner(company_id=cid, **payload.model_dump())
@@ -310,7 +325,7 @@ def create_partner(cid: int, payload: PartnerIn, db: Session = Depends(get_sessi
 
 
 @router.put("/partners/{pid}", response_model=PartnerOut)
-def update_partner(pid: int, payload: PartnerIn, db: Session = Depends(get_session)):
+def update_partner(pid: int, payload: PartnerIn, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     p = db.get(Partner, pid)
     if not p:
         raise HTTPException(404, "Sócio não encontrado")
@@ -321,7 +336,7 @@ def update_partner(pid: int, payload: PartnerIn, db: Session = Depends(get_sessi
 
 
 @router.delete("/partners/{pid}")
-def delete_partner(pid: int, db: Session = Depends(get_session)):
+def delete_partner(pid: int, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     p = db.get(Partner, pid)
     if not p:
         raise HTTPException(404, "Sócio não encontrado")
@@ -337,14 +352,14 @@ def list_professionals(db: Session = Depends(get_session)):
 
 
 @router.post("/professionals", response_model=ProfessionalOut, status_code=201)
-def create_professional(payload: ProfessionalIn, db: Session = Depends(get_session)):
+def create_professional(payload: ProfessionalIn, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     pr = TrustedProfessional(**payload.model_dump())
     db.add(pr); db.commit(); db.refresh(pr)
     return pr
 
 
 @router.put("/professionals/{pid}", response_model=ProfessionalOut)
-def update_professional(pid: int, payload: ProfessionalIn, db: Session = Depends(get_session)):
+def update_professional(pid: int, payload: ProfessionalIn, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     pr = db.get(TrustedProfessional, pid)
     if not pr:
         raise HTTPException(404, "Profissional não encontrado")
@@ -355,7 +370,7 @@ def update_professional(pid: int, payload: ProfessionalIn, db: Session = Depends
 
 
 @router.delete("/professionals/{pid}")
-def delete_professional(pid: int, db: Session = Depends(get_session)):
+def delete_professional(pid: int, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     pr = db.get(TrustedProfessional, pid)
     if not pr:
         raise HTTPException(404, "Profissional não encontrado")
@@ -373,14 +388,14 @@ def list_family(db: Session = Depends(get_session)):
 
 
 @router.post("/family", response_model=FamilyMemberOut, status_code=201)
-def create_family_member(payload: FamilyMemberIn, db: Session = Depends(get_session)):
+def create_family_member(payload: FamilyMemberIn, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     m = FamilyMember(**payload.model_dump())
     db.add(m); db.commit(); db.refresh(m)
     return m
 
 
 @router.put("/family/{fid}", response_model=FamilyMemberOut)
-def update_family_member(fid: int, payload: FamilyMemberIn, db: Session = Depends(get_session)):
+def update_family_member(fid: int, payload: FamilyMemberIn, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     m = db.get(FamilyMember, fid)
     if not m:
         raise HTTPException(404, "Membro não encontrado")
@@ -391,7 +406,7 @@ def update_family_member(fid: int, payload: FamilyMemberIn, db: Session = Depend
 
 
 @router.delete("/family/{fid}")
-def delete_family_member(fid: int, db: Session = Depends(get_session)):
+def delete_family_member(fid: int, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     m = db.get(FamilyMember, fid)
     if not m:
         raise HTTPException(404, "Membro não encontrado")
@@ -407,14 +422,14 @@ def list_family_doctors(db: Session = Depends(get_session)):
 
 
 @router.post("/family-doctors", response_model=FamilyDoctorOut, status_code=201)
-def create_family_doctor(payload: FamilyDoctorIn, db: Session = Depends(get_session)):
+def create_family_doctor(payload: FamilyDoctorIn, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     d = FamilyDoctor(**payload.model_dump())
     db.add(d); db.commit(); db.refresh(d)
     return d
 
 
 @router.put("/family-doctors/{did}", response_model=FamilyDoctorOut)
-def update_family_doctor(did: int, payload: FamilyDoctorIn, db: Session = Depends(get_session)):
+def update_family_doctor(did: int, payload: FamilyDoctorIn, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     d = db.get(FamilyDoctor, did)
     if not d:
         raise HTTPException(404, "Médico não encontrado")
@@ -425,7 +440,7 @@ def update_family_doctor(did: int, payload: FamilyDoctorIn, db: Session = Depend
 
 
 @router.delete("/family-doctors/{did}")
-def delete_family_doctor(did: int, db: Session = Depends(get_session)):
+def delete_family_doctor(did: int, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     d = db.get(FamilyDoctor, did)
     if not d:
         raise HTTPException(404, "Médico não encontrado")
@@ -443,14 +458,14 @@ def list_investments(db: Session = Depends(get_session)):
 
 
 @router.post("/investments", response_model=InvestmentOut, status_code=201)
-def create_investment(payload: InvestmentIn, db: Session = Depends(get_session)):
+def create_investment(payload: InvestmentIn, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     inv = Investment(**payload.model_dump())
     db.add(inv); db.commit(); db.refresh(inv)
     return inv
 
 
 @router.put("/investments/{iid}", response_model=InvestmentOut)
-def update_investment(iid: int, payload: InvestmentIn, db: Session = Depends(get_session)):
+def update_investment(iid: int, payload: InvestmentIn, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     inv = db.get(Investment, iid)
     if not inv:
         raise HTTPException(404, "Investimento não encontrado")
@@ -461,7 +476,7 @@ def update_investment(iid: int, payload: InvestmentIn, db: Session = Depends(get
 
 
 @router.delete("/investments/{iid}")
-def delete_investment(iid: int, db: Session = Depends(get_session)):
+def delete_investment(iid: int, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     inv = db.get(Investment, iid)
     if not inv:
         raise HTTPException(404, "Investimento não encontrado")
@@ -475,14 +490,14 @@ def list_real_estate(db: Session = Depends(get_session)):
 
 
 @router.post("/real-estate", response_model=RealEstateOut, status_code=201)
-def create_real_estate(payload: RealEstateIn, db: Session = Depends(get_session)):
+def create_real_estate(payload: RealEstateIn, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     re_ = RealEstate(**payload.model_dump())
     db.add(re_); db.commit(); db.refresh(re_)
     return re_
 
 
 @router.put("/real-estate/{rid}", response_model=RealEstateOut)
-def update_real_estate(rid: int, payload: RealEstateIn, db: Session = Depends(get_session)):
+def update_real_estate(rid: int, payload: RealEstateIn, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     re_ = db.get(RealEstate, rid)
     if not re_:
         raise HTTPException(404, "Imóvel não encontrado")
@@ -493,7 +508,7 @@ def update_real_estate(rid: int, payload: RealEstateIn, db: Session = Depends(ge
 
 
 @router.delete("/real-estate/{rid}")
-def delete_real_estate(rid: int, db: Session = Depends(get_session)):
+def delete_real_estate(rid: int, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     re_ = db.get(RealEstate, rid)
     if not re_:
         raise HTTPException(404, "Imóvel não encontrado")
@@ -511,14 +526,14 @@ def list_legal_cases(db: Session = Depends(get_session)):
 
 
 @router.post("/legal-cases", response_model=LegalCaseOut, status_code=201)
-def create_legal_case(payload: LegalCaseIn, db: Session = Depends(get_session)):
+def create_legal_case(payload: LegalCaseIn, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     lc = LegalCase(**payload.model_dump())
     db.add(lc); db.commit(); db.refresh(lc)
     return lc
 
 
 @router.put("/legal-cases/{lid}", response_model=LegalCaseOut)
-def update_legal_case(lid: int, payload: LegalCaseIn, db: Session = Depends(get_session)):
+def update_legal_case(lid: int, payload: LegalCaseIn, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     lc = db.get(LegalCase, lid)
     if not lc:
         raise HTTPException(404, "Processo não encontrado")
@@ -529,7 +544,7 @@ def update_legal_case(lid: int, payload: LegalCaseIn, db: Session = Depends(get_
 
 
 @router.delete("/legal-cases/{lid}")
-def delete_legal_case(lid: int, db: Session = Depends(get_session)):
+def delete_legal_case(lid: int, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     lc = db.get(LegalCase, lid)
     if not lc:
         raise HTTPException(404, "Processo não encontrado")
@@ -543,14 +558,14 @@ def list_contracts(db: Session = Depends(get_session)):
 
 
 @router.post("/contracts", response_model=ContractOut, status_code=201)
-def create_contract(payload: ContractIn, db: Session = Depends(get_session)):
+def create_contract(payload: ContractIn, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     c = Contract(**payload.model_dump())
     db.add(c); db.commit(); db.refresh(c)
     return c
 
 
 @router.put("/contracts/{cid}", response_model=ContractOut)
-def update_contract(cid: int, payload: ContractIn, db: Session = Depends(get_session)):
+def update_contract(cid: int, payload: ContractIn, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     c = db.get(Contract, cid)
     if not c:
         raise HTTPException(404, "Contrato não encontrado")
@@ -561,7 +576,7 @@ def update_contract(cid: int, payload: ContractIn, db: Session = Depends(get_ses
 
 
 @router.delete("/contracts/{cid}")
-def delete_contract(cid: int, db: Session = Depends(get_session)):
+def delete_contract(cid: int, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     c = db.get(Contract, cid)
     if not c:
         raise HTTPException(404, "Contrato não encontrado")
@@ -582,14 +597,14 @@ def list_vault(category: Optional[str] = None, db: Session = Depends(get_session
 
 
 @router.post("/vault", response_model=VaultEntryOut, status_code=201)
-def create_vault_entry(payload: VaultEntryIn, db: Session = Depends(get_session)):
+def create_vault_entry(payload: VaultEntryIn, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     v = VaultEntry(**payload.model_dump())
     db.add(v); db.commit(); db.refresh(v)
     return v
 
 
 @router.put("/vault/{vid}", response_model=VaultEntryOut)
-def update_vault_entry(vid: int, payload: VaultEntryIn, db: Session = Depends(get_session)):
+def update_vault_entry(vid: int, payload: VaultEntryIn, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     v = db.get(VaultEntry, vid)
     if not v:
         raise HTTPException(404, "Entrada não encontrada")
@@ -604,7 +619,7 @@ def update_vault_entry(vid: int, payload: VaultEntryIn, db: Session = Depends(ge
 
 
 @router.delete("/vault/{vid}")
-def delete_vault_entry(vid: int, db: Session = Depends(get_session)):
+def delete_vault_entry(vid: int, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     v = db.get(VaultEntry, vid)
     if not v:
         raise HTTPException(404, "Entrada não encontrada")
@@ -630,14 +645,14 @@ def list_goals(db: Session = Depends(get_session)):
 
 
 @router.post("/goals", response_model=GoalOut, status_code=201)
-def create_goal(payload: GoalIn, db: Session = Depends(get_session)):
+def create_goal(payload: GoalIn, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     g = Goal(**payload.model_dump())
     db.add(g); db.commit(); db.refresh(g)
     return g
 
 
 @router.put("/goals/{gid}", response_model=GoalOut)
-def update_goal(gid: int, payload: GoalIn, db: Session = Depends(get_session)):
+def update_goal(gid: int, payload: GoalIn, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     g = db.get(Goal, gid)
     if not g:
         raise HTTPException(404, "Meta não encontrada")
@@ -648,7 +663,7 @@ def update_goal(gid: int, payload: GoalIn, db: Session = Depends(get_session)):
 
 
 @router.delete("/goals/{gid}")
-def delete_goal(gid: int, db: Session = Depends(get_session)):
+def delete_goal(gid: int, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     g = db.get(Goal, gid)
     if not g:
         raise HTTPException(404, "Meta não encontrada")

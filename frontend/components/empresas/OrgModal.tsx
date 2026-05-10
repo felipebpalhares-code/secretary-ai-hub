@@ -11,6 +11,7 @@ import {
   deleteOrganization,
   enrichOrganization,
 } from "@/lib/contacts-api"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 type Mode =
   | { kind: "create" }
@@ -174,39 +175,43 @@ export function OrgModal({
         <div className="flex w-full items-center justify-between">
           <div>
             {mode.kind === "edit" && (
-              confirmDelete ? (
-                <div className="flex items-center gap-2 text-[11.5px]">
-                  <span className="text-err font-semibold">Confirma apagar?</span>
+              <PermissionGate module="empresas" action="deletar">
+                {confirmDelete ? (
+                  <div className="flex items-center gap-2 text-[11.5px]">
+                    <span className="text-err font-semibold">Confirma apagar?</span>
+                    <button
+                      onClick={doDelete}
+                      disabled={submitting}
+                      className="px-2 py-1 rounded-md bg-red-50 border border-red-200 text-err font-semibold hover:bg-red-100 disabled:opacity-50 transition-colors"
+                    >
+                      Sim, apagar
+                    </button>
+                    <button onClick={() => setConfirmDelete(false)} className="text-ink-3 hover:text-ink">
+                      Cancelar
+                    </button>
+                  </div>
+                ) : (
                   <button
-                    onClick={doDelete}
+                    onClick={() => setConfirmDelete(true)}
                     disabled={submitting}
-                    className="px-2 py-1 rounded-md bg-red-50 border border-red-200 text-err font-semibold hover:bg-red-100 disabled:opacity-50 transition-colors"
+                    className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-err hover:text-red-700 transition-colors"
                   >
-                    Sim, apagar
+                    <Icon name="trash" size={12} />
+                    Apagar
                   </button>
-                  <button onClick={() => setConfirmDelete(false)} className="text-ink-3 hover:text-ink">
-                    Cancelar
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setConfirmDelete(true)}
-                  disabled={submitting}
-                  className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-err hover:text-red-700 transition-colors"
-                >
-                  <Icon name="trash" size={12} />
-                  Apagar
-                </button>
-              )
+                )}
+              </PermissionGate>
             )}
           </div>
           <div className="flex gap-2">
             <SecondaryButton onClick={onClose} disabled={submitting}>
               Cancelar
             </SecondaryButton>
-            <PrimaryButton onClick={submit} disabled={submitting || !canSubmit}>
-              {submitting ? "Salvando…" : "Salvar"}
-            </PrimaryButton>
+            <PermissionGate module="empresas" action={mode.kind === "edit" ? "editar" : "criar"}>
+              <PrimaryButton onClick={submit} disabled={submitting || !canSubmit}>
+                {submitting ? "Salvando…" : "Salvar"}
+              </PrimaryButton>
+            </PermissionGate>
           </div>
         </div>
       }

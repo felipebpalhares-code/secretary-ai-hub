@@ -22,6 +22,7 @@ import { ContactModal } from "@/components/contatos/ContactModal"
 import { CategoryDialog } from "@/components/contatos/CategoryDialog"
 import { CategoryMenu } from "@/components/contatos/CategoryMenu"
 import { ConfirmDialog } from "@/components/contatos/ConfirmDialog"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 type Chip = "todos" | "30d" | "wa" | "email" | "empresa"
 
@@ -202,13 +203,15 @@ export function ContatosHub() {
               </button>
             ))}
           </div>
-          <button
-            onClick={() => setModal({ open: true, mode: { kind: "create" } })}
-            className="inline-flex items-center gap-1.5 bg-brand text-white text-small font-semibold px-3 py-2 rounded-default hover:bg-brand-hover transition-colors"
-          >
-            <Icon name="plus" size={13} />
-            Novo contato
-          </button>
+          <PermissionGate module="contatos" action="criar">
+            <button
+              onClick={() => setModal({ open: true, mode: { kind: "create" } })}
+              className="inline-flex items-center gap-1.5 bg-brand text-white text-small font-semibold px-3 py-2 rounded-default hover:bg-brand-hover transition-colors"
+            >
+              <Icon name="plus" size={13} />
+              Novo contato
+            </button>
+          </PermissionGate>
         </div>
 
         {/* Chips */}

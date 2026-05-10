@@ -1,5 +1,7 @@
 """
 Rotas REST do módulo de Agentes IA.
+
+Sprint H — todos os endpoints exigem permissão `agentes:<acao>`.
 """
 from __future__ import annotations
 import json
@@ -9,6 +11,8 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
+from core.dependencies import require_permission
+from models.user import User
 from models.agent import AgentWebhook
 from schemas.agents import (
     AgentCreate, AgentUpdate, AgentResponse,
@@ -24,21 +28,26 @@ from services.database import get_session
 
 router = APIRouter(prefix="/api", tags=["agents"])
 
+PERM_VER     = Depends(require_permission("agentes", "ver"))
+PERM_CRIAR   = Depends(require_permission("agentes", "criar"))
+PERM_EDITAR  = Depends(require_permission("agentes", "editar"))
+PERM_DELETAR = Depends(require_permission("agentes", "deletar"))
+
 
 # ═══════════════════════════ AGENTS ═══════════════════════════
 
 @router.post("/agents", response_model=AgentResponse, status_code=201)
-def create_agent(payload: AgentCreate, db: Session = Depends(get_session)):
+def create_agent(payload: AgentCreate, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     return agent_service.create_agent(db, payload)
 
 
 @router.get("/agents", response_model=list[AgentResponse])
-def list_agents(db: Session = Depends(get_session)):
+def list_agents(_: User = PERM_VER, db: Session = Depends(get_session)):
     return agent_service.list_agents(db)
 
 
 @router.get("/agents/{agent_id}", response_model=AgentResponse)
-def get_agent(agent_id: str, db: Session = Depends(get_session)):
+def get_agent(agent_id: str, _: User = PERM_VER, db: Session = Depends(get_session)):
     agent = agent_service.get_agent(db, agent_id)
     if not agent:
         raise HTTPException(404, "Agente não encontrado")
@@ -46,7 +55,7 @@ def get_agent(agent_id: str, db: Session = Depends(get_session)):
 
 
 @router.patch("/agents/{agent_id}", response_model=AgentResponse)
-def update_agent(agent_id: str, payload: AgentUpdate, db: Session = Depends(get_session)):
+def update_agent(agent_id: str, payload: AgentUpdate, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     agent = agent_service.update_agent(db, agent_id, payload)
     if not agent:
         raise HTTPException(404, "Agente não encontrado")
@@ -54,7 +63,7 @@ def update_agent(agent_id: str, payload: AgentUpdate, db: Session = Depends(get_
 
 
 @router.delete("/agents/{agent_id}")
-def delete_agent(agent_id: str, db: Session = Depends(get_session)):
+def delete_agent(agent_id: str, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     if not agent_service.delete_agent(db, agent_id):
         raise HTTPException(404, "Agente não encontrado")
     return {"ok": True}
@@ -63,7 +72,7 @@ def delete_agent(agent_id: str, db: Session = Depends(get_session)):
 # ═══════════════════════════ INSTRUCTIONS ═══════════════════════════
 
 @router.post("/agents/{agent_id}/instructions", response_model=InstructionResponse, status_code=201)
-def add_instruction(agent_id: str, payload: InstructionCreate, db: Session = Depends(get_session)):
+def add_instruction(agent_id: str, payload: InstructionCreate, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     instr = agent_service.add_instruction(db, agent_id, payload)
     if not instr:
         raise HTTPException(404, "Agente não encontrado")
@@ -71,7 +80,7 @@ def add_instruction(agent_id: str, payload: InstructionCreate, db: Session = Dep
 
 
 @router.delete("/agents/{agent_id}/instructions/{instruction_id}")
-def remove_instruction(agent_id: str, instruction_id: str, db: Session = Depends(get_session)):
+def remove_instruction(agent_id: str, instruction_id: str, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     if not agent_service.delete_instruction(db, instruction_id):
         raise HTTPException(404, "Instrução não encontrada")
     return {"ok": True}
@@ -83,6 +92,7 @@ def remove_instruction(agent_id: str, instruction_id: str, db: Session = Depends
 async def upload_document(
     agent_id: str,
     file: UploadFile = File(...),
+    _: User = PERM_CRIAR,
     db: Session = Depends(get_session),
 ):
     if file.content_type not in docsvc.ALLOWED_MIME and file.filename.split(".")[-1].lower() not in {"pdf", "docx", "doc", "txt", "md"}:
@@ -101,14 +111,14 @@ async def upload_document(
 
 
 @router.get("/agents/{agent_id}/documents", response_model=list[DocumentResponse])
-def list_documents(agent_id: str, db: Session = Depends(get_session)):
+def list_documents(agent_id: str, _: User = PERM_VER, db: Session = Depends(get_session)):
     if not agent_service.get_agent(db, agent_id):
         raise HTTPException(404, "Agente não encontrado")
     return docsvc.list_documents(db, agent_id)
 
 
 @router.delete("/agents/{agent_id}/documents/{document_id}")
-def delete_document(agent_id: str, document_id: str, db: Session = Depends(get_session)):
+def delete_document(agent_id: str, document_id: str, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     doc = docsvc.get_document(db, document_id)
     if not doc or doc.agent_id != agent_id:
         raise HTTPException(404, "Documento não encontrado")
@@ -119,7 +129,7 @@ def delete_document(agent_id: str, document_id: str, db: Session = Depends(get_s
 # ═══════════════════════════ CONVERSATIONS ═══════════════════════════
 
 @router.post("/agents/{agent_id}/conversations", response_model=ConversationResponse, status_code=201)
-def create_conversation(agent_id: str, payload: ConversationCreate, db: Session = Depends(get_session)):
+def create_conversation(agent_id: str, payload: ConversationCreate, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     conv = chat_service.create_conversation(db, agent_id, payload.title)
     if not conv:
         raise HTTPException(404, "Agente não encontrado")
@@ -127,14 +137,14 @@ def create_conversation(agent_id: str, payload: ConversationCreate, db: Session 
 
 
 @router.get("/agents/{agent_id}/conversations", response_model=list[ConversationResponse])
-def list_conversations(agent_id: str, db: Session = Depends(get_session)):
+def list_conversations(agent_id: str, _: User = PERM_VER, db: Session = Depends(get_session)):
     if not agent_service.get_agent(db, agent_id):
         raise HTTPException(404, "Agente não encontrado")
     return chat_service.list_conversations(db, agent_id)
 
 
 @router.get("/conversations/{conversation_id}", response_model=ConversationResponse)
-def get_conversation(conversation_id: str, db: Session = Depends(get_session)):
+def get_conversation(conversation_id: str, _: User = PERM_VER, db: Session = Depends(get_session)):
     conv = chat_service.get_conversation(db, conversation_id)
     if not conv:
         raise HTTPException(404, "Conversa não encontrada")
@@ -142,14 +152,14 @@ def get_conversation(conversation_id: str, db: Session = Depends(get_session)):
 
 
 @router.delete("/conversations/{conversation_id}")
-def delete_conversation(conversation_id: str, db: Session = Depends(get_session)):
+def delete_conversation(conversation_id: str, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     if not chat_service.delete_conversation(db, conversation_id):
         raise HTTPException(404, "Conversa não encontrada")
     return {"ok": True}
 
 
 @router.get("/conversations/{conversation_id}/messages", response_model=list[MessageResponse])
-def list_messages(conversation_id: str, db: Session = Depends(get_session)):
+def list_messages(conversation_id: str, _: User = PERM_VER, db: Session = Depends(get_session)):
     conv = chat_service.get_conversation(db, conversation_id)
     if not conv:
         raise HTTPException(404, "Conversa não encontrada")
@@ -168,6 +178,7 @@ async def _sse_stream(generator: AsyncGenerator[dict[str, Any], None]) -> AsyncG
 async def post_message(
     conversation_id: str,
     payload: MessageCreate,
+    _: User = PERM_CRIAR,
     db: Session = Depends(get_session),
 ):
     """
@@ -207,7 +218,7 @@ def _webhook_to_out(w: AgentWebhook) -> WebhookResponse:
 
 
 @router.post("/agents/{agent_id}/webhooks", response_model=WebhookResponse, status_code=201)
-def create_webhook(agent_id: str, payload: WebhookCreate, db: Session = Depends(get_session)):
+def create_webhook(agent_id: str, payload: WebhookCreate, _: User = PERM_CRIAR, db: Session = Depends(get_session)):
     if not agent_service.get_agent(db, agent_id):
         raise HTTPException(404, "Agente não encontrado")
     w = AgentWebhook(
@@ -222,7 +233,7 @@ def create_webhook(agent_id: str, payload: WebhookCreate, db: Session = Depends(
 
 
 @router.get("/agents/{agent_id}/webhooks", response_model=list[WebhookResponse])
-def list_webhooks(agent_id: str, db: Session = Depends(get_session)):
+def list_webhooks(agent_id: str, _: User = PERM_VER, db: Session = Depends(get_session)):
     if not agent_service.get_agent(db, agent_id):
         raise HTTPException(404, "Agente não encontrado")
     rows = db.query(AgentWebhook).filter(AgentWebhook.agent_id == agent_id).all()
@@ -230,7 +241,7 @@ def list_webhooks(agent_id: str, db: Session = Depends(get_session)):
 
 
 @router.patch("/webhooks/{webhook_id}", response_model=WebhookResponse)
-def update_webhook(webhook_id: str, payload: WebhookUpdate, db: Session = Depends(get_session)):
+def update_webhook(webhook_id: str, payload: WebhookUpdate, _: User = PERM_EDITAR, db: Session = Depends(get_session)):
     w = db.get(AgentWebhook, webhook_id)
     if not w:
         raise HTTPException(404, "Webhook não encontrado")
@@ -244,7 +255,7 @@ def update_webhook(webhook_id: str, payload: WebhookUpdate, db: Session = Depend
 
 
 @router.delete("/webhooks/{webhook_id}")
-def delete_webhook(webhook_id: str, db: Session = Depends(get_session)):
+def delete_webhook(webhook_id: str, _: User = PERM_DELETAR, db: Session = Depends(get_session)):
     w = db.get(AgentWebhook, webhook_id)
     if not w:
         raise HTTPException(404, "Webhook não encontrado")

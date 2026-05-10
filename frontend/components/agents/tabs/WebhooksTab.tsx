@@ -12,6 +12,7 @@ import {
   updateWebhook,
 } from "@/lib/agents-api"
 import { cn } from "@/lib/cn"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 const EVENT_LABEL: Record<WebhookEvent, string> = {
   on_message_received: "Mensagem recebida",
@@ -79,14 +80,16 @@ export function WebhooksTab({ agent }: { agent: Agent }) {
               <BookOpen size={14} strokeWidth={1.5} />
               Como usar com N8N?
             </button>
-            <button
-              type="button"
-              onClick={() => setModalOpen(true)}
-              className="inline-flex items-center gap-2 bg-brand text-white rounded-default px-4 py-2 text-body-strong font-medium shadow-xs hover:bg-brand-hover transition"
-            >
-              <Plus size={14} strokeWidth={1.5} />
-              Adicionar webhook
-            </button>
+            <PermissionGate module="agentes" action="editar">
+              <button
+                type="button"
+                onClick={() => setModalOpen(true)}
+                className="inline-flex items-center gap-2 bg-brand text-white rounded-default px-4 py-2 text-body-strong font-medium shadow-xs hover:bg-brand-hover transition"
+              >
+                <Plus size={14} strokeWidth={1.5} />
+                Adicionar webhook
+              </button>
+            </PermissionGate>
           </div>
         </div>
 
@@ -159,15 +162,19 @@ function Row({
           🔒 assinado
         </span>
       )}
-      <Toggle active={wh.active} onClick={onToggle} />
-      <button
-        type="button"
-        onClick={onDelete}
-        aria-label="Remover webhook"
-        className="text-text-tertiary hover:text-danger p-1.5 rounded-default hover:bg-danger-subtle transition"
-      >
-        <Trash2 size={14} strokeWidth={1.5} />
-      </button>
+      <PermissionGate module="agentes" action="editar">
+        <Toggle active={wh.active} onClick={onToggle} />
+      </PermissionGate>
+      <PermissionGate module="agentes" action="editar">
+        <button
+          type="button"
+          onClick={onDelete}
+          aria-label="Remover webhook"
+          className="text-text-tertiary hover:text-danger p-1.5 rounded-default hover:bg-danger-subtle transition"
+        >
+          <Trash2 size={14} strokeWidth={1.5} />
+        </button>
+      </PermissionGate>
     </div>
   )
 }

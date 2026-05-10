@@ -71,6 +71,14 @@ services:
 
       CORS_ORIGINS: "https://${DOMAIN_HUB}"
       DATABASE_PATH: /data/felipe_hub.db
+
+      # Sprint H — Autenticação multi-usuário
+      JWT_SECRET: ${JWT_SECRET}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+      BOOTSTRAP_ADMIN_NAME: ${BOOTSTRAP_ADMIN_NAME:-Felipe Bernardeli Palhares}
+      COOKIE_SECURE: "true"
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
     volumes:
       - hub-data:/data
     restart: unless-stopped
