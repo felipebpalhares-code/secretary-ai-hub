@@ -103,28 +103,28 @@ def client():
 def assistant_factory():
     """
     Cria um ASSISTANT com permissões configuráveis e retorna um TestClient
-    autenticado como ele. Uso:
+    autenticado como ele. Cada chamada cria um user novo com email único
+    (UUID) — assim diferentes testes não compartilham permissões.
+
+    Uso:
         c = assistant_factory({'contatos': {'ver': True, 'criar': True}})
     """
-    from services.user_service import create_user, get_user_by_email
+    import uuid
+    from services.user_service import create_user
     from models.user import UserRole
 
-    created_emails: list[str] = []
-
     def _make(permissions: dict | None = None, *, email: str | None = None, password: str = "AssistantTest123!"):
-        email = email or f"assistant-{len(created_emails)}@example.com"
+        email = email or f"assistant-{uuid.uuid4().hex[:12]}@example.com"
         with SessionLocal() as db:
-            if not get_user_by_email(db, email):
-                create_user(
-                    db,
-                    email=email,
-                    name="Assistant Teste",
-                    role=UserRole.ASSISTANT,
-                    permissions=permissions or {},
-                    raw_password=password,
-                    must_change_password=False,
-                )
-        created_emails.append(email)
+            create_user(
+                db,
+                email=email,
+                name="Assistant Teste",
+                role=UserRole.ASSISTANT,
+                permissions=permissions or {},
+                raw_password=password,
+                must_change_password=False,
+            )
         c = TestClient(app)
         r = c.post("/api/auth/login", json={"email": email, "password": password})
         assert r.status_code == 200, f"Login do assistant falhou: {r.text}"

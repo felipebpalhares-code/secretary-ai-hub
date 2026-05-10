@@ -63,15 +63,19 @@ def login(
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-def logout(response: Response):
-    # delete_cookie respeita path e domain — passamos os mesmos atributos do set
+def logout():
+    # Crio o Response aqui pra setar o Set-Cookie diretamente. Se eu mutasse
+    # um parâmetro `response: Response` e retornasse outro Response novo, o
+    # delete_cookie ficaria perdido (FastAPI só mergeia o parâmetro quando
+    # a rota retorna um valor não-Response).
+    response = Response(status_code=status.HTTP_204_NO_CONTENT)
     kwargs = _cookie_kwargs()
     response.delete_cookie(
         COOKIE_NAME,
         path=kwargs["path"],
         domain=kwargs.get("domain"),
     )
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return response
 
 
 @router.get("/me", response_model=UserResponse)
