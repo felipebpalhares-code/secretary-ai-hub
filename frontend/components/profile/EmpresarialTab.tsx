@@ -34,6 +34,7 @@ import { EditPartnerModal } from "./EditPartnerModal"
 import { EditProfessionalModal } from "./EditProfessionalModal"
 import { SearchCompaniesByCpfModal } from "./SearchCompaniesByCpfModal"
 import { PermissionGate } from "@/components/auth/PermissionGate"
+import { FeatureGate } from "@/components/auth/FeatureGate"
 
 const ROLE_LABEL: Record<string, string> = {
   contador: "Contador",
@@ -229,17 +230,19 @@ export function EmpresarialTab() {
           title="Empresas"
           action={
             <div className="flex gap-2">
-              <PermissionGate module="quem-sou-eu" action="criar">
-                <button
-                  type="button"
-                  onClick={() => setSearchByCpfOpen(true)}
-                  title="Buscar empresas pelo CPF na Receita Federal"
-                  className="inline-flex items-center gap-[5px] text-[11.5px] font-semibold text-accent border border-hair px-[11px] py-[5px] rounded-md hover:border-accent transition-colors"
-                >
-                  <Icon name="search" size={13} />
-                  Buscar pelo CPF
-                </button>
-              </PermissionGate>
+              <FeatureGate feature="buscaEmpresasPorCpf">
+                <PermissionGate module="quem-sou-eu" action="criar">
+                  <button
+                    type="button"
+                    onClick={() => setSearchByCpfOpen(true)}
+                    title="Buscar empresas pelo CPF na Receita Federal"
+                    className="inline-flex items-center gap-[5px] text-[11.5px] font-semibold text-accent border border-hair px-[11px] py-[5px] rounded-md hover:border-accent transition-colors"
+                  >
+                    <Icon name="search" size={13} />
+                    Buscar pelo CPF
+                  </button>
+                </PermissionGate>
+              </FeatureGate>
               <PermissionGate module="quem-sou-eu" action="criar">
                 <AddBtn label="Nova empresa" onClick={() => setCompanyModal({ open: true, data: null })} />
               </PermissionGate>

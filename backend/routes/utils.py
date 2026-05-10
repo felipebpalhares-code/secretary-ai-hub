@@ -17,6 +17,7 @@ import httpx
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
 from core.dependencies import get_current_user, require_permission
+from core.features import require_feature
 from models.user import User
 from services.profile_extract import extract_person
 
@@ -272,7 +273,10 @@ def _is_valid_cpf(digits: str) -> bool:
     return d2 == int(digits[10])
 
 
-@router.get("/companies-by-cpf/{cpf}")
+@router.get(
+    "/companies-by-cpf/{cpf}",
+    dependencies=[Depends(require_feature("BUSCA_EMPRESAS_POR_CPF"))],
+)
 async def companies_by_cpf(cpf: str) -> list[dict[str, Any]]:
     """
     Retorna a lista de empresas onde o CPF informado é sócio/administrador,
