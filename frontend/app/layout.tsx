@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import "./globals.css"
-import { Sidebar } from "@/components/Sidebar"
+import { LayoutShell } from "@/components/auth/LayoutShell"
+import { AuthBootstrap } from "@/components/auth/AuthBootstrap"
 
 export const metadata: Metadata = {
   title: "Felipe Hub",
@@ -11,8 +12,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR">
       <body className="bg-bg text-ink text-[13.5px] h-screen flex overflow-hidden">
-        <Sidebar />
-        <main className="flex-1 flex flex-col overflow-hidden min-w-0">{children}</main>
+        <AuthBootstrap />
+        <LayoutShell>{children}</LayoutShell>
       </body>
     </html>
   )
