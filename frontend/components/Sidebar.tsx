@@ -6,6 +6,7 @@ import { Icon } from "./Icon"
 import { cn } from "@/lib/cn"
 import { useAuthStore } from "@/stores/authStore"
 import { authApi } from "@/lib/auth-api"
+import { isFeatureEnabled } from "@/lib/features"
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -44,7 +45,9 @@ export function Sidebar() {
       <nav className="flex-1 p-[10px] overflow-y-auto scrollbar-none">
         {NAV.map((group) => {
           const items = group.items.filter(
-            (it) => !it.adminOnly || user?.role === "ADMIN",
+            (it) =>
+              (!it.adminOnly || user?.role === "ADMIN") &&
+              (!it.feature || isFeatureEnabled(it.feature)),
           )
           if (items.length === 0) return null
           return (

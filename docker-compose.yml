@@ -53,6 +53,9 @@ services:
       #   python -c "import secrets; print(secrets.token_urlsafe(32))"
       # e cole no .env. Não troque depois — invalida todas as sessões ativas.
       JWT_SECRET: ${JWT_SECRET:-}
+
+      # Feature flags — vide docs/PENDENCIAS.md
+      FEATURE_BUSCA_EMPRESAS_POR_CPF_ENABLED: ${FEATURE_BUSCA_EMPRESAS_POR_CPF_ENABLED:-false}
       # Bootstrap do admin inicial — usado uma única vez no primeiro startup,
       # quando a tabela users está vazia. Deixe vazio depois de criado.
       BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
