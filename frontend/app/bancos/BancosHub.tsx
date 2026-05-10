@@ -11,21 +11,26 @@ import {
   type RemoteAccount,
   type RemoteConnection,
 } from "@/lib/api"
+import { isFeatureEnabled, type FeatureKey } from "@/lib/features"
 
 type Tab = {
   id: string
   label: string
   icon: ComponentProps<typeof Icon>["name"]
   soon?: boolean
+  feature?: FeatureKey
 }
 
+// Tabs com `feature` só aparecem quando a flag estiver on. Mantemos o id
+// "extrato" sem flag porque ele exibe dados reais do Pluggy (filtra mock
+// quando connections===0).
 const TABS: Tab[] = [
   { id: "geral", label: "Visão Geral", icon: "grid" },
   { id: "extrato", label: "Extrato", icon: "chart" },
-  { id: "cartoes", label: "Cartões", icon: "card" },
-  { id: "pix", label: "PIX & Operações", icon: "send" },
-  { id: "boletos", label: "Boletos", icon: "file" },
-  { id: "tributos", label: "Tributos", icon: "shield" },
+  { id: "cartoes", label: "Cartões", icon: "card", feature: "bancosCartoes" },
+  { id: "pix", label: "PIX & Operações", icon: "send", feature: "bancosPix" },
+  { id: "boletos", label: "Boletos", icon: "file", feature: "bancosBoletos" },
+  { id: "tributos", label: "Tributos", icon: "shield", feature: "bancosTributos" },
   { id: "analise", label: "Análise", icon: "target" },
 ]
 
@@ -66,10 +71,12 @@ export function BancosHub() {
     }
   }, [])
 
+  const visibleTabs = TABS.filter((t) => !t.feature || isFeatureEnabled(t.feature))
+
   return (
     <div className="flex-1 flex flex-col bg-bg-app overflow-hidden">
       <div className="bg-bg-surface border-b border-default flex overflow-x-auto px-5 shrink-0">
-        {TABS.map((t) => (
+        {visibleTabs.map((t) => (
           <button
             key={t.id}
             onClick={() => !t.soon && setTab(t.id)}

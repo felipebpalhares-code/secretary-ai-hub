@@ -83,6 +83,16 @@ no repositório — só não é exposto.
 | Custo | varia |
 | Esforço | 24-40h |
 
+### Componentes órfãos /bancos · não montados em nenhuma página
+
+`components/banks/AccountList.tsx`, `BalanceHero.tsx`, `EntityCard.tsx`,
+`Analise.tsx`, `Extrato.tsx`, `Pix.tsx`, `CreditCards.tsx`, `Boletos.tsx`,
+`Tributos.tsx` importam de `lib/banks-data.ts` e `lib/transactions-data.ts`.
+Nenhum é montado pelo `BancosHub.tsx` atual (que só renderiza
+`GeralTab` real + EmptyStates). Quando F5-F8 ou as outras forem reativadas,
+esses componentes precisam migrar de mock pra fonte real OU ser
+deletados.
+
 ### F8 · /bancos · sub-tab Tributos
 
 | Item | Valor |
