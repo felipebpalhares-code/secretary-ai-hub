@@ -72,6 +72,12 @@ services:
       CORS_ORIGINS: "https://${DOMAIN_HUB}"
       DATABASE_PATH: /data/felipe_hub.db
 
+      # Google OAuth (Calendar/Contacts/Gmail)
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-https://${DOMAIN_API}/api/auth/google/callback}
+      FRONTEND_URL: ${FRONTEND_URL:-https://${DOMAIN_HUB}}
+
       # Sprint H — Autenticação multi-usuário
       JWT_SECRET: ${JWT_SECRET}
       BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}

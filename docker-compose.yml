@@ -49,10 +49,9 @@ services:
       CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
 
       # Sprint H — Autenticação multi-usuário
-      # JWT_SECRET: gere uma vez com:
+      # JWT_SECRET é OBRIGATÓRIO (login/me dão 500 sem ele). Gere uma vez com:
       #   python -c "import secrets; print(secrets.token_urlsafe(32))"
-      # Se ficar vazio, o backend gera um secret efêmero no boot (todas as
-      # sessões caem a cada restart — só aceitável em dev).
+      # e cole no .env. Não troque depois — invalida todas as sessões ativas.
       JWT_SECRET: ${JWT_SECRET:-}
       # Bootstrap do admin inicial — usado uma única vez no primeiro startup,
       # quando a tabela users está vazia. Deixe vazio depois de criado.
