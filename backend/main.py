@@ -8,6 +8,7 @@ from agents.orchestrator import process
 from services.database import init_db, SessionLocal
 from services.scheduler import start_scheduler, stop_scheduler
 from services.contact_service import seed_default_categories
+from services import user_service
 from routes.connections import router as connections_router
 from routes.banks import router as banks_router
 from routes.profile import router as profile_router
@@ -19,6 +20,8 @@ from routes.google_contacts import router as google_contacts_router
 from routes.google_calendar import router as google_calendar_router
 from routes.contacts import router as contacts_router
 from routes.organizations import router as organizations_router
+from routes.auth import router as auth_router
+from routes.users import router as users_router
 
 
 @asynccontextmanager
@@ -26,6 +29,10 @@ async def lifespan(app: FastAPI):
     init_db()
     with SessionLocal() as db:
         seed_default_categories(db)
+        # Sprint H — admin inicial via env vars + backfill created_by_user_id
+        admin = user_service.bootstrap_admin_if_needed(db)
+        if admin is not None:
+            user_service.backfill_created_by_user_id(db, admin.id)
     start_scheduler()
     yield
     stop_scheduler()
@@ -45,6 +52,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router)       # Sprint H
+app.include_router(users_router)      # Sprint H
 app.include_router(connections_router)
 app.include_router(banks_router)
 app.include_router(profile_router)
