@@ -17,6 +17,7 @@ export class ApiError extends Error {
 
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
+    credentials: "include",  // Sprint H — envia cookie httpOnly access_token
     ...init,
     headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
   })
@@ -24,6 +25,8 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const payload = await res.json().catch(() => ({}))
     throw new ApiError(res.status, payload)
   }
+  // 204 No Content
+  if (res.status === 204) return undefined as T
   return res.json()
 }
 
