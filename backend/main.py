@@ -5,6 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import json
 
 from agents.orchestrator import process
+from core.security import COOKIE_NAME, decode_access_token
+from models.user import User
 from services.database import init_db, SessionLocal
 from services.scheduler import start_scheduler, stop_scheduler
 from services.contact_service import seed_default_categories
@@ -72,8 +74,32 @@ def health():
     return {"status": "ok"}
 
 
+def _ws_user_from_cookie(websocket: WebSocket) -> User | None:
+    """Sprint H — autentica WebSocket via cookie httpOnly access_token."""
+    token = websocket.cookies.get(COOKIE_NAME)
+    if not token:
+        return None
+    payload = decode_access_token(token)
+    if not payload:
+        return None
+    try:
+        user_id = int(payload.get("sub"))
+    except (TypeError, ValueError):
+        return None
+    with SessionLocal() as db:
+        user = db.query(User).filter(User.id == user_id).first()
+        if user and user.is_active:
+            return user
+    return None
+
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    user = _ws_user_from_cookie(websocket)
+    if user is None:
+        # 1008 = policy violation. Fecha sem aceitar.
+        await websocket.close(code=1008)
+        return
     await websocket.accept()
     try:
         while True:
