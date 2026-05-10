@@ -27,6 +27,7 @@ import models.message_log  # noqa: F401, E402
 import models.task  # noqa: F401, E402
 import models.agent  # noqa: F401, E402
 import models.oauth_credential  # noqa: F401, E402
+import models.user  # noqa: F401, E402  — Sprint H
 
 config = context.config
 

@@ -13,6 +13,7 @@ import models.task            # noqa: F401
 import models.agent           # noqa: F401
 import models.oauth_credential  # noqa: F401
 import models.contact         # noqa: F401
+import models.user            # noqa: F401  — Sprint H
 
 log = logging.getLogger(__name__)
 
