@@ -30,6 +30,7 @@ import {
 } from "./_shared"
 import { EditFamilyMemberModal } from "./EditFamilyMemberModal"
 import { EditFamilyDoctorModal } from "./EditFamilyDoctorModal"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 const RELATION_BADGE: Record<string, { label: string; variant: "gray" | "indigo" }> = {
   pai: { label: "Pai", variant: "gray" },
@@ -70,8 +71,12 @@ function MemberCard({
       {m.doctor_name && <FieldRow label="Médico">{m.doctor_name}</FieldRow>}
       {m.notes && <FieldRow label="Notas">{m.notes}</FieldRow>}
       <div className="flex gap-2 mt-3">
-        <EditBtn onClick={onEdit} />
-        <DeleteBtn onClick={onDelete} />
+        <PermissionGate module="quem-sou-eu" action="editar">
+          <EditBtn onClick={onEdit} />
+        </PermissionGate>
+        <PermissionGate module="quem-sou-eu" action="deletar">
+          <DeleteBtn onClick={onDelete} />
+        </PermissionGate>
       </div>
     </Card>
   )
@@ -136,9 +141,13 @@ export function FamiliaTab() {
           title="Cônjuge"
           action={
             spouse ? (
-              <EditBtn onClick={() => setMemberModal({ open: true, initial: spouse, defaultRelation: "conjuge", lock: true })} />
+              <PermissionGate module="quem-sou-eu" action="editar">
+                <EditBtn onClick={() => setMemberModal({ open: true, initial: spouse, defaultRelation: "conjuge", lock: true })} />
+              </PermissionGate>
             ) : (
-              <AddBtn label="Adicionar cônjuge" onClick={() => setMemberModal({ open: true, initial: null, defaultRelation: "conjuge", lock: true })} />
+              <PermissionGate module="quem-sou-eu" action="criar">
+                <AddBtn label="Adicionar cônjuge" onClick={() => setMemberModal({ open: true, initial: null, defaultRelation: "conjuge", lock: true })} />
+              </PermissionGate>
             )
           }
         />
@@ -162,10 +171,12 @@ export function FamiliaTab() {
         <SectionHdr
           title="Filhos"
           action={
-            <AddBtn
-              label="Adicionar filho(a)"
-              onClick={() => setMemberModal({ open: true, initial: null, defaultRelation: "filho", lock: true })}
-            />
+            <PermissionGate module="quem-sou-eu" action="criar">
+              <AddBtn
+                label="Adicionar filho(a)"
+                onClick={() => setMemberModal({ open: true, initial: null, defaultRelation: "filho", lock: true })}
+              />
+            </PermissionGate>
           }
         />
         {children.length === 0 ? (
@@ -189,10 +200,12 @@ export function FamiliaTab() {
         <SectionHdr
           title="Pais e irmãos"
           action={
-            <AddBtn
-              label="Adicionar"
-              onClick={() => setMemberModal({ open: true, initial: null, defaultRelation: "irmao", lock: false })}
-            />
+            <PermissionGate module="quem-sou-eu" action="criar">
+              <AddBtn
+                label="Adicionar"
+                onClick={() => setMemberModal({ open: true, initial: null, defaultRelation: "irmao", lock: false })}
+              />
+            </PermissionGate>
           }
         />
         {parentsAndSiblings.length === 0 ? (
@@ -216,15 +229,19 @@ export function FamiliaTab() {
                       {p.email && <span>{p.email}</span>}
                     </div>
                   </div>
-                  <button
-                    onClick={() => setMemberModal({ open: true, initial: p, defaultRelation: p.relation as FamilyRelation, lock: false })}
-                    className="text-ink-3 hover:text-accent p-1 rounded"
-                  >
-                    <Icon name="edit" size={13} />
-                  </button>
-                  <button onClick={() => handleDelete(p)} className="text-ink-3 hover:text-err p-1 rounded">
-                    <Icon name="close" size={13} />
-                  </button>
+                  <PermissionGate module="quem-sou-eu" action="editar">
+                    <button
+                      onClick={() => setMemberModal({ open: true, initial: p, defaultRelation: p.relation as FamilyRelation, lock: false })}
+                      className="text-ink-3 hover:text-accent p-1 rounded"
+                    >
+                      <Icon name="edit" size={13} />
+                    </button>
+                  </PermissionGate>
+                  <PermissionGate module="quem-sou-eu" action="deletar">
+                    <button onClick={() => handleDelete(p)} className="text-ink-3 hover:text-err p-1 rounded">
+                      <Icon name="close" size={13} />
+                    </button>
+                  </PermissionGate>
                 </div>
               )
             })}
@@ -236,7 +253,11 @@ export function FamiliaTab() {
       <div>
         <SectionHdr
           title="Médicos da família"
-          action={<AddBtn label="Novo médico" onClick={() => setDoctorModal({ open: true, initial: null })} />}
+          action={
+            <PermissionGate module="quem-sou-eu" action="criar">
+              <AddBtn label="Novo médico" onClick={() => setDoctorModal({ open: true, initial: null })} />
+            </PermissionGate>
+          }
         />
         {doctors.length === 0 ? (
           <EmptyState icon="phone" title="Nenhum médico cadastrado" subtitle="Pediatra, cardiologista, médico de família — quem você procura primeiro." />
@@ -257,8 +278,12 @@ export function FamiliaTab() {
                 )}
                 {d.clinic && <FieldRow label="Clínica">{d.clinic}</FieldRow>}
                 <div className="flex gap-2 mt-3">
-                  <EditBtn onClick={() => setDoctorModal({ open: true, initial: d })} />
-                  <DeleteBtn onClick={() => handleDeleteDoctor(d)} />
+                  <PermissionGate module="quem-sou-eu" action="editar">
+                    <EditBtn onClick={() => setDoctorModal({ open: true, initial: d })} />
+                  </PermissionGate>
+                  <PermissionGate module="quem-sou-eu" action="deletar">
+                    <DeleteBtn onClick={() => handleDeleteDoctor(d)} />
+                  </PermissionGate>
                 </div>
               </Card>
             ))}

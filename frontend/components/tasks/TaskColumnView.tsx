@@ -8,6 +8,7 @@ import type { TaskColumn, TaskItem } from "@/lib/api"
 import { TaskCard } from "./TaskCard"
 import { TaskColumnHeader } from "./TaskColumnHeader"
 import { TaskInlineCreate } from "./TaskInlineCreate"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 export function TaskColumnView({
   column,
@@ -90,13 +91,15 @@ export function TaskColumnView({
           )}
 
           {!adding && (
-            <button
-              type="button"
-              onClick={() => setAdding(true)}
-              className="text-left text-[12.5px] font-medium text-gray-400 hover:text-indigo-600 hover:bg-gray-50 transition-colors px-3 py-2 rounded-md flex items-center gap-1"
-            >
-              <Icon name="plus" size={13} /> Adicionar tarefa
-            </button>
+            <PermissionGate module="tarefas" action="criar">
+              <button
+                type="button"
+                onClick={() => setAdding(true)}
+                className="text-left text-[12.5px] font-medium text-gray-400 hover:text-indigo-600 hover:bg-gray-50 transition-colors px-3 py-2 rounded-md flex items-center gap-1"
+              >
+                <Icon name="plus" size={13} /> Adicionar tarefa
+              </button>
+            </PermissionGate>
           )}
         </div>
       </SortableContext>

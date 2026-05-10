@@ -33,6 +33,7 @@ import { EditCompanyModal } from "./EditCompanyModal"
 import { EditPartnerModal } from "./EditPartnerModal"
 import { EditProfessionalModal } from "./EditProfessionalModal"
 import { SearchCompaniesByCpfModal } from "./SearchCompaniesByCpfModal"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 const ROLE_LABEL: Record<string, string> = {
   contador: "Contador",
@@ -68,8 +69,12 @@ function CompanyCard({
           {company.is_active ? "Ativa" : "Inativa"}
         </Badge>
         <span className="ml-auto flex gap-2">
-          <EditBtn onClick={onEdit} />
-          <DeleteBtn onClick={onDelete} />
+          <PermissionGate module="quem-sou-eu" action="editar">
+            <EditBtn onClick={onEdit} />
+          </PermissionGate>
+          <PermissionGate module="quem-sou-eu" action="deletar">
+            <DeleteBtn onClick={onDelete} />
+          </PermissionGate>
         </span>
       </div>
 
@@ -103,7 +108,9 @@ function CompanyCard({
         <div className="text-[10px] font-bold text-ink-3 uppercase tracking-[.06em]">
           Sócios ({partners.length})
         </div>
-        <AddBtn label="Adicionar sócio" onClick={onAddPartner} />
+        <PermissionGate module="quem-sou-eu" action="criar">
+          <AddBtn label="Adicionar sócio" onClick={onAddPartner} />
+        </PermissionGate>
       </div>
 
       {partners.length === 0 ? (
@@ -124,20 +131,24 @@ function CompanyCard({
                 </div>
               </div>
               {p.ownership != null && <Badge variant="indigo">{p.ownership}%</Badge>}
-              <button
-                onClick={() => onEditPartner(p)}
-                className="text-ink-3 hover:text-accent p-1 rounded"
-                aria-label="Editar sócio"
-              >
-                <Icon name="edit" size={13} />
-              </button>
-              <button
-                onClick={() => onDeletePartner(p)}
-                className="text-ink-3 hover:text-err p-1 rounded"
-                aria-label="Apagar sócio"
-              >
-                <Icon name="close" size={13} />
-              </button>
+              <PermissionGate module="quem-sou-eu" action="editar">
+                <button
+                  onClick={() => onEditPartner(p)}
+                  className="text-ink-3 hover:text-accent p-1 rounded"
+                  aria-label="Editar sócio"
+                >
+                  <Icon name="edit" size={13} />
+                </button>
+              </PermissionGate>
+              <PermissionGate module="quem-sou-eu" action="deletar">
+                <button
+                  onClick={() => onDeletePartner(p)}
+                  className="text-ink-3 hover:text-err p-1 rounded"
+                  aria-label="Apagar sócio"
+                >
+                  <Icon name="close" size={13} />
+                </button>
+              </PermissionGate>
             </div>
           ))}
         </div>
@@ -218,16 +229,20 @@ export function EmpresarialTab() {
           title="Empresas"
           action={
             <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setSearchByCpfOpen(true)}
-                title="Buscar empresas pelo CPF na Receita Federal"
-                className="inline-flex items-center gap-[5px] text-[11.5px] font-semibold text-accent border border-hair px-[11px] py-[5px] rounded-md hover:border-accent transition-colors"
-              >
-                <Icon name="search" size={13} />
-                Buscar pelo CPF
-              </button>
-              <AddBtn label="Nova empresa" onClick={() => setCompanyModal({ open: true, data: null })} />
+              <PermissionGate module="quem-sou-eu" action="criar">
+                <button
+                  type="button"
+                  onClick={() => setSearchByCpfOpen(true)}
+                  title="Buscar empresas pelo CPF na Receita Federal"
+                  className="inline-flex items-center gap-[5px] text-[11.5px] font-semibold text-accent border border-hair px-[11px] py-[5px] rounded-md hover:border-accent transition-colors"
+                >
+                  <Icon name="search" size={13} />
+                  Buscar pelo CPF
+                </button>
+              </PermissionGate>
+              <PermissionGate module="quem-sou-eu" action="criar">
+                <AddBtn label="Nova empresa" onClick={() => setCompanyModal({ open: true, data: null })} />
+              </PermissionGate>
             </div>
           }
         />
@@ -237,7 +252,11 @@ export function EmpresarialTab() {
             icon="building"
             title="Nenhuma empresa cadastrada"
             subtitle="Adicione a primeira empresa pra começar — sócios, sistemas e participação ficam dentro dela."
-            action={<AddBtn label="Adicionar primeira empresa" onClick={() => setCompanyModal({ open: true, data: null })} />}
+            action={
+              <PermissionGate module="quem-sou-eu" action="criar">
+                <AddBtn label="Adicionar primeira empresa" onClick={() => setCompanyModal({ open: true, data: null })} />
+              </PermissionGate>
+            }
           />
         ) : (
           companies.map((c) => (
@@ -258,7 +277,11 @@ export function EmpresarialTab() {
       <div>
         <SectionHdr
           title="Profissionais de confiança"
-          action={<AddBtn label="Novo profissional" onClick={() => setProfModal({ open: true, data: null })} />}
+          action={
+            <PermissionGate module="quem-sou-eu" action="criar">
+              <AddBtn label="Novo profissional" onClick={() => setProfModal({ open: true, data: null })} />
+            </PermissionGate>
+          }
         />
 
         {professionals.length === 0 ? (
@@ -266,7 +289,11 @@ export function EmpresarialTab() {
             icon="users"
             title="Nenhum profissional cadastrado"
             subtitle="Contador, advogado, corretor ou engenheiro de obras — quem você consulta com frequência."
-            action={<AddBtn label="Adicionar primeiro" onClick={() => setProfModal({ open: true, data: null })} />}
+            action={
+              <PermissionGate module="quem-sou-eu" action="criar">
+                <AddBtn label="Adicionar primeiro" onClick={() => setProfModal({ open: true, data: null })} />
+              </PermissionGate>
+            }
           />
         ) : (
           <div className="grid grid-cols-2 gap-3">
@@ -284,8 +311,12 @@ export function EmpresarialTab() {
                 <FieldRow label="E-mail">{p.email ?? "—"}</FieldRow>
                 {p.notes && <FieldRow label="Notas">{p.notes}</FieldRow>}
                 <div className="flex gap-2 mt-3">
-                  <EditBtn onClick={() => setProfModal({ open: true, data: p })} />
-                  <DeleteBtn onClick={() => handleDeleteProfessional(p)} />
+                  <PermissionGate module="quem-sou-eu" action="editar">
+                    <EditBtn onClick={() => setProfModal({ open: true, data: p })} />
+                  </PermissionGate>
+                  <PermissionGate module="quem-sou-eu" action="deletar">
+                    <DeleteBtn onClick={() => handleDeleteProfessional(p)} />
+                  </PermissionGate>
                 </div>
               </Card>
             ))}

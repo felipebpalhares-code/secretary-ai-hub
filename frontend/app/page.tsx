@@ -7,6 +7,7 @@ import { StatCard } from "@/components/ui/StatCard"
 import { Icon } from "@/components/Icon"
 import { listAgents } from "@/lib/agents-api"
 import { banksConnections } from "@/lib/api"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 type KpiNumeric = { state: "loading" } | { state: "ready"; value: number } | { state: "error" }
 
@@ -57,14 +58,16 @@ export default function PainelPage() {
           <>
             <IconButton name="search" disabled title="Em breve" />
             <IconButton name="bell" disabled title="Em breve" />
-            <Button
-              variant="primary"
-              icon="plus"
-              onClick={() => router.push("/tarefas")}
-              title="Abrir Tarefas"
-            >
-              Nova tarefa
-            </Button>
+            <PermissionGate module="tarefas" action="criar">
+              <Button
+                variant="primary"
+                icon="plus"
+                onClick={() => router.push("/tarefas")}
+                title="Abrir Tarefas"
+              >
+                Nova tarefa
+              </Button>
+            </PermissionGate>
           </>
         }
       />

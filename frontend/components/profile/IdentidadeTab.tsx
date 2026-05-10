@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/Badge"
 import { FieldRow } from "@/components/ui/FieldRow"
 import { SensField } from "@/components/ui/SensField"
 import { useIdentity } from "./identity-context"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 /* ─── helpers locais ─── */
 function SectionHdr({ title, action }: { title: string; action?: ReactNode }) {
@@ -102,13 +103,15 @@ export function IdentidadeTab() {
       <SectionHdr
         title="Dados pessoais"
         action={
-          <button
-            onClick={openEdit}
-            className="inline-flex items-center gap-[5px] text-[11.5px] font-semibold text-accent border border-hair px-[11px] py-[5px] rounded-md hover:border-accent transition-colors"
-          >
-            <Icon name="edit" size={13} />
-            Editar
-          </button>
+          <PermissionGate module="quem-sou-eu" action="editar">
+            <button
+              onClick={openEdit}
+              className="inline-flex items-center gap-[5px] text-[11.5px] font-semibold text-accent border border-hair px-[11px] py-[5px] rounded-md hover:border-accent transition-colors"
+            >
+              <Icon name="edit" size={13} />
+              Editar
+            </button>
+          </PermissionGate>
         }
       />
       <div className="grid grid-cols-2 gap-3">

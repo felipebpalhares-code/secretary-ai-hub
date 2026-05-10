@@ -25,6 +25,7 @@ import {
 } from "./_shared"
 import { EditLegalCaseModal } from "./EditLegalCaseModal"
 import { EditContractModal } from "./EditContractModal"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 function deadlineBadge(iso: string | null) {
   const d = daysUntil(iso)
@@ -117,7 +118,11 @@ export function JuridicoTab() {
       <div>
         <SectionHdr
           title="Processos ativos"
-          action={<AddBtn label="Novo processo" onClick={() => setCaseModal({ open: true, initial: null })} />}
+          action={
+            <PermissionGate module="quem-sou-eu" action="criar">
+              <AddBtn label="Novo processo" onClick={() => setCaseModal({ open: true, initial: null })} />
+            </PermissionGate>
+          }
         />
         {activeCases.length === 0 ? (
           <EmptyState icon="shield" title="Nenhum processo ativo" subtitle="Cadastre processos pra receber alertas de prazos automaticamente." />
@@ -153,11 +158,15 @@ export function JuridicoTab() {
                 </div>
                 {c.notes && <div className="text-[11.5px] text-ink-3 mt-2 font-medium">{c.notes}</div>}
                 <div className="flex gap-2 mt-3">
-                  <EditBtn onClick={() => setCaseModal({ open: true, initial: c })} />
-                  <DeleteBtn onClick={async () => {
-                    if (!confirmDelete(c.case_number)) return
-                    await deleteLegalCase(c.id); await reload()
-                  }} />
+                  <PermissionGate module="quem-sou-eu" action="editar">
+                    <EditBtn onClick={() => setCaseModal({ open: true, initial: c })} />
+                  </PermissionGate>
+                  <PermissionGate module="quem-sou-eu" action="deletar">
+                    <DeleteBtn onClick={async () => {
+                      if (!confirmDelete(c.case_number)) return
+                      await deleteLegalCase(c.id); await reload()
+                    }} />
+                  </PermissionGate>
                 </div>
               </div>
             )
@@ -179,18 +188,22 @@ export function JuridicoTab() {
                   </div>
                 </div>
                 <Badge variant="gray">Encerrado</Badge>
-                <button onClick={() => setCaseModal({ open: true, initial: c })} className="text-ink-3 hover:text-accent p-1 rounded">
-                  <Icon name="edit" size={13} />
-                </button>
-                <button
-                  onClick={async () => {
-                    if (!confirmDelete(c.case_number)) return
-                    await deleteLegalCase(c.id); await reload()
-                  }}
-                  className="text-ink-3 hover:text-err p-1 rounded"
-                >
-                  <Icon name="close" size={13} />
-                </button>
+                <PermissionGate module="quem-sou-eu" action="editar">
+                  <button onClick={() => setCaseModal({ open: true, initial: c })} className="text-ink-3 hover:text-accent p-1 rounded">
+                    <Icon name="edit" size={13} />
+                  </button>
+                </PermissionGate>
+                <PermissionGate module="quem-sou-eu" action="deletar">
+                  <button
+                    onClick={async () => {
+                      if (!confirmDelete(c.case_number)) return
+                      await deleteLegalCase(c.id); await reload()
+                    }}
+                    className="text-ink-3 hover:text-err p-1 rounded"
+                  >
+                    <Icon name="close" size={13} />
+                  </button>
+                </PermissionGate>
               </div>
             ))}
           </div>
@@ -201,7 +214,11 @@ export function JuridicoTab() {
       <div>
         <SectionHdr
           title="Contratos importantes"
-          action={<AddBtn label="Novo contrato" onClick={() => setContractModal({ open: true, initial: null })} />}
+          action={
+            <PermissionGate module="quem-sou-eu" action="criar">
+              <AddBtn label="Novo contrato" onClick={() => setContractModal({ open: true, initial: null })} />
+            </PermissionGate>
+          }
         />
         {contracts.length === 0 ? (
           <EmptyState icon="file" title="Nenhum contrato cadastrado" subtitle="Locação, prestação de serviços, parcerias — tudo que tem prazo e renovação." />
@@ -227,18 +244,22 @@ export function JuridicoTab() {
                     </div>
                   </div>
                   <Badge variant={variant}>{label}</Badge>
-                  <button onClick={() => setContractModal({ open: true, initial: c })} className="text-ink-3 hover:text-accent p-1 rounded">
-                    <Icon name="edit" size={13} />
-                  </button>
-                  <button
-                    onClick={async () => {
-                      if (!confirmDelete(c.type)) return
-                      await deleteContract(c.id); await reload()
-                    }}
-                    className="text-ink-3 hover:text-err p-1 rounded"
-                  >
-                    <Icon name="close" size={13} />
-                  </button>
+                  <PermissionGate module="quem-sou-eu" action="editar">
+                    <button onClick={() => setContractModal({ open: true, initial: c })} className="text-ink-3 hover:text-accent p-1 rounded">
+                      <Icon name="edit" size={13} />
+                    </button>
+                  </PermissionGate>
+                  <PermissionGate module="quem-sou-eu" action="deletar">
+                    <button
+                      onClick={async () => {
+                        if (!confirmDelete(c.type)) return
+                        await deleteContract(c.id); await reload()
+                      }}
+                      className="text-ink-3 hover:text-err p-1 rounded"
+                    >
+                      <Icon name="close" size={13} />
+                    </button>
+                  </PermissionGate>
                 </div>
               )
             })}

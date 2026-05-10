@@ -25,6 +25,7 @@ import {
 } from "./_shared"
 import { EditInvestmentModal } from "./EditInvestmentModal"
 import { EditRealEstateModal } from "./EditRealEstateModal"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 export function FinanceiroTab() {
   const [investments, setInvestments] = useState<Investment[] | null>(null)
@@ -81,14 +82,22 @@ export function FinanceiroTab() {
       <div>
         <SectionHdr
           title={`Investimentos${investments.length ? ` · ${fmtBRL(investTotal)} aprox.` : ""}`}
-          action={<AddBtn label="Novo investimento" onClick={() => setInvModal({ open: true, initial: null })} />}
+          action={
+            <PermissionGate module="quem-sou-eu" action="criar">
+              <AddBtn label="Novo investimento" onClick={() => setInvModal({ open: true, initial: null })} />
+            </PermissionGate>
+          }
         />
         {investments.length === 0 ? (
           <EmptyState
             icon="chart"
             title="Nenhum investimento cadastrado"
             subtitle="Tesouro, CDB, FII, ações — registre pra ter visão consolidada de patrimônio."
-            action={<AddBtn label="Adicionar primeiro" onClick={() => setInvModal({ open: true, initial: null })} />}
+            action={
+              <PermissionGate module="quem-sou-eu" action="criar">
+                <AddBtn label="Adicionar primeiro" onClick={() => setInvModal({ open: true, initial: null })} />
+              </PermissionGate>
+            }
           />
         ) : (
           <div className="border border-hair rounded-md overflow-hidden bg-card">
@@ -105,15 +114,19 @@ export function FinanceiroTab() {
                   </div>
                 </div>
                 <div className="font-bold tabular text-ink">{fmtBRL(i.approx_value)}</div>
-                <button
-                  onClick={() => setInvModal({ open: true, initial: i })}
-                  className="text-ink-3 hover:text-accent p-1 rounded"
-                >
-                  <Icon name="edit" size={13} />
-                </button>
-                <button onClick={() => handleDeleteInvestment(i)} className="text-ink-3 hover:text-err p-1 rounded">
-                  <Icon name="close" size={13} />
-                </button>
+                <PermissionGate module="quem-sou-eu" action="editar">
+                  <button
+                    onClick={() => setInvModal({ open: true, initial: i })}
+                    className="text-ink-3 hover:text-accent p-1 rounded"
+                  >
+                    <Icon name="edit" size={13} />
+                  </button>
+                </PermissionGate>
+                <PermissionGate module="quem-sou-eu" action="deletar">
+                  <button onClick={() => handleDeleteInvestment(i)} className="text-ink-3 hover:text-err p-1 rounded">
+                    <Icon name="close" size={13} />
+                  </button>
+                </PermissionGate>
               </div>
             ))}
           </div>
@@ -123,14 +136,22 @@ export function FinanceiroTab() {
       <div>
         <SectionHdr
           title={`Imóveis${realEstate.length ? ` · ${fmtBRL(reTotal)} aprox.` : ""}`}
-          action={<AddBtn label="Novo imóvel" onClick={() => setReModal({ open: true, initial: null })} />}
+          action={
+            <PermissionGate module="quem-sou-eu" action="criar">
+              <AddBtn label="Novo imóvel" onClick={() => setReModal({ open: true, initial: null })} />
+            </PermissionGate>
+          }
         />
         {realEstate.length === 0 ? (
           <EmptyState
             icon="home"
             title="Nenhum imóvel cadastrado"
             subtitle="Residência, comercial, terreno — guarda matrícula e financiamento."
-            action={<AddBtn label="Adicionar primeiro" onClick={() => setReModal({ open: true, initial: null })} />}
+            action={
+              <PermissionGate module="quem-sou-eu" action="criar">
+                <AddBtn label="Adicionar primeiro" onClick={() => setReModal({ open: true, initial: null })} />
+              </PermissionGate>
+            }
           />
         ) : (
           <div className="grid grid-cols-2 gap-3">
@@ -152,8 +173,12 @@ export function FinanceiroTab() {
                   <FieldRow label="Financiado até">{r.financed_until}</FieldRow>
                 )}
                 <div className="flex gap-2 mt-3">
-                  <EditBtn onClick={() => setReModal({ open: true, initial: r })} />
-                  <DeleteBtn onClick={() => handleDeleteRealEstate(r)} />
+                  <PermissionGate module="quem-sou-eu" action="editar">
+                    <EditBtn onClick={() => setReModal({ open: true, initial: r })} />
+                  </PermissionGate>
+                  <PermissionGate module="quem-sou-eu" action="deletar">
+                    <DeleteBtn onClick={() => handleDeleteRealEstate(r)} />
+                  </PermissionGate>
                 </div>
               </Card>
             ))}

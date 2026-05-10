@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react"
 import { Icon } from "@/components/Icon"
 import type { TaskColumn } from "@/lib/api"
 import { COLUMN_COLORS } from "./_helpers"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 export function TaskColumnHeader({
   column,
@@ -89,14 +90,16 @@ export function TaskColumnHeader({
 
       <span className="text-[11px] font-medium text-gray-400 tabular">{count}</span>
 
-      <button
-        type="button"
-        onClick={onAdd}
-        className="text-gray-400 hover:text-indigo-600 p-1 rounded transition-colors"
-        aria-label="Adicionar tarefa"
-      >
-        <Icon name="plus" size={13} />
-      </button>
+      <PermissionGate module="tarefas" action="criar">
+        <button
+          type="button"
+          onClick={onAdd}
+          className="text-gray-400 hover:text-indigo-600 p-1 rounded transition-colors"
+          aria-label="Adicionar tarefa"
+        >
+          <Icon name="plus" size={13} />
+        </button>
+      </PermissionGate>
 
       <div className="relative" ref={menuRef}>
         <button
@@ -109,56 +112,64 @@ export function TaskColumnHeader({
         </button>
         {menuOpen && (
           <div className="absolute right-0 top-full mt-1 w-52 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1 text-[12.5px]">
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false)
-                setEditing(true)
-              }}
-              className="w-full text-left px-3 py-1.5 hover:bg-gray-50 flex items-center gap-2 text-gray-700"
-            >
-              <Icon name="edit" size={12} /> Renomear
-            </button>
-            <div className="px-3 py-1.5">
-              <div className="text-[10.5px] font-bold text-gray-400 uppercase mb-1.5">Cor</div>
-              <div className="flex flex-wrap gap-1">
-                {COLUMN_COLORS.map((c) => (
-                  <button
-                    key={c.label}
-                    type="button"
-                    onClick={() => {
-                      onChangeColor(c.value)
-                      setMenuOpen(false)
-                    }}
-                    title={c.label}
-                    className={`w-5 h-5 rounded-full ${c.ring} ${
-                      column.color === c.value ? "ring-2 ring-indigo-300 ring-offset-1" : ""
-                    }`}
-                  />
-                ))}
+            <PermissionGate module="tarefas" action="editar">
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false)
+                  setEditing(true)
+                }}
+                className="w-full text-left px-3 py-1.5 hover:bg-gray-50 flex items-center gap-2 text-gray-700"
+              >
+                <Icon name="edit" size={12} /> Renomear
+              </button>
+            </PermissionGate>
+            <PermissionGate module="tarefas" action="editar">
+              <div className="px-3 py-1.5">
+                <div className="text-[10.5px] font-bold text-gray-400 uppercase mb-1.5">Cor</div>
+                <div className="flex flex-wrap gap-1">
+                  {COLUMN_COLORS.map((c) => (
+                    <button
+                      key={c.label}
+                      type="button"
+                      onClick={() => {
+                        onChangeColor(c.value)
+                        setMenuOpen(false)
+                      }}
+                      title={c.label}
+                      className={`w-5 h-5 rounded-full ${c.ring} ${
+                        column.color === c.value ? "ring-2 ring-indigo-300 ring-offset-1" : ""
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false)
-                onToggleDone()
-              }}
-              className="w-full text-left px-3 py-1.5 hover:bg-gray-50 flex items-center gap-2 text-gray-700"
-            >
-              <Icon name="check" size={12} />
-              {column.is_done_column ? "Desmarcar como Concluído" : "Marcar como Concluído"}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false)
-                onDelete()
-              }}
-              className="w-full text-left px-3 py-1.5 hover:bg-red-50 flex items-center gap-2 text-red-600"
-            >
-              <Icon name="trash" size={12} /> Apagar coluna
-            </button>
+            </PermissionGate>
+            <PermissionGate module="tarefas" action="editar">
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false)
+                  onToggleDone()
+                }}
+                className="w-full text-left px-3 py-1.5 hover:bg-gray-50 flex items-center gap-2 text-gray-700"
+              >
+                <Icon name="check" size={12} />
+                {column.is_done_column ? "Desmarcar como Concluído" : "Marcar como Concluído"}
+              </button>
+            </PermissionGate>
+            <PermissionGate module="tarefas" action="deletar">
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false)
+                  onDelete()
+                }}
+                className="w-full text-left px-3 py-1.5 hover:bg-red-50 flex items-center gap-2 text-red-600"
+              >
+                <Icon name="trash" size={12} /> Apagar coluna
+              </button>
+            </PermissionGate>
           </div>
         )}
       </div>

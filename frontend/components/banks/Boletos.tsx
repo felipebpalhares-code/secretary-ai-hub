@@ -11,6 +11,7 @@ import {
   type Boleto,
 } from "@/lib/boletos-data"
 import { ENTITIES, fmtBRL } from "@/lib/banks-data"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 type SubTab = "a-pagar" | "pagos" | "receber"
 
@@ -84,10 +85,12 @@ export function Boletos() {
             Mês: <strong className="text-ink font-bold">23</strong>
           </div>
         </div>
-        <button className="px-[13px] py-[7px] rounded-md border border-hair bg-card text-[12px] font-semibold text-ink hover:bg-bg hover:border-ink-4 transition-colors flex items-center gap-1">
-          <Icon name="plus" size={12} />
-          Importar boleto
-        </button>
+        <PermissionGate module="bancos" action="editar">
+          <button className="px-[13px] py-[7px] rounded-md border border-hair bg-card text-[12px] font-semibold text-ink hover:bg-bg hover:border-ink-4 transition-colors flex items-center gap-1">
+            <Icon name="plus" size={12} />
+            Importar boleto
+          </button>
+        </PermissionGate>
       </div>
 
       {/* Sub tabs */}
@@ -375,19 +378,25 @@ function BoletoDetail({ boleto, tab }: { boleto: Boleto; tab: SubTab }) {
 
       {tab === "a-pagar" && (
         <div className="px-5 py-3 flex flex-col gap-2">
-          <button className="px-3 py-[10px] rounded-md bg-accent text-white border border-accent text-[12.5px] font-semibold hover:bg-accent-hover transition-colors flex items-center justify-center gap-2">
-            <Icon name="send" size={13} />
-            Pagar agora
-          </button>
+          <PermissionGate module="bancos" action="editar">
+            <button className="px-3 py-[10px] rounded-md bg-accent text-white border border-accent text-[12.5px] font-semibold hover:bg-accent-hover transition-colors flex items-center justify-center gap-2">
+              <Icon name="send" size={13} />
+              Pagar agora
+            </button>
+          </PermissionGate>
           <div className="grid grid-cols-2 gap-2">
-            <button className="px-2 py-[8px] rounded-md bg-card border border-hair text-ink text-[11.5px] font-semibold hover:bg-bg hover:border-ink-4 transition-colors flex items-center justify-center gap-1">
-              <Icon name="calendar" size={11} />
-              Agendar
-            </button>
-            <button className="px-2 py-[8px] rounded-md bg-card border border-hair text-ink text-[11.5px] font-semibold hover:bg-bg hover:border-ink-4 transition-colors flex items-center justify-center gap-1">
-              <Icon name="check" size={11} />
-              Marcar pago
-            </button>
+            <PermissionGate module="bancos" action="editar">
+              <button className="px-2 py-[8px] rounded-md bg-card border border-hair text-ink text-[11.5px] font-semibold hover:bg-bg hover:border-ink-4 transition-colors flex items-center justify-center gap-1">
+                <Icon name="calendar" size={11} />
+                Agendar
+              </button>
+            </PermissionGate>
+            <PermissionGate module="bancos" action="editar">
+              <button className="px-2 py-[8px] rounded-md bg-card border border-hair text-ink text-[11.5px] font-semibold hover:bg-bg hover:border-ink-4 transition-colors flex items-center justify-center gap-1">
+                <Icon name="check" size={11} />
+                Marcar pago
+              </button>
+            </PermissionGate>
           </div>
           <button className="px-2 py-[8px] rounded-md bg-card border border-hair text-ink-2 text-[11.5px] font-semibold hover:bg-bg hover:border-ink-4 transition-colors flex items-center justify-center gap-1">
             <Icon name="file" size={11} />
@@ -407,14 +416,18 @@ function BoletoDetail({ boleto, tab }: { boleto: Boleto; tab: SubTab }) {
 
       {tab === "receber" && (
         <div className="px-5 py-3 flex flex-col gap-2">
-          <button className="px-3 py-[10px] rounded-md bg-accent text-white border border-accent text-[12.5px] font-semibold hover:bg-accent-hover transition-colors flex items-center justify-center gap-2">
-            <Icon name="send" size={13} />
-            Reenviar para cliente
-          </button>
-          <button className="px-3 py-[8px] rounded-md bg-card border border-hair text-ink text-[12px] font-semibold hover:bg-bg hover:border-ink-4 transition-colors flex items-center justify-center gap-1">
-            <Icon name="check" size={12} />
-            Marcar como recebido
-          </button>
+          <PermissionGate module="bancos" action="editar">
+            <button className="px-3 py-[10px] rounded-md bg-accent text-white border border-accent text-[12.5px] font-semibold hover:bg-accent-hover transition-colors flex items-center justify-center gap-2">
+              <Icon name="send" size={13} />
+              Reenviar para cliente
+            </button>
+          </PermissionGate>
+          <PermissionGate module="bancos" action="editar">
+            <button className="px-3 py-[8px] rounded-md bg-card border border-hair text-ink text-[12px] font-semibold hover:bg-bg hover:border-ink-4 transition-colors flex items-center justify-center gap-1">
+              <Icon name="check" size={12} />
+              Marcar como recebido
+            </button>
+          </PermissionGate>
         </div>
       )}
     </div>

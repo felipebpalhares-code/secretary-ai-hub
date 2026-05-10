@@ -10,6 +10,7 @@ import {
   type CreditCard,
 } from "@/lib/cards-data"
 import { ENTITIES, fmtBRL } from "@/lib/banks-data"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 const BANK_GRADIENT = {
   itau: "from-orange-500 to-orange-700",
@@ -72,10 +73,12 @@ export function CreditCards() {
           <div className="text-[11px] font-bold text-ink-3 uppercase tracking-[.07em]">
             Seus cartões
           </div>
-          <button className="inline-flex items-center gap-[5px] text-[11.5px] font-semibold text-accent bg-accent-soft border border-indigo-200 px-[11px] py-[5px] rounded-md hover:bg-indigo-100 transition-colors">
-            <Icon name="plus" size={11} />
-            Adicionar cartão
-          </button>
+          <PermissionGate module="bancos" action="editar">
+            <button className="inline-flex items-center gap-[5px] text-[11.5px] font-semibold text-accent bg-accent-soft border border-indigo-200 px-[11px] py-[5px] rounded-md hover:bg-indigo-100 transition-colors">
+              <Icon name="plus" size={11} />
+              Adicionar cartão
+            </button>
+          </PermissionGate>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {CARDS.map((card) => (
@@ -222,9 +225,11 @@ function InvoicePanel({ card }: { card: CreditCard }) {
           <span className="text-[18px] font-bold text-ink mono tracking-[-.3px]">
             {fmtBRL(card.used)}
           </span>
-          <button className="px-[13px] py-[7px] rounded-md bg-accent text-white border border-accent text-[12px] font-semibold hover:bg-accent-hover transition-colors">
-            Pagar fatura
-          </button>
+          <PermissionGate module="bancos" action="editar">
+            <button className="px-[13px] py-[7px] rounded-md bg-accent text-white border border-accent text-[12px] font-semibold hover:bg-accent-hover transition-colors">
+              Pagar fatura
+            </button>
+          </PermissionGate>
         </div>
       </div>
 

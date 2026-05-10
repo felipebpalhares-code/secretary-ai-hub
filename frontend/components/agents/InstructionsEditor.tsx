@@ -16,6 +16,7 @@ import {
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { ChevronDown, GripVertical, Plus, Trash2 } from "lucide-react"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 export type InstructionItem = { id: string; content: string }
 
@@ -117,15 +118,17 @@ export function InstructionsEditor({
         </DndContext>
       )}
 
-      <button
-        type="button"
-        onClick={() => onAdd("")}
-        disabled={saving}
-        className="inline-flex items-center gap-2 self-start text-small text-text-secondary hover:text-text-primary px-3 py-2 rounded-default border border-dashed border-default hover:border-strong hover:bg-bg-subtle transition disabled:opacity-50"
-      >
-        <Plus size={14} strokeWidth={1.5} />
-        Adicionar instrução
-      </button>
+      <PermissionGate module="agentes" action="editar">
+        <button
+          type="button"
+          onClick={() => onAdd("")}
+          disabled={saving}
+          className="inline-flex items-center gap-2 self-start text-small text-text-secondary hover:text-text-primary px-3 py-2 rounded-default border border-dashed border-default hover:border-strong hover:bg-bg-subtle transition disabled:opacity-50"
+        >
+          <Plus size={14} strokeWidth={1.5} />
+          Adicionar instrução
+        </button>
+      </PermissionGate>
     </div>
   )
 }
@@ -179,15 +182,17 @@ function Row({
         className="flex-1 bg-transparent border-0 text-body text-text-primary placeholder:text-text-tertiary resize-none focus:outline-none focus:ring-0 disabled:opacity-50"
       />
 
-      <button
-        type="button"
-        onClick={() => onRemove(item.id)}
-        disabled={saving}
-        aria-label="Remover instrução"
-        className="text-text-tertiary hover:text-danger p-1.5 rounded-default hover:bg-danger-subtle transition disabled:opacity-50"
-      >
-        <Trash2 size={14} strokeWidth={1.5} />
-      </button>
+      <PermissionGate module="agentes" action="editar">
+        <button
+          type="button"
+          onClick={() => onRemove(item.id)}
+          disabled={saving}
+          aria-label="Remover instrução"
+          className="text-text-tertiary hover:text-danger p-1.5 rounded-default hover:bg-danger-subtle transition disabled:opacity-50"
+        >
+          <Trash2 size={14} strokeWidth={1.5} />
+        </button>
+      </PermissionGate>
     </div>
   )
 }

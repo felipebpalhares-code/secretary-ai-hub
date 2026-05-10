@@ -6,6 +6,7 @@ import { BancosHub } from "./BancosHub"
 import { ConnectButton, BackendBanner } from "@/components/banks/ConnectButton"
 import { useBackendStatus } from "@/lib/useBackendStatus"
 import { banksSync, banksConnections } from "@/lib/api"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 export function BancosShell() {
   const status = useBackendStatus()
@@ -54,24 +55,28 @@ export function BancosShell() {
         actions={
           <>
             <IconButton name="search" disabled title="Em breve" />
-            <button
-              onClick={handleSync}
-              disabled={status !== "online" || syncing}
-              className="inline-flex items-center gap-[6px] px-[13px] py-[7px] rounded-md border border-hair bg-card text-[12.5px] font-semibold text-ink hover:bg-bg hover:border-ink-4 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {syncing ? (
-                <>
-                  <span className="w-[10px] h-[10px] rounded-full border-2 border-current border-r-transparent animate-spin" />
-                  Sincronizando...
-                </>
-              ) : (
-                <>
-                  <Icon name="settings" size={13} />
-                  Sincronizar
-                </>
-              )}
-            </button>
-            <ConnectButton backend={status} onConnected={() => setRefreshKey((k) => k + 1)} />
+            <PermissionGate module="bancos" action="editar">
+              <button
+                onClick={handleSync}
+                disabled={status !== "online" || syncing}
+                className="inline-flex items-center gap-[6px] px-[13px] py-[7px] rounded-md border border-hair bg-card text-[12.5px] font-semibold text-ink hover:bg-bg hover:border-ink-4 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {syncing ? (
+                  <>
+                    <span className="w-[10px] h-[10px] rounded-full border-2 border-current border-r-transparent animate-spin" />
+                    Sincronizando...
+                  </>
+                ) : (
+                  <>
+                    <Icon name="settings" size={13} />
+                    Sincronizar
+                  </>
+                )}
+              </button>
+            </PermissionGate>
+            <PermissionGate module="bancos" action="editar">
+              <ConnectButton backend={status} onConnected={() => setRefreshKey((k) => k + 1)} />
+            </PermissionGate>
             <BackendStatusPill status={status} />
           </>
         }

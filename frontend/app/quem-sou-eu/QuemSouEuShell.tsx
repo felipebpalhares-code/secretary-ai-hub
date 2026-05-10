@@ -6,6 +6,7 @@ import { IdentityProvider, useIdentity } from "@/components/profile/identity-con
 import { EditIdentityModal } from "@/components/profile/EditIdentityModal"
 import { getBannerStats, type BannerStats } from "@/lib/api"
 import { ProfileTabs } from "./ProfileTabs"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 const ZERO_STATS: BannerStats = {
   companies: 0,
@@ -52,9 +53,11 @@ function ShellInner() {
         actions={
           <>
             <IconButton name="search" disabled title="Em breve" />
-            <Button variant="primary" icon="edit" onClick={openEdit}>
-              Editar perfil
-            </Button>
+            <PermissionGate module="quem-sou-eu" action="editar">
+              <Button variant="primary" icon="edit" onClick={openEdit}>
+                Editar perfil
+              </Button>
+            </PermissionGate>
           </>
         }
       />

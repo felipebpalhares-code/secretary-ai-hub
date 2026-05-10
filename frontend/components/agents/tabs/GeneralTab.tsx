@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Save } from "lucide-react"
 import { type Agent, type AgentUpdate, updateAgent } from "@/lib/agents-api"
+import { PermissionGate } from "@/components/auth/PermissionGate"
 
 const MODELS = [
   { value: "claude-sonnet-4-5-20250929", label: "Claude Sonnet 4.5 (preciso)" },
@@ -165,15 +166,17 @@ export function GeneralTab({
         <div className="border-t border-default bg-bg-surface px-6 md:px-8 py-3 shrink-0">
           <div className="max-w-3xl mx-auto flex items-center justify-between">
             <span className="text-small text-text-secondary">Você tem alterações não salvas</span>
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving}
-              className="inline-flex items-center gap-2 bg-brand text-white rounded-default px-4 py-2 text-body-strong font-medium shadow-xs hover:bg-brand-hover transition disabled:opacity-50"
-            >
-              <Save size={14} strokeWidth={1.5} />
-              {saving ? "Salvando…" : "Salvar alterações"}
-            </button>
+            <PermissionGate module="agentes" action="editar">
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving}
+                className="inline-flex items-center gap-2 bg-brand text-white rounded-default px-4 py-2 text-body-strong font-medium shadow-xs hover:bg-brand-hover transition disabled:opacity-50"
+              >
+                <Save size={14} strokeWidth={1.5} />
+                {saving ? "Salvando…" : "Salvar alterações"}
+              </button>
+            </PermissionGate>
           </div>
         </div>
       )}
