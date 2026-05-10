@@ -48,6 +48,21 @@ services:
       # CORS — frontend Next.js
       CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
 
+      # Sprint H — Autenticação multi-usuário
+      # JWT_SECRET: gere uma vez com:
+      #   python -c "import secrets; print(secrets.token_urlsafe(32))"
+      # Se ficar vazio, o backend gera um secret efêmero no boot (todas as
+      # sessões caem a cada restart — só aceitável em dev).
+      JWT_SECRET: ${JWT_SECRET:-}
+      # Bootstrap do admin inicial — usado uma única vez no primeiro startup,
+      # quando a tabela users está vazia. Deixe vazio depois de criado.
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+      BOOTSTRAP_ADMIN_NAME: ${BOOTSTRAP_ADMIN_NAME:-Felipe Bernardeli Palhares}
+      # Cookie httpOnly: secure=false em dev (HTTP), true em prod (HTTPS).
+      COOKIE_SECURE: "false"
+      COOKIE_DOMAIN: ""
+
       # Banco SQLite — persiste em volume
       DATABASE_PATH: /data/felipe_hub.db
 
