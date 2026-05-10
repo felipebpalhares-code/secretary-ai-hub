@@ -25,6 +25,12 @@ os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")
 
 # Sprint H — JWT secret obrigatório pra todos os testes (auth e demais).
 os.environ.setdefault("JWT_SECRET", "test-jwt-secret-do-not-use-in-prod")
+# Sprint H — overrides obrigatórios pra TestClient. Em prod o container tem
+# COOKIE_DOMAIN=.b2bclaw.com.br e COOKIE_SECURE=true; com isso o cookie do
+# login não é armazenado pelo TestClient (que roda em testserver via HTTP),
+# fazendo todos os testes autenticados regredirem pra 401.
+os.environ["COOKIE_DOMAIN"] = ""
+os.environ["COOKIE_SECURE"] = "false"
 
 if not os.environ.get("ENCRYPTION_KEY"):
     from cryptography.fernet import Fernet

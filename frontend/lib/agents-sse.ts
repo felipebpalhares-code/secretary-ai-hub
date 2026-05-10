@@ -31,6 +31,7 @@ export async function sendMessageStream(
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
     body: JSON.stringify({ content }),
+    credentials: "include", // Sprint H — envia cookie httpOnly access_token
     signal,
   })
 

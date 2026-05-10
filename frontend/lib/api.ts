@@ -720,6 +720,7 @@ export async function extractPersonDocument(
   const res = await fetch(`${BASE}/api/utils/extract-person-document`, {
     method: "POST",
     body: form,
+    credentials: "include", // Sprint H — envia cookie httpOnly access_token
   })
   if (!res.ok) {
     const payload = await res.json().catch(() => ({}))
@@ -770,6 +771,7 @@ export async function extractIdentity(
   const res = await fetch(`${BASE}/api/profile/identity/extract`, {
     method: "POST",
     body: form,
+    credentials: "include", // Sprint H — envia cookie httpOnly access_token
   })
   if (!res.ok) {
     const payload = await res.json().catch(() => ({}))

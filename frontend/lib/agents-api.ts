@@ -138,7 +138,11 @@ export const deleteDocument = (agentId: string, documentId: string) =>
 export async function uploadDocument(agentId: string, file: File): Promise<DocumentMeta> {
   const form = new FormData()
   form.append("file", file)
-  const res = await fetch(`${BASE}/api/agents/${agentId}/documents`, { method: "POST", body: form })
+  const res = await fetch(`${BASE}/api/agents/${agentId}/documents`, {
+    method: "POST",
+    body: form,
+    credentials: "include", // Sprint H — envia cookie httpOnly access_token
+  })
   if (!res.ok) {
     const payload = await res.json().catch(() => ({}))
     throw new ApiError(res.status, payload)

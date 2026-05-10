@@ -39,7 +39,9 @@ export async function disconnect(): Promise<{ ok: boolean }> {
  * Em 401/500 nao lanca — devolve {ok:false,error} pra UI tratar visualmente.
  */
 export async function testConnection(): Promise<GoogleTestResponse> {
-  const res = await fetch(`${BASE}/api/google/test`)
+  const res = await fetch(`${BASE}/api/google/test`, {
+    credentials: "include", // Sprint H — envia cookie httpOnly access_token
+  })
   const payload = (await res.json().catch(() => ({}))) as Partial<GoogleTestResponse>
   if (!res.ok) {
     return {
